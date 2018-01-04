@@ -1,0 +1,11 @@
+   font_manager
+        |包含
+   font_table 多种字体表
+        |包含
+   font_cache 一种字体的多种样式缓存
+
+1. font_manager
+ a. 加载字体配置文件
+ b. 添加字体
+ c. 设置字体
+ d. 删除字体
