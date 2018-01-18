@@ -192,7 +192,7 @@ namespace filesystem
 
 			if(!fs.is_open() && treat_failure_as_error)
 				err_fs << "Could not open '" << name << "' for reading.\n";
-			/* linux:??
+			/* linux:????
 			else if(!is_filename_case_correct(name, fd)) 
 			{
 				err_fs << "Not opening '" << name << 
@@ -224,7 +224,7 @@ namespace filesystem
 		return new std::ofstream(fs::path(name), std::ios::binary);
 	}
 
-	/* Throws io_exception if an erro occurs */
+	/* Throws io_exception if an erro occurs.. */
 	void write_file(const std::string& name, const std::string& data)
 	{
 		auto os = ostream_file(name);

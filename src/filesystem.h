@@ -52,7 +52,7 @@ namespace filesystem
 	std::unique_ptr<std::ostream>& ostream_file(const std::string& name, 
 			bool create_firectory = true);
 	/* Throws io_exection if an erro occurs. */
-	void write_file(const std::string& name, const std::string& data);
+	void write_file(const std::string& name, const std::string& data); //
 }
 
 #endif
