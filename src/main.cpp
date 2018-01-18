@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2018 by Shan Daming
+ * Copyright (C) 2017 by Shan Daming
  */
 
 #include "game.h"
@@ -73,7 +73,8 @@ int main(int argc, char* argv[])
 
 		int res = do_gameloop(args);
 		safe_exit(res);
-	}catch(...)
+	}catch()
+	catch(...)
 	{}
 
 	return 0;
