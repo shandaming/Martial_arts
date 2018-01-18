@@ -2,6 +2,7 @@
  * Copyright (C) by Shan Daming <shandaming@hotmail.com>
  */
 
+#include <SDL2/SDL.h>
 #include "exception.h"
 
 static std::string create_error(const std::string& operation, bool use_sdl_error)

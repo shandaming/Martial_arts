@@ -1,13 +1,30 @@
 /*
- * Copyright (C) 2017 by Shan Daming
+ * Copyright (C) 2017-2018 by Shan Daming
  */
 
 #include "game.h"
+
+static int do_gameloop(std::vector<std::string>& args)
+{
+	srand(time(nullptr));
+
+	//Commandline_options cmdline_opts = Commandline_options(args);
+	game_config::game_program_dir = filesystem::directory_name(args[0]);
+
+	// int finished = process_command_args(cmdine_opts);
+	// if(finished == -1)
+	//	return finished;
+	
+
+}
 
 static void game_terminate_handler(int) { exit(0); }
 
 int main(int argc, char* argv[])
 {
+	std::locale locale("zh_CN.UTF-8");
+	std::locale::global(locale);
+
 	std::vector<std::string> args;
 
 	for(int i = 0; i < argc; ++i)
@@ -37,6 +54,27 @@ int main(int argc, char* argv[])
 	Event_context global_context;
 
 	SDL_StartTextInput();
+
+	try
+	{
+		std::out << "JY " << game_config::revison << "\n";
+		time_t t = time(nullptr);
+		std::cout << std::put_time(localtime(&t), %c %Z) << "\n";
+
+		auto exe_dir = filesystem::get_exe_dir();
+		if(!exe_dir.empty())
+		{
+			std::string auto_dir;
+			if(filesystem::file_exists(exe_dir + "/data/main.cfg"))
+				auto_dir = exe_dir;
+
+			//
+		}
+
+		int res = do_gameloop(args);
+		safe_exit(res);
+	}catch(...)
+	{}
 
 	return 0;
 }

@@ -6,6 +6,7 @@
 #define FILESYSTEM_H
 
 #include <fstream>
+#include <iostream>
 #include <filesystem>
 #include <sstream>
 #include <cstdio>
@@ -31,11 +32,27 @@ long get_file_bytes_count(FILE* fd);
 
 namespace filesystem
 {
+	/* An exception object used when an IO erro occurs */
+	struct IO_excetpion : public Error
+	{
+		IO_exception() : Error("") {}
+		IO_exception(const std::string& msg) : Error(msg) {}
+	};
+
 	std::string get_cwd();
 
 	std::string get_exe_dir();
 
 	std::string directory_name(const std::string& file);
+
+	/* Basic disk I/O - read file. */
+	std::string read_file(const std::string& name);
+	std::unique_ptr<std::istream>& istream_file(const std::string& fname, 
+			bool treat_failure_as_error = true);
+	std::unique_ptr<std::ostream>& ostream_file(const std::string& name, 
+			bool create_firectory = true);
+	/* Throws io_exection if an erro occurs. */
+	void write_file(const std::string& name, const std::string& data);
 }
 
 #endif

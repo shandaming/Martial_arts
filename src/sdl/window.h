@@ -17,7 +17,7 @@ class Window
 		~Window();
 
 		Window(const Window&) = delete;
-		WIndow operator=(const Window&) = delete;
+		Window operator=(const Window&) = delete;
 
 		void set_size(int w, int h);
 
@@ -41,7 +41,7 @@ class Window
 
 		void set_title(const std::string& title);
 
-		void set_icon(const SDL_Surface& icon);
+		void set_icon(SDL_Surface* icon);
 
 		int get_flags();
 

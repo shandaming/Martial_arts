@@ -5,6 +5,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+version_info sdl_get_version();
+
 bool is_neutral(const Surface& surf);
 
 Surface make_neutral_surface(const Surface &surf);

@@ -4,6 +4,14 @@
 
 #include "utils.h"
 
+version_info sdl_get_version()
+{
+	SDL_version sdl_version();
+	SDL_GetVersion(&sdl_version);
+	return version_info(sdl_version.major, sdl_version.minor, 
+			sdl_version.patch);
+}
+
 Texture get_texture_portion(SDL_Renderer* r, const Texture& t, SDL_Rect& area)
 {
 	if(!t)

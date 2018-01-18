@@ -8,6 +8,9 @@
 
 static log::Log_domain log_filesystem("filesystem");
 
+using dbg_fs = log_stream(debug, log_filesystem);
+using log_fs = log_stream(info, log_filesystem);
+using wrn_fs = log_stream(warn, log_filesystem);
 using err_fs = log_stream(err, log_filesystem);
 
 using fs = std::filesystem;
@@ -121,6 +124,11 @@ long get_file_bytes_count(FILE* fd)
 	return count;
 }
 
+bool is_filename_case_correct(const std::string& name, std::ifstream& fd)
+{
+		return true; // linux: return true?
+}
+
 namespace filesystem
 {
 	std::string get_cwd()
@@ -154,5 +162,87 @@ namespace filesystem
 	std::string directory_name(const std::string& file)
 	{
 		return fs::path(file).parent_path().string();
+	}
+
+	std::string read_file(const std::string& name)
+	{
+		auto s = istream_file(name);
+		std::stringstream ss;
+		ss << s->rdbuf();
+		return ss.str();
+	}
+
+	std::unique_ptr<std::istream>& istream_file(const std::string& name, 
+			bool treat_filure_as_error)
+	{
+		log_fs << "Streaming " << name << " for reading.\n";
+
+		if(name.empty())
+		{
+			err_fs << "Trying to open file with empty name.\n";
+
+			std::unique_ptr<std::istream> fs(new std::ifstream());
+			fs->clear(std::ios::failbit);
+			return fs;
+		}
+
+		try
+		{
+			std::ifstream fs(fs::path(name), std::ios::binary);
+
+			if(!fs.is_open() && treat_failure_as_error)
+				err_fs << "Could not open '" << name << "' for reading.\n";
+			/* linux:??
+			else if(!is_filename_case_correct(name, fd)) 
+			{
+				err_fs << "Not opening '" << name << 
+					"' due to case mismatch.\n";
+
+				std::unique_ptr<std::ifstream> fs(new std::ifstream());
+				fs->clear(std::ios::failbit);
+				return fs;
+			}
+			*/
+			return std::unique_ptr<istream> s(new ifstream(fs));
+		}
+		catch(std::exception&)
+		{
+			if(treat_failure_as_error)
+				err_fs << "Could not open '" << name << "' for reading.\n";
+			std::unique_ptr<std::istream> s(new std::ifstream());
+			s->clear(std::ios::failbit);
+
+			return s;
+		}
+	}
+
+	std::unique_ptr<std::ostream> ostream_file(const std::string& name, 
+			bool crate_directory)
+	{
+		log_fs << "streaming " << name << " for writting.\n";
+
+		return new std::ofstream(fs::path(name), std::ios::binary);
+	}
+
+	/* Throws io_exception if an erro occurs */
+	void write_file(const std::string& name, const std::string& data)
+	{
+		auto os = ostream_file(name);
+		os->exceptions(st::ios::goodbit);
+
+		constexpr size_t block_size = 4096;
+		char buf[block_size];
+
+		for(size_t i = 0; i < data.size(); i += block_size)
+		{
+			size_t bytes = std::min<size_t>(block_size, data.size() - i);
+			std::copy(data.begin() + i, data.begin() + i + bytes, buf);
+
+			os->write(buf, bytes);
+			if(os->bad)
+				throw IO_exception("Error writting to file: '" + 
+						name + "'");
+		}
+
 	}
 }
