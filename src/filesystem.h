@@ -32,7 +32,7 @@ long get_file_bytes_count(FILE* fd);
 
 namespace filesystem
 {
-	/* An exception object used when an IO erro occurs */
+	/* An exception object used when an IO erro occurs. */
 	struct IO_excetpion : public Error
 	{
 		IO_exception() : Error("") {}

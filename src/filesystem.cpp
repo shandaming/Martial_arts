@@ -4,7 +4,7 @@
 
 #include "filesystem.h"
 
-#define PATH ""
+#define PATH " "
 
 static log::Log_domain log_filesystem("filesystem");
 
