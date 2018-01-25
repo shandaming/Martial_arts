@@ -164,6 +164,25 @@ namespace filesystem
 		return fs::path(file).parent_path().string();
 	}
 
+	std::string normalize_path(const std::string& path, 
+			bool normalize_separators,
+			bool resolve_dot_entries)
+	{
+		if(path.empty())
+			return path;
+
+		fs::error_code ec;
+		fs::path p = resolve_dot_entries ? fs::canonical(path, ec) :
+			fs::absolute(path);
+
+		if(ec)
+			return "";
+		if(normalize_separators)
+			return p.make_preferred().string();
+		else
+			return p.string();
+	}
+
 	std::string read_file(const std::string& name)
 	{
 		auto s = istream_file(name);
@@ -203,7 +222,7 @@ namespace filesystem
 				return fs;
 			}
 			*/
-			return std::unique_ptr<istream> s(new ifstream(fs));
+			return (new ifstream(fs));
 		}
 		catch(std::exception&)
 		{

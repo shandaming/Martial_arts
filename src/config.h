@@ -28,31 +28,18 @@ class Config
 		explicit Config(const std::string& file);
 		~Config();
 
-		int get_integer(const std::vector<std::string>& keys);
-		double get_float(const std::vector<std::string>& key);
-		std::string get_string(const std::vector<std::string>& key);
+		template<typename... Args>
+		int get_integer(Args&&... keys);
+		template<typename... Args>
+		double get_float(Args&&... key);
+		template<typename... Args>
+		std::string get_string(Args&&... key);
 
-		void update_value(const std::vector<std::string>& keys, 
-				const std::string& value)
-		{
-			Config::Node* n = root_;
+		template<typename... Args>
+		void update_value(Args&&... keys, const std::string& value);
+		template<typename... Args>
+		void update_value(Args&&... keys, double value);
 
-			for(auto it = keys.begin(); it != keys.end() && n; ++it)
-				n = get_object_item(n, *it);
-
-			n->value = value;
-		}
-		void update_value(const std::vector<std::string>& keys,
-				double value)
-		{
-			Config::Node* n = root_;
-
-			for(auto it = keys.begin(); it != keys.end() && n; ++it)
-				n = get_object_item(n, *it);
-
-			n->number = value;
-		}
-	protected:
 		struct Node
 		{
 			Node() : type(Type::NULLPTR), number(0), next(nullptr), 
@@ -71,11 +58,20 @@ class Config
 
 		int get_node_count(Node* item)
 		{
-			int i;
-			Node* c = item->child;
+			int i = 0;
 
-			for(i = 0; c; c = c->next)
+			while(item)
+			{
 				++i;
+				Node* c = item->next;
+				if(item->child)
+				{
+					++i;
+					i += get_node_count(item->child);
+				}
+
+				item = c;
+			}
 			return i;
 		}
 
@@ -155,5 +151,83 @@ class Config
 
 		std::string file_;
 };
+
+namespace detail
+{
+	template<typename C = Config, typename T>
+	struct Config_unpacker
+	{
+		void visit(C& c, Node* n, T& val)
+		{
+			n = c.get_object_item(n, val);
+		}
+	};
+
+	template<typename C = Config, typename... Args>
+	struct Config_unpacker
+	{
+		void visit(C& c, Node* n, Args&&... args)
+		{
+			Config_unpacker<C, Args...> unpack;
+			unpack.visit(c, n, std::forward<Args>(vals)...);
+		}
+	};
+}
+
+template<typename... Args>
+int Config::get_integer(Args&&... keys)
+{
+	detail::Config_unpacker<Config, Args...> unpack;
+	Config::Node* n = root_;
+
+	unpack.visit(*this, n, std::forward<Args>(keys)...);
+
+	if(n->type == Type::INTEGER)
+		return n->number;
+}
+
+template<typename... Args>
+double Config::get_float(Args&&... keys)
+{
+	detail::Config_unpacker<Config, Args...> unpack;
+	Config::Node* n = root_;
+
+	unpack.visit(*this, n, std::forward<Args>(keys)...);
+
+	if(n->type == Type::FLOAT)
+		return n->number;
+}
+
+template<typename... Args>
+std::string Config::get_string(Args&&... keys)
+{
+	detail::Config_unpacker<Config, Args...> unpack;
+	Config::Node* n = root_;
+
+	unpack.visit(*this, n, std::forward<Args>(keys)...);
+
+	if(n->type == Type::STRING)
+		return n->value;
+}
+
+template<typename... Args>
+void Config::update_value(Args&&... keys, const std::string& value)
+{
+	Config::Node* n = root_;
+	detail::Config_unpacker<Config, Args...> unpack;
+
+	unpack.visit(*this, n, std::forward<Args>(keys)...);
+	n->value = value;
+}
+
+template<typename... Args>
+void Config::update_value(Args&&... keys, double value)
+{
+	Config::Node* n = root_;
+	detial::Config_unpacker<Config, Args...> unpack;
+
+	unpack.visit(*this, n, std::forward<Args>(keys)...);
+	n->number = value;
+}
 
 #endif

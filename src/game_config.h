@@ -12,6 +12,8 @@ namespace game_config
 {
 	extern constexpr std::string version;
 
+	extern std::string path;
+
 	extern std::string game_program_dir;
 }
 

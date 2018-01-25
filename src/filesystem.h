@@ -45,6 +45,13 @@ namespace filesystem
 
 	std::string directory_name(const std::string& file);
 
+	/*
+	 * Returns the absolute path of a file
+	 */
+	std::string normalize_path(const std::string& path, 
+			bool normalize_separators = false, 
+			bool resolve_dot_entries = false);
+
 	/* Basic disk I/O - read file. */
 	std::string read_file(const std::string& name);
 	std::unique_ptr<std::istream>& istream_file(const std::string& fname, 

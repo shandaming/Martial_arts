@@ -5,6 +5,7 @@
 #include <cfloat>
 #include <climits>
 #include "config.h"
+#include "filesystem.h"
 
 template<typename T>
 static T skip(const T& value)
@@ -30,52 +31,16 @@ Config::Config() : root_(nullptr)
 
 Config::Config(const std::string& file) : root_(nullptr), file_(file)
 {
-	std::string text = read_file(file_);
+	std::string text = filesystem::read_file(file_);
 	root_ = parse(text);
 }
 
 Config::~Config()
 {
 	std::string out = print_value(root_, 0, 0, 1);
-	write_file(file_, out);
+	filesystem::write_file(file_, out);
 
 	json_delete(root_);
-}
-
-int Config::get_integer(const std::vector<std::string>& keys)
-{
-	Config::Node* n = root_;
-
-	for(auto it = keys.begin(); it != keys.end() && n; ++it)
-	{
-		n = get_object_item(n, *it);
-	}
-	if(n->type == Type::INTEGER)
-		return n->number;
-}
-
-double Config::get_float(const std::vector<std::string>& keys)
-{
-	Config::Node* n = root_;
-
-	for(auto it = keys.begin(); it != keys.end() && n; ++it)
-	{
-		n = get_object_item(n, *it);
-	}
-	if(n->type == Type::FLOAT)
-		return n->number;
-}
-
-std::string Config::get_string(const std::vector<std::string>& keys)
-{
-	Config::Node* n = root_;
-
-	for(auto it = keys.begin(); it != keys.end() && n; ++it)
-	{
-		n = get_object_item(n, *it);
-	}
-	if(n->type == Type::STRING)
-		return n->value;
 }
 
 Config::Node* Config::new_item()

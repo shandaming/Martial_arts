@@ -1,30 +1,59 @@
 /*
- * Copyright (C) 2017 by Shan Daming
+ * Copyright (C) 2017 - 2018 by Shan Daming
  */
 
-#include "game.h"
+#include "log.h"
+#include "game_launcher.h"
+
+static log::log_domain log_config("config");
+using log_config = log_stream(info, log_config);
+using log_general = log_stream(info, log::general());
+
+static void safe_exit(int res)
+{
+	log_general << "exiting with code " << res << "\n";
+	exit(res);
+}
+
+static void init_locale()
+{
+	std::locale locale("zh_CN.UTF-8");
+	std::locale::global(locale);
+}
 
 static int do_gameloop(std::vector<std::string>& args)
 {
 	srand(time(nullptr));
 
-	//Commandline_options cmdline_opts = Commandline_options(args);
+	Commandline_options cmdline_opts = Commandline_options(args);
 	game_config::game_program_dir = filesystem::directory_name(args[0]);
 
 	// int finished = process_command_args(cmdine_opts);
 	// if(finished == -1)
 	//	return finished;
 	
+	std::unique_ptr<Game_launcher> game(new Game_launcher(cmdline_opts, 
+				args[0].c_str()));
+	int start_ticks = SDL_GetTicks();
 
+	init_locale();
+
+	bool res;
+
+	// Do initialize fonts before reading the game config, to have game 
+	// config erro messages displayed. fonts will be re-initialized later
+	// when the language is read from the game config.
+	res = font::load_font_config();
+	if(!res)
+	{
+		std::cerr << "could not initialize fonts\n";
+	}
 }
 
 static void game_terminate_handler(int) { exit(0); }
 
 int main(int argc, char* argv[])
 {
-	std::locale locale("zh_CN.UTF-8");
-	std::locale::global(locale);
-
 	std::vector<std::string> args;
 
 	for(int i = 0; i < argc; ++i)
@@ -64,11 +93,28 @@ int main(int argc, char* argv[])
 		auto exe_dir = filesystem::get_exe_dir();
 		if(!exe_dir.empty())
 		{
+			// Try to autodetect the location of the game data dir. Note 
+			// that the root of the source tree currently doubles as the 
+			// data dir.
 			std::string auto_dir;
+
+			// scons leaves the resulting binaries at the root of the source
+			// tree by default.
 			if(filesystem::file_exists(exe_dir + "/data/main.cfg"))
 				auto_dir = exe_dir;
 
-			//
+			// cmake encourages creating a subdir at the root of the source
+			// tree for the build, and the resulting binaries are found in
+			// it.
+			else if(filesystem::file_exists(exe_dir + "/../data/main.cfg"))
+				auto_dir = filesystem::normalize_path(exe_dir + "/..");
+
+			if(!auto_dir.empty())
+			{
+				std::cerr << "Automatically found a possible data \
+					directory at " << auto_dir << "\n";
+				game_config::path = auto_dir;
+			}
 		}
 
 		int res = do_gameloop(args);
