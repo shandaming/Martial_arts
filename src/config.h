@@ -31,14 +31,14 @@ class Config
 		template<typename... Args>
 		int get_integer(Args&&... keys);
 		template<typename... Args>
-		double get_float(Args&&... key);
+		double get_float(Args&&... keys);
 		template<typename... Args>
-		std::string get_string(Args&&... key);
+		std::string get_string(Args&&... keys);
 
 		template<typename... Args>
-		void update_value(Args&&... keys, const std::string& value);
+		void update_value(const std::string& value, Args&&... keys);
 		template<typename... Args>
-		void update_value(Args&&... keys, double value);
+		void update_value(double value, Args&&... keys);
 
 		struct Node
 		{
@@ -52,6 +52,12 @@ class Config
 
 			double number;
 		};
+
+		Node* operator[](const std::string& str)
+		{
+                        Node* n = root_; 
+			return get_object_item(n, str);
+		}
 
 		Node* new_item();
 		void json_delete(Node* j);
@@ -154,33 +160,25 @@ class Config
 
 namespace detail
 {
-	template<typename C = Config, typename T>
-	struct Config_unpacker
+	template<typename T>
+	void visit(Config& c, Config::Node* n, T& val)
 	{
-		void visit(C& c, Node* n, T& val)
-		{
-			n = c.get_object_item(n, val);
-		}
-	};
+		n = c.get_object_item(n, val);
+	}
 
-	template<typename C = Config, typename... Args>
-	struct Config_unpacker
+	template<typename... Args>
+	void visit(Config& c, Config::Node* n, Args&&... args)
 	{
-		void visit(C& c, Node* n, Args&&... args)
-		{
-			Config_unpacker<C, Args...> unpack;
-			unpack.visit(c, n, std::forward<Args>(vals)...);
-		}
-	};
+		visit(c, n, std::forward<Args>(args)...);
+	}
 }
 
 template<typename... Args>
 int Config::get_integer(Args&&... keys)
 {
-	detail::Config_unpacker<Config, Args...> unpack;
 	Config::Node* n = root_;
 
-	unpack.visit(*this, n, std::forward<Args>(keys)...);
+	detail::visit(*this, n, std::forward<Args>(keys)...);
 
 	if(n->type == Type::INTEGER)
 		return n->number;
@@ -189,10 +187,9 @@ int Config::get_integer(Args&&... keys)
 template<typename... Args>
 double Config::get_float(Args&&... keys)
 {
-	detail::Config_unpacker<Config, Args...> unpack;
 	Config::Node* n = root_;
 
-	unpack.visit(*this, n, std::forward<Args>(keys)...);
+	detail::visit(*this, n, std::forward<Args>(keys)...);
 
 	if(n->type == Type::FLOAT)
 		return n->number;
@@ -201,32 +198,29 @@ double Config::get_float(Args&&... keys)
 template<typename... Args>
 std::string Config::get_string(Args&&... keys)
 {
-	detail::Config_unpacker<Config, Args...> unpack;
 	Config::Node* n = root_;
 
-	unpack.visit(*this, n, std::forward<Args>(keys)...);
+	detail::visit(*this, n, std::forward<Args>(keys)...);
 
 	if(n->type == Type::STRING)
 		return n->value;
 }
 
 template<typename... Args>
-void Config::update_value(Args&&... keys, const std::string& value)
+void Config::update_value(const std::string& value, Args&&... keys)
 {
 	Config::Node* n = root_;
-	detail::Config_unpacker<Config, Args...> unpack;
 
-	unpack.visit(*this, n, std::forward<Args>(keys)...);
+	detail::visit(*this, n, std::forward<Args>(keys)...);
 	n->value = value;
 }
 
 template<typename... Args>
-void Config::update_value(Args&&... keys, double value)
+void Config::update_value(double value, Args&&... keys)
 {
 	Config::Node* n = root_;
-	detial::Config_unpacker<Config, Args...> unpack;
 
-	unpack.visit(*this, n, std::forward<Args>(keys)...);
+	detail::visit(*this, n, std::forward<Args>(keys)...);
 	n->number = value;
 }
 
