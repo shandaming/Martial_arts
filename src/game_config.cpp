@@ -6,7 +6,9 @@
 
 namespace game_config
 {
-	constexpr std::string version = VERSION;
+	const std::string version = VERSION;
+
+	const Version_info game_version(VERSION);
 
 #ifdef MARTIAL_ARTS
 	std::string path = MARTIAL_ARTS;

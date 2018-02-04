@@ -7,14 +7,17 @@
 
 #include <string>
 #include <vector>
+#include "version.h"
 
 namespace game_config
 {
-	extern constexpr std::string version;
+	extern const std::string version;
 
 	extern std::string path;
 
 	extern std::string game_program_dir;
+
+	extern const Version_info game_version;
 }
 
 #endif

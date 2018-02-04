@@ -32,6 +32,9 @@ long get_file_bytes_count(FILE* fd);
 
 namespace filesystem
 {
+	using scoped_istream = std::unique_ptr<std::istream>;
+	using scoped_ostream = std::unique_ptr<std::ostream>;
+
 	/* An exception object used when an IO erro occurs. */
 	struct IO_excetpion : public Error
 	{
@@ -39,11 +42,21 @@ namespace filesystem
 		IO_exception(const std::string& msg) : Error(msg) {}
 	};
 
-	std::string get_cwd();
+	void set_user_data_dir(const std::string& path);
 
+	std::string get_cwd();
 	std::string get_exe_dir();
 
 	std::string directory_name(const std::string& file);
+
+	/*
+	 * Create a recursive directory tree if it does exist already
+	 */
+	bool create_directory_if_missing_recursive(const std::string& dirname);
+
+	bool file_exists(const std::string& name);
+
+	bool looks_like_pbl(const std::string& file);
 
 	/*
 	 * Returns the absolute path of a file
@@ -60,6 +73,13 @@ namespace filesystem
 			bool create_firectory = true);
 	/* Throws io_exection if an erro occurs. */
 	void write_file(const std::string& name, const std::string& data); //
+
+	/*
+	 * Returns a complete path to the actual JSON file or directory
+	 * or an empty string if the file isn't present.
+	 */
+	std::string get_json_location(const std::string& filename,
+			const std::string& current_dir = std::string());
 }
 
 #endif

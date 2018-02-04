@@ -8,9 +8,10 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <unitlity>
+#include <utility>
+#include <chrono>
 
-namespace log
+namespace lg
 {
 	/*
 	 * Helper class to redirect the output of the logger in a certain scope
@@ -99,7 +100,7 @@ namespace log
 			}
 
 			Scope_logger(const Log_domain& domain, const std::string& str)
-				: out_put_(nullptr)
+				: output_(nullptr)
 			{
 				if(!debug().dont_log(domain))
 					do_log_entry(domain, str);
@@ -124,7 +125,7 @@ namespace log
 }
 
 template<typename Callabled>
-inline std::ostream log_stream(Callabled& c, const Log_domain& domain)
+inline std::ostream log_stream(Callabled& c, const lg::Log_domain& domain)
 {
 	if(std::is_function<decltype(c)>::value)
 	{

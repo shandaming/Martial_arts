@@ -55,9 +55,12 @@ class Config
 
 		Node* operator[](const std::string& str)
 		{
-                        Node* n = root_; 
+            Node* n = root_; 
 			return get_object_item(n, str);
 		}
+
+		template<typename... Args>
+		std::string operator[](Args&&... keys);
 
 		Node* new_item();
 		void json_delete(Node* j);
@@ -204,6 +207,19 @@ std::string Config::get_string(Args&&... keys)
 
 	if(n->type == Type::STRING)
 		return n->value;
+	return "";
+}
+
+template<typename... Args>
+std::string Config::operator[](Args&& ... keys)
+{
+	Config::Node* n = root_;
+
+	detail::visit(*this, n, std::forward<Args>(keys)...);
+
+	if(n->type == Type::STRING)
+		return n->value;
+	return "";
 }
 
 template<typename... Args>

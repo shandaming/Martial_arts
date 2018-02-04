@@ -3,11 +3,15 @@
  */
 
 #include "log.h"
-#include "game_launcher.h"
+#include "game_config.h"
+//#include "game_launcher.h"
+#include "commandline_options.h"
+#include "filesystem.h"
+#include <SDL2/SDL.h>
+static lg::Log_domain log_config("config");
 
-static log::log_domain log_config("config");
-using log_config = log_stream(info, log_config);
-using log_general = log_stream(info, log::general());
+#define log_config log_stream(lg::info, log_config)
+#define log_general log_stream(lg::info, lg::general())
 
 static void safe_exit(int res)
 {
@@ -32,7 +36,7 @@ static int do_gameloop(std::vector<std::string>& args)
 	// if(finished == -1)
 	//	return finished;
 	
-	std::unique_ptr<Game_launcher> game(new Game_launcher(cmdline_opts, 
+	//std::unique_ptr<Game_launcher> game(new Game_launcher(cmdline_opts, 
 				args[0].c_str()));
 	int start_ticks = SDL_GetTicks();
 
@@ -43,7 +47,7 @@ static int do_gameloop(std::vector<std::string>& args)
 	// Do initialize fonts before reading the game config, to have game 
 	// config erro messages displayed. fonts will be re-initialized later
 	// when the language is read from the game config.
-	res = font::load_font_config();
+	//res = font::load_font_config();
 	if(!res)
 	{
 		std::cerr << "could not initialize fonts\n";

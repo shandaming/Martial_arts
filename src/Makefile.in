@@ -99,9 +99,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__dirstamp = $(am__leading_dot)dirstamp
-am_Martial_arts_new_legend_OBJECTS = win_test.$(OBJEXT) \
-	sdl/exception.$(OBJEXT) sdl/window.$(OBJEXT)
+am_Martial_arts_new_legend_OBJECTS = main.$(OBJEXT) log.$(OBJEXT)
 Martial_arts_new_legend_OBJECTS =  \
 	$(am_Martial_arts_new_legend_OBJECTS)
 Martial_arts_new_legend_DEPENDENCIES =
@@ -255,11 +253,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign subdir-objects
-Martial_arts_new_legend_SOURCES = win_test.cpp 		\
-				sdl/exception.cpp	\
-				sdl/window.cpp
+Martial_arts_new_legend_SOURCES = main.cpp 		\
+				log.cpp	
 
-Martial_arts_new_legend_LDADD = -lSDL2
+Martial_arts_new_legend_LDADD = -lSDL2_image -lSDL2_ttf -lSDL2_mixer
 AM_CXXFLAGS = -std=c++17
 all: all-am
 
@@ -336,16 +333,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-sdl/$(am__dirstamp):
-	@$(MKDIR_P) sdl
-	@: > sdl/$(am__dirstamp)
-sdl/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) sdl/$(DEPDIR)
-	@: > sdl/$(DEPDIR)/$(am__dirstamp)
-sdl/exception.$(OBJEXT): sdl/$(am__dirstamp) \
-	sdl/$(DEPDIR)/$(am__dirstamp)
-sdl/window.$(OBJEXT): sdl/$(am__dirstamp) \
-	sdl/$(DEPDIR)/$(am__dirstamp)
 
 Martial_arts_new_legend$(EXEEXT): $(Martial_arts_new_legend_OBJECTS) $(Martial_arts_new_legend_DEPENDENCIES) $(EXTRA_Martial_arts_new_legend_DEPENDENCIES) 
 	@rm -f Martial_arts_new_legend$(EXEEXT)
@@ -353,14 +340,12 @@ Martial_arts_new_legend$(EXEEXT): $(Martial_arts_new_legend_OBJECTS) $(Martial_a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f sdl/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/win_test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdl/$(DEPDIR)/exception.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@sdl/$(DEPDIR)/window.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/log.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -493,8 +478,6 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f sdl/$(DEPDIR)/$(am__dirstamp)
-	-rm -f sdl/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -504,7 +487,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) sdl/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -550,7 +533,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) sdl/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

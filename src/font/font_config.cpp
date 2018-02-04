@@ -7,26 +7,46 @@
 
 static log::Log_domain log_font("font");
 
-#define DBG log_stream(debug, log_font)
-#define LOG log_stream(info, log_font)
-#define WRN log_stream(warn, log_font)
-#define ERR log_stream(err, log_font)
+using dbg = log_stream(debug, log_font);
+using log = log_stream(info, log_font);
+using wrn = log_stream(warn, log_font);
+using err = log_stream(err, log_font);
 
 namespace font
 {
 	bool check_font_file(const std::string& name)
 	{
-		if()
+		if(!Game_config::path.empty())
+		{
+			if(!filesystem::file_exists("fonts/" + name))
+			{
+				if(!filesystem::file_exists(name))
+				{
+					wrn << "Failed opening font file '" << name <<
+						"': No such file or directory\n";
+					return false;
+				}
+			}
+		}
+		else
+		{
+			if(!filesystem::file_exists("fonts/" + name))
+			{
+				if(!filesystem::file_exists(name))
+				{
+					wrn << "Failed opening font file '" << name <<
+						"': No such file or directory\n";
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
-	static bool add_font_to_fontlist(const Config& fonts_config,
-			std::vector<font::Subset_descriptor>& fontlist,
-			const std::string& name)
+	static void add_font_to_fontlist(const Config& fonts_config,
+			std::vector<font::Subset_descriptor>& fontlist)
 	{
-		auto font = fonts_config();
-
-		fontlist.push_back(font::Subset_descriptor(font));
-		return true;
+		fontlist.push_back(font::Subset_descriptor(font_config));
 	}
 
 	bool load_font_config()
@@ -34,8 +54,37 @@ namespace font
 		Config cfg;
 		try
 		{
-			if(!filesystem::file_exit("fonts.cfg"))
+			std::string& cfg_path = filesystem::get_json_location(
+					"hardwired/fonts.cfg");
+			if(cfg_path.empty())
+			{
+				err << "Could not resolve path to fonts.cfg, \
+					file not found\n";
 				return false;
+			}
+			cfg.open(cfg_path);
 		}
+		catch(...)
+		{
+			err << "could not read fonts.cfg\n";
+			return false;
+		}
+
+		std::set<std::string> known_fonts;
+		
+		known_fonts.insert(cfg_path["fonts", "name"]);
+		known_fonts.insert(cfg_path["fonts", "bold_name"]);
+		known_fonts.insert(cfg_path["fonts", "italic_name"]);
+
+		std::vector<font::Subset_descriptor> fontlist;
+
+		for(auto& font : known_fonts)
+			add_font_to_fontlist(cfg, fontlist);
+
+		if(fontlist.empty())
+			return false;
+
+		sdl_ttf::set_font_list(fontlist);
+		return true;
 	}
 }

@@ -57,7 +57,7 @@ struct SDL_ttf
 	static TTF_Font* get_font(Font_id);
 
 	// Set the list of fonts
-	static void set_font_list(const std::vector<>);
+	static void set_font_list(const std::vector<font::Subset_descriptor>& fontlist);
 
 	// Split a utf8 string into text_chunks
 	static std::vector<Text_chunk> split_text(const std::string& text);

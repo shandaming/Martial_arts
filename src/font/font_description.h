@@ -15,7 +15,15 @@ struct Subset_descriptor
 	Subset_descriptor() : 
 		name(), hold_name(), italic_name(), present_codepoints() {}
 
-	Subset_descriptor(const Config& font) :
+	Subset_descriptor(const Config& font) : name(font["font", "name"]),
+											bold_name(),
+											italic_name()
+	{
+		if(!font["font", "bold_name"].empty())
+			bold_name = font["font", "bold_name"];
+		if(!font["font", "italic_name"].empty())
+			italic_name = font["font", "italic_name"];
+	}
 
 	std::string name;
 	std::optional<std::string> hold_name;

@@ -173,6 +173,8 @@ TTF_Font* SDL_ttf::get_font(Font_id& id)
 	return nullptr;
 }
 
+
+
 static Texture render_text(SDL_Renderer* r,const std::string& text, 
 		int font_size, const Color& color, int style, bool use_markup)
 {
@@ -312,4 +314,74 @@ SDL_Rect draw_text_line(SDL_Renderer* r, Texture& gui_texture,
 		add_tooltip(dest, text);
 
 	return dest;
+}
+
+/* SDL_ttf */
+
+SDL_ttf::SDL_ttf()
+{
+	int res = TTF_Init();
+	if(res == -1)
+	{
+		err_ft << "Could not initialize SDL_TTF" << std::endl;
+		throw font::error("SDL_TTF could not initialize, TTF_INIT \
+				returned: " + std::to_string(res));
+	}
+	else
+		log_ft << "Initialized true type fonts\n";
+}
+
+static void clear_fonts()
+{
+	for(auto& i : open_fonst)
+		TTF_CloseFont(i.second);
+
+	open_fonst.clear();
+	font_table.clear();
+
+	font_names.clear();
+	bold_names.clear();
+	italic_names.clear();
+
+	line_size_cache.clear();
+}
+
+SDL_ttf::~SDL_ttf()
+{
+	clear_fonts();
+	TTF_Quit();
+}
+
+void SDL_ttf::set_font_list(const std::vector<Subset_descriptor>& fontlist)
+{
+	clear_fonts();
+
+	for(auto& f : fontlist)
+	{
+		if(!check_font_file(f.name))
+			continue;
+		// Insert fonts only if the font file exists
+		Subset_id subset = font_names.size();
+		font_names.push_back(f.name);
+
+		if(f.bold_name && check_font_file(*f.bold_name))
+			bold_names.push_back(*f.bold_name);
+		else
+			bold_names.emplace_back();
+
+		if(f.italic_name && check_font_file(*f.italic_name))
+			italic_names.push_back(*f.italic_name);
+		else
+			italic_names.emplace_back();
+	}
+
+	assert(font_names.size() == bold_names.size());
+	assert(font_names.size() == italic_names.size());
+
+	dbg_ft << "Set the font list. The styled font families are:\n";
+
+	for(auto i = 0; i != font_names.size(); ++i)
+		dbg_ft << "[" << i << "]:\t\tbase:\t'" << font_names[i] << 
+			"'\tbold:\t'" << bold_names[i] << "'\titalic:\t'" <<
+			italic_names[i] << "'\n";
 }

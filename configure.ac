@@ -27,9 +27,10 @@ AC_PROG_CC
 # Chekcs for SDL2
 # AC_SEARCH_LIBS(SDL_Init, SDL2, , AC_MSG_ERROR([Unable to find SDL2 library.])
 AC_CHECK_LIB(SDL2, SDL_Init,, AC_MSG_ERROR([Unable to find SDL2 library]))
-AC_CHECK_LIB(SDL2_image, IMG_Init,, AC_MSG_ERROR([Unable to find SDL2_image library.]))
-AC_CHECK_LIB(SDL2_mixer, Mix_Init,, AC_MSG_ERROR([Unable to find SDL2_mixer library.]))
-AC_CHECK_LIB(SDL2_ttf, TTF_Init,, AC_MSG_ERROR([Unable to find SDL2_ttf library.]))
+# Autoconf need to find <.pc> file, the following three installed without <.pc> file
+# AC_CHECK_LIB(SDL2_image, IMG_Init,, AC_MSG_ERROR([Unable to find SDL2_image library.]))
+# AC_CHECK_LIB(SDL2_mixer, Mix_Init,, AC_MSG_ERROR([Unable to find SDL2_mixer library.]))
+# AC_CHECK_LIB(SDL2_ttf, TTF_Init,, AC_MSG_ERROR([Unable to find SDL2_ttf library.]))
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h strings.h unistd.h])

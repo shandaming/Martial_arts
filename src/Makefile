@@ -99,9 +99,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__dirstamp = $(am__leading_dot)dirstamp
-am_Martial_arts_new_legend_OBJECTS = win_test.$(OBJEXT) \
-	sdl/exception.$(OBJEXT) sdl/window.$(OBJEXT)
+am_Martial_arts_new_legend_OBJECTS = main.$(OBJEXT) log.$(OBJEXT)
 Martial_arts_new_legend_OBJECTS =  \
 	$(am_Martial_arts_new_legend_OBJECTS)
 Martial_arts_new_legend_DEPENDENCIES =
@@ -162,12 +160,12 @@ ETAGS = etags
 CTAGS = ctags
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/mylw/cpp/SDL/missing aclocal-1.15
+ACLOCAL = ${SHELL} /home/mylw/cpp/Martial_arts/missing aclocal-1.15
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} /home/mylw/cpp/SDL/missing autoconf
-AUTOHEADER = ${SHELL} /home/mylw/cpp/SDL/missing autoheader
-AUTOMAKE = ${SHELL} /home/mylw/cpp/SDL/missing automake-1.15
+AUTOCONF = ${SHELL} /home/mylw/cpp/Martial_arts/missing autoconf
+AUTOHEADER = ${SHELL} /home/mylw/cpp/Martial_arts/missing autoheader
+AUTOMAKE = ${SHELL} /home/mylw/cpp/Martial_arts/missing automake-1.15
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -195,7 +193,7 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = -lSDL2 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/mylw/cpp/SDL/missing makeinfo
+MAKEINFO = ${SHELL} /home/mylw/cpp/Martial_arts/missing makeinfo
 MKDIR_P = /bin/mkdir -p
 OBJEXT = o
 PACKAGE = full-package-name
@@ -210,10 +208,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = VERSION
-abs_builddir = /home/mylw/cpp/SDL/src
-abs_srcdir = /home/mylw/cpp/SDL/src
-abs_top_builddir = /home/mylw/cpp/SDL
-abs_top_srcdir = /home/mylw/cpp/SDL
+abs_builddir = /home/mylw/cpp/Martial_arts/src
+abs_srcdir = /home/mylw/cpp/Martial_arts/src
+abs_top_builddir = /home/mylw/cpp/Martial_arts
+abs_top_srcdir = /home/mylw/cpp/Martial_arts
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 am__include = include
@@ -233,7 +231,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/mylw/cpp/SDL/install-sh
+install_sh = ${SHELL} /home/mylw/cpp/Martial_arts/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -255,11 +253,10 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign subdir-objects
-Martial_arts_new_legend_SOURCES = win_test.cpp 		\
-				sdl/exception.cpp	\
-				sdl/window.cpp
+Martial_arts_new_legend_SOURCES = main.cpp 		\
+				log.cpp	
 
-Martial_arts_new_legend_LDADD = -lSDL2
+Martial_arts_new_legend_LDADD = -lSDL2_image -lSDL2_ttf -lSDL2_mixer
 AM_CXXFLAGS = -std=c++17
 all: all-am
 
@@ -336,16 +333,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-sdl/$(am__dirstamp):
-	@$(MKDIR_P) sdl
-	@: > sdl/$(am__dirstamp)
-sdl/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) sdl/$(DEPDIR)
-	@: > sdl/$(DEPDIR)/$(am__dirstamp)
-sdl/exception.$(OBJEXT): sdl/$(am__dirstamp) \
-	sdl/$(DEPDIR)/$(am__dirstamp)
-sdl/window.$(OBJEXT): sdl/$(am__dirstamp) \
-	sdl/$(DEPDIR)/$(am__dirstamp)
 
 Martial_arts_new_legend$(EXEEXT): $(Martial_arts_new_legend_OBJECTS) $(Martial_arts_new_legend_DEPENDENCIES) $(EXTRA_Martial_arts_new_legend_DEPENDENCIES) 
 	@rm -f Martial_arts_new_legend$(EXEEXT)
@@ -353,14 +340,12 @@ Martial_arts_new_legend$(EXEEXT): $(Martial_arts_new_legend_OBJECTS) $(Martial_a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f sdl/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
-include ./$(DEPDIR)/win_test.Po
-include sdl/$(DEPDIR)/exception.Po
-include sdl/$(DEPDIR)/window.Po
+include ./$(DEPDIR)/log.Po
+include ./$(DEPDIR)/main.Po
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -493,8 +478,6 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f sdl/$(DEPDIR)/$(am__dirstamp)
-	-rm -f sdl/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -504,7 +487,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) sdl/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -550,7 +533,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) sdl/$(DEPDIR)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
