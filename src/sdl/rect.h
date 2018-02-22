@@ -8,6 +8,8 @@
 #include <string>
 #include <iostream>
 #include <SDL2/SDL.h>
+#include "point.h"
+#include "../color.h"
 
 constexpr SDL_Rect empty_rect{0, 0, 0, 0};
 
@@ -66,14 +68,14 @@ void draw_rect(const SDL_Rect& rect, const Color& color);
 /*
  * Draw a filled rectangle.
  */
-void fill_rect(const SDL_rect& rect, const Color& color)
+void fill_rect(const SDL_Rect& rect, const Color& color);
 
 /*
  * Fill a rectangle on a given texture. Alias for SDL_RenderFillRect. 
  */
 inline void fill_renderer_rect(SDL_Renderer* renderer, const SDL_Rect& rect)
 {
-	SDL_RenderFillRect(renderer, rect);
+	SDL_RenderFillRect(renderer, &rect);
 }
 
 bool operator==(const SDL_Rect& rect1, const SDL_Rect& rect2);

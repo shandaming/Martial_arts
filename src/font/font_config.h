@@ -5,6 +5,7 @@
 #ifndef FONT_CONFIG_H
 #define FONT_CONFIG_H
 
+#include <set>
 #include "font_options.h"
 #include "sdl_ttf.h"
 
@@ -12,8 +13,8 @@ namespace font
 {
 	struct Manager
 	{
-		Manager();
-		~Manager();
+		Manager() {}
+		~Manager() {}
 
 		Manager(const Manager&) = delete;
 		Manager& operator=(const Manager&) = delete;

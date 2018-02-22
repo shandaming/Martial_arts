@@ -3,7 +3,15 @@
  */
 
 #include "sdl_ttf.h"
+#include "font_config.h"
 #include "../serialization/unicode.h"
+#include "../log.h"
+
+static lg::Log_domain log_font("font");
+#define DBG_FT LOG_STREAM(lg::debug, log_font)
+#define LOG_FT LOG_STREAM(lg::info, log_font)
+#define WRN_FT LOG_STREAM(lg::warn, log_font)
+#define ERR_FT LOG_STREAM(lg::err, log_font)
 
 /*
  * Record stored in the font table.
@@ -43,10 +51,12 @@ static TTF_Font* open_font(const std::string& fname, int size)
 {
 	std::pair<std::string, int>  key = std::make_pair(fname, size);
 	auto it = open_fonts.find(key);
-	if(it != open_fonds.end())
+	if(it != open_fonts.end())
 		return it->second;
 
-	TTF_Font* result = TTF_OpenFont(file_exists(fname), size);
+	TTF_Font* result;
+        if(file_exists(fname))
+                result = TTF_OpenFont(fname.c_str(), size);
 	if(result)
 	{
 		open_fonts.emplace(key, result);
@@ -64,7 +74,8 @@ SDL_Rect line_size(const std::string& line, int font_size, int style)
 {
 	line_size_cache_map& cache = line_size_cache[style][font_size];
 
-	if((auto it = cache.find(line)) != cache.end())
+        auto it = cache.find(line);
+	if(it != cache.end())
 		return it->second;
 
 	const Color col{0, 0, 0, 0};
@@ -88,9 +99,9 @@ std::string make_text_ellipsis(const std::string& text, int font_size,
 		return "";
 
 	std::string current_substring, temp;
-	Iterator it(text);
+	iterator it(text);
 
-	for(; it != Iterator::end(text); ++it)
+	for(; it != iterator::end(text); ++it)
 	{
 		temp = current_substring;
 		temp.append(it.substr().first, it.substr().second);
@@ -112,10 +123,10 @@ std::string make_text_ellipsis(const std::string& text, int font_size,
  *
  * Uses the font table for caching.
  */
-TTF_Font* SDL_ttf::get_font(Font_id& id)
+TTF_Font* get_font(Font_id& id)
 {
 	auto it = font_table.find(id);
-	if(it != ont_table.end())
+	if(it != font_table.end())
 	{
 		if(it->second.font != nullptr)
 		{
@@ -168,18 +179,18 @@ TTF_Font* SDL_ttf::get_font(Font_id& id)
 	}
 
 	// Failed to find a font.
-	TTF_Record rec{nullptr, TTF_STYLE_NORMAL};
+	TTF_record rec{nullptr, TTF_STYLE_NORMAL};
 	font_table.emplace(id, rec);
 	return nullptr;
 }
 
 
 
-static Texture render_text(SDL_Renderer* r,const std::string& text, 
+static Surface render_text(SDL_Renderer* r,const std::string& text, 
 		int font_size, const Color& color, int style, bool use_markup)
 {
 	// we keep blank lines and spaces (may be wanted for indentation)
-	const std::vector<std::string> lines = split(text, '\n', 0);
+	const std::vector<std::string> lines = utils::split(text, '\n', 0);
 	std::vector<std::vector<Surface>> surfs;
 	surfs.reserve(lines.size());
 	size_t width = 0, height = 0;
@@ -208,7 +219,7 @@ static Texture render_text(SDL_Renderer* r,const std::string& text,
 		}
 
 		const Text_surface& cached_tt = Text_cache::find(txt_tt);
-		const std::vector<Surface>& res = cached_tt.get_texture();
+		const std::vector<Surface>& res = cached_tt.get_surface();
 
 		if(!res.empty())
 		{
@@ -227,7 +238,7 @@ static Texture render_text(SDL_Renderer* r,const std::string& text,
 	}
 	else
 	{
-		Surface res(create_compatible_surface(surfaces.front().front(),
+		Surface res(create_compatible_surface(surfs.front().front(),
 					width, height));
 		if(res.null())
 			return res;
@@ -243,7 +254,7 @@ static Texture render_text(SDL_Renderer* r,const std::string& text,
 					j_end = it_end->end(); j != j_end; ++j)
 			{
 				SDL_Rect dstrect = create_rect(xpos, ypos, 0, 0);
-				bit_surface(*j, nullptr, res, &dstrect);
+				blit_surface(*j, nullptr, res, &dstrect);
 				xpos += (*j)->w;
 				height = std::max<size_t>((*j)->h, height);
 			}
@@ -253,11 +264,11 @@ static Texture render_text(SDL_Renderer* r,const std::string& text,
 	}
 }
 
-inline Surface get_rendered_text(const std::string& str, int size, 
+inline Surface get_rendered_text(SDL_Renderer* r, const std::string& str, int size, 
 		const Color& color, int style)
 {
 	// TODO maybe later to parse markup here, but a lot to check
-	return render_text(str, size, color, style, false);
+	return render_text(r, str, size, color, style, false);
 }
 
 SDL_Rect draw_text_line(SDL_Renderer* r, Texture& gui_texture, 
@@ -279,7 +290,7 @@ SDL_Rect draw_text_line(SDL_Renderer* r, Texture& gui_texture,
 	const std::string etext = make_text_ellipsis(text, size, area.w);
 
 	// for the main current use, we already parsed markup.
-	Surface surface(render_text(etext, size, color, typle, false));
+	Surface surface(render_text(r, etext, size, color, style, false));
 	if(!surface)
 		return {0, 0, 0, 0};
 
@@ -307,8 +318,8 @@ SDL_Rect draw_text_line(SDL_Renderer* r, Texture& gui_texture,
 		SDL_Rect src = dest;
 		src.x = src.y = 0;
 		
-		t.create_texture_from_surface(r, surface);
-		SDL_RenderCopy(r, t, &src, &dest);
+		gui_texture.create_texture_from_surface(r, surface);
+		SDL_RenderCopy(r, gui_texture, &src, &dest);
 	}
 	if(use_tooltips)
 		add_tooltip(dest, text);
@@ -323,20 +334,20 @@ SDL_ttf::SDL_ttf()
 	int res = TTF_Init();
 	if(res == -1)
 	{
-		err_ft << "Could not initialize SDL_TTF" << std::endl;
-		throw font::error("SDL_TTF could not initialize, TTF_INIT \
+		ERR_FT << "Could not initialize SDL_TTF" << std::endl;
+		throw font::Font_error("SDL_TTF could not initialize, TTF_INIT \
 				returned: " + std::to_string(res));
 	}
 	else
-		log_ft << "Initialized true type fonts\n";
+		LOG_FT << "Initialized true type fonts\n";
 }
 
 static void clear_fonts()
 {
-	for(auto& i : open_fonst)
+	for(auto& i : open_fonts)
 		TTF_CloseFont(i.second);
 
-	open_fonst.clear();
+	open_fonts.clear();
 	font_table.clear();
 
 	font_names.clear();
@@ -358,18 +369,18 @@ void SDL_ttf::set_font_list(const std::vector<Subset_descriptor>& fontlist)
 
 	for(auto& f : fontlist)
 	{
-		if(!check_font_file(f.name))
+		if(!font::check_font_file(f.name))
 			continue;
 		// Insert fonts only if the font file exists
 		Subset_id subset = font_names.size();
 		font_names.push_back(f.name);
 
-		if(f.bold_name && check_font_file(*f.bold_name))
+		if(f.bold_name && font::check_font_file(*f.bold_name))
 			bold_names.push_back(*f.bold_name);
 		else
 			bold_names.emplace_back();
 
-		if(f.italic_name && check_font_file(*f.italic_name))
+		if(f.italic_name && font::check_font_file(*f.italic_name))
 			italic_names.push_back(*f.italic_name);
 		else
 			italic_names.emplace_back();
@@ -378,10 +389,10 @@ void SDL_ttf::set_font_list(const std::vector<Subset_descriptor>& fontlist)
 	assert(font_names.size() == bold_names.size());
 	assert(font_names.size() == italic_names.size());
 
-	dbg_ft << "Set the font list. The styled font families are:\n";
+	DBG_FT << "Set the font list. The styled font families are:\n";
 
 	for(auto i = 0; i != font_names.size(); ++i)
-		dbg_ft << "[" << i << "]:\t\tbase:\t'" << font_names[i] << 
+		DBG_FT << "[" << i << "]:\t\tbase:\t'" << font_names[i] << 
 			"'\tbold:\t'" << bold_names[i] << "'\titalic:\t'" <<
 			italic_names[i] << "'\n";
 }

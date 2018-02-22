@@ -10,9 +10,9 @@
 
 struct UTF8_impl
 {
-	static const char* get_name() { reutrn "UTF-8"; }
+	static const char* get_name() { return "UTF-8"; }
 
-	static size_t byte_size_from_ucs4_codepoint(uint32_t cb)
+	static size_t byte_size_from_ucs4_codepoint(uint32_t ch)
 	{
 		if(ch < (1u << 7))
 			return 1;
@@ -96,7 +96,7 @@ struct UTF8_impl
 
 		// Check for non-shortest-form encoding
 		// This has been forbidden in Unicode 3.1 for security reasons
-		if(size > bute_size_from_ucs4_codepoint(current_char))
+		if(size > byte_size_from_ucs4_codepoint(current_char))
 			throw Error("Invalid utf8 exception");
 		return current_char;
 	}

@@ -18,7 +18,7 @@ namespace font
 		FANG_ZHENG_YA_HEI
 	};
 
-	inline Family_class str_to_family_class(const std::String& str)
+	inline Family_class str_to_family_class(const std::string& str)
 	{
 		if(str == "fang_song")
 			return Family_class::FANG_SONG;

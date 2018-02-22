@@ -2,6 +2,23 @@
  * Copyright (C) 2017 by Shan Daming
  */
 
+#include "log.h"
+
+namespace
+{
+	class Null_streambuf : public std::streambuf
+	{
+		public:
+			Null_streambuf() {}
+		private:
+			virtual int overflow(int c) 
+			{
+				return std::char_traits<char>::not_eof(c);
+			}
+	};
+}
+
+static std::ostream null_ostream(new Null_streambuf);
 static int indent = 0;
 static bool timestamp = true;
 static bool precise_timestamp = false;
@@ -15,7 +32,7 @@ static std::ostream& output()
 	return std::cerr;
 }
 
-namespace log
+namespace lg
 {
 	/* Redirect_output_setter */
 
@@ -27,7 +44,7 @@ namespace log
 
 	Redirect_output_setter::~Redirect_output_setter()
 	{
-		output_stream = old_stream;
+		output_stream = old_stream_;
 	}
 
 	static std::map<std::string, int>* domains;
@@ -73,8 +90,7 @@ namespace log
 		// Indirection to prevent initialization depending on link order.
 		if(!domains)
 			domains = new std::map<std::string, int>;
-		domain_ = &*domains->insert_or_assign(
-				std::make_pair(name, 1)).first;
+		domain_ = &*domains->insert(std::make_pair(name, 1)).first;
 	}
 
 	bool set_log_domain_severity(const std::string& name, int severity)
@@ -131,7 +147,7 @@ namespace log
 
 	void set_strict_severity(int severity)
 	{
-		strict_level_ = severity;
+		strict_level = severity;
 	}
 
 	void set_strict_severity(const Logger& lg)
@@ -184,11 +200,11 @@ namespace log
 			return null_ostream;
 		else
 		{
-			if(!strict_threw && (severity_ <= strict_level_))
+			if(!strict_threw && (severity_ <= strict_level))
 			{
 				std::stringstream ss;
 				ss << "Error (strict mode, strict_level = " << 
-					strict_level_ << "): JY reported on channel " << name_
+					strict_level << "): JY reported on channel " << name_
 					<< " " << domain.domain_->first;
 				std::cerr << ss.str() << "\n";
 				strict_threw = true;
@@ -212,40 +228,40 @@ namespace log
 		}
 
 	}
-}
 
-void Scope_logger::do_log_entry(Log_domain const& domain, 
-		const std::string& str)
-{
-	output_ = &debug()(domain, false, true);
-	str_ = str;
+	void Scope_logger::do_log_entry(const Log_domain & domain, 
+			const std::string& str)
+	{
+		output_ = &debug()(domain, false, true);
+		str_ = str;
+	
+		ticks_ = std::chrono::system_clock::now();
+	
+		(*output_) << "{ BEGIN: " << str_ << "\n";
+		++indent;
+	}
 
-	ticks_ = std::chrono::system_clock::now();
+	void Scope_logger::do_log_exit()
+	{
+		auto ticks = std::chrono::system_clock::now() - ticks_;
+		--indent;
+		do_indent();
 
-	(*output_) << "{ BEGIN: " << str_ << "\n";
-	++indent;
-}
+		if(timestamp)
+			(*output_) << get_timestamp(time(nullptr));
+		(*output_) << "} END: " << str_ << " (took " << ticks.count() << 
+			"ms)\n";
+	}
 
-void Scope_logger::do_log_exit()
-{
-	auto ticks = std::chrono::system_clock::now() - ticks_;
-	--indent;
-	do_indent();
+	void Scope_logger::do_indent() const
+	{
+		for(int i = 0; i != indent; ++i)
+			(*output_) << " ";
+	}
 
-	if(timestamp)
-		(*output_) << get_timestamp(time(nullptr));
-	(*output_) << "} END: " << str_ << " (took " << ticks.count() << 
-		"ms)\n";
-}
-
-void Scope_logger::do_indent() const
-{
-	for(int i = 0; i != indent; ++i)
-		(*output_) << " ";
-}
-
-std::stringstream& vml_error()
-{
-	static std::stringstream lg;
-	return lg;
+	std::stringstream& vml_error()
+	{
+		static std::stringstream lg;
+		return lg;
+	}
 }

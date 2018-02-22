@@ -1,19 +1,26 @@
 /*
- * Copyright (C) 2017 by Shan Daming <shandaming@hotmail.com>
+ * Copyright (C) 2017-2018 by Shan Daming <shandaming@hotmail.com>
  */
 
 #ifndef SDL_TTF_H
 #define SDL_TTF_H
 
 #include <SDL2/SDL_ttf.h>
+#include <map>
 #include "text_cache.h"
 #include "constants.h"
 #include "marked-up_text.h"
+#include "font_description.h"
+#include "error.h"
+#include "../tooltips.h"
+#include "../sdl/utils.h"
+#include "../sdl/rect.h"
+#include "../preferences/general.h"
 #include "../serialization/unicode.h"
 #include "../serialization/string_utils.h"
 
 // Return a SDL surface containing the text rendered in a given color
-Surface get_render_text(const std::string& text, int size, 
+Surface get_render_text(SDL_Renderer* r, const std::string& text, int size, 
 		const Color& color, int style = 0);
 
 SDL_Rect draw_text_line(Texture& gui_texture, const SDL_Rect& area,
@@ -27,7 +34,7 @@ TTF_Font* get_font(Font_id& id);
  * (...)
  */
 std::string make_text_ellipsis(const std::string& text, int font_size, 
-		int max_width, int style);
+		int max_width, int style = TTF_STYLE_NORMAL);
 
 /* Returns the maximum height of a font, in pixels */
 int get_max_height(int size);
@@ -36,7 +43,7 @@ int get_max_height(int size);
  * Determine the width of a line of text given a certain font size.
  * The font type used is the default wesnoth font type.
  */
-int line_width(const std::string& line, int font_size, int style);
+int line_width(const std::string& line, int font_size, int style = TTF_STYLE_NORMAL);
 
 /*
  * Determine the size of a line of text text given a certain font size.
@@ -57,7 +64,7 @@ struct SDL_ttf
 	static TTF_Font* get_font(Font_id);
 
 	// Set the list of fonts
-	static void set_font_list(const std::vector<font::Subset_descriptor>& fontlist);
+	static void set_font_list(const std::vector<Subset_descriptor>& fontlist);
 
 	// Split a utf8 string into text_chunks
 	static std::vector<Text_chunk> split_text(const std::string& text);

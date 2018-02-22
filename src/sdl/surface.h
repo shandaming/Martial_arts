@@ -42,7 +42,7 @@ class Surface
 
 		Surface& operator=(const Surface& s)
 		{
-			assing(s);
+			assign(s);
 			return *this;
 		}
 
@@ -60,8 +60,7 @@ class Surface
 		operator SDL_Surface*() const { return surface_; }
 
 		SDL_Surface* get() const { return surface_; }
-
-		SDL_Surface* operator() const { return surface_; }
+                SDL_Surface* operator->() { return surface_; }
 
 		bool null() const { return surface_ == nullptr; }
 	private:

@@ -2,10 +2,12 @@
  * Copyright (C) 2017 by Shan Daming
  */
 
-#ifndef MARKED-UP_TEXT_H
-#define MARKED-UP_TEXT_H
+#ifndef MARKED_UP_TEXT_H
+#define MARKED_UP_TEXT_H
 
 #include <string>
+#include <SDL2/SDL_ttf.h>
+#include "standard_colors.h"
 
 /* Standard markups for color, size, font, images */
 extern const char LARGE_TEXT, SMALL_TEXT, BOLD_TEXT, NORMAL_TEXT, 

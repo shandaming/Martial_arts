@@ -6,6 +6,7 @@
 #define TEXTURE_H
 
 #include <SDL2/SDL.h>
+#include "window.h"
 
 class Texture
 {
@@ -14,22 +15,21 @@ class Texture
 
 		Texture(SDL_Texture* t) : texture_(t) {}
 
-		SDL_Texture& create_texture_from_surface(SDL_Renderer* r,
+		void create_texture_from_surface(SDL_Renderer* r,
 				SDL_Surface* s)
 		{
 			if(texture_)
 				free_texture();
 			if(s && r)
 			{
-				texture_ = SDL_createTextureFromSurface(r, s);
+				texture_ = SDL_CreateTextureFromSurface(r, s);
 				SDL_FreeSurface(s);
 				s = nullptr;
-				return *this;
 			}
 		}
 
-		Texture(const Texture&) = delete;
-		Texture& operator=(const Texture&) = delete;
+		Texture(const Texture& t) { texture_ = t.get(); }
+		Texture& operator=(const Texture& t) { texture_ = t.get(); }
 
 		~Texture()
 		{
@@ -44,6 +44,11 @@ class Texture
 		SDL_Texture* get() const
 		{
 			return texture_;
+		}
+
+		void assign(SDL_Texture* texture)
+		{
+			texture_ = texture;
 		}
 
 		SDL_Texture* operator->() const
@@ -62,7 +67,7 @@ class Texture
 				SDL_DestroyTexture(texture_);
 		}
 
-		SDL_Texture * texture_;
+		SDL_Texture* texture_;
 };
 
 bool operator<(const Texture& a, const Texture& b);
@@ -96,12 +101,14 @@ struct Texture_restorer
 
 struct Clip_rect_setter
 {
-	Clip_rect_setter(const Window& w, const SDL_Rect* r, bool operate = true) : renderer_(w), rect_(), operate_(operate)
+	Clip_rect_setter(Window& w, const SDL_Rect* r, bool operate = true) : renderer_(w), rect_(), operate_(operate)
 	{
 		if(operate_)
 		{
 			SDL_RenderGetClipRect(renderer_, &rect_);
-			SDL_RenderSetClipRect(renderer_, r);
+			SDL_Rect final_rect;
+			SDL_IntersectRect(&rect_, r, &final_rect);
+			SDL_RenderSetClipRect(renderer_, &final_rect);
 		}
 	}
 

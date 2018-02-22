@@ -4,11 +4,11 @@
 
 #include "utils.h"
 
-version_info sdl_get_version()
+Version_info sdl_get_version()
 {
 	SDL_version sdl_version();
 	SDL_GetVersion(&sdl_version);
-	return version_info(sdl_version.major, sdl_version.minor, 
+	return Version_info(sdl_version.major, sdl_version.minor, 
 			sdl_version.patch);
 }
 

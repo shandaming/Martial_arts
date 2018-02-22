@@ -74,7 +74,7 @@ namespace utils
 						match.length()) ? match.substr(solid_end) : "";
 				std::string consumed_str = (solid_len < test_len) ?
 					str.substr(current + solid_len) : "";
-				matches = wlidcard_string_match(consumed_str, 
+				matches = wildcard_string_match(consumed_str, 
 						consumed_match);
 			}
 		}while(wild_matching && !matches && ++current < str.length());

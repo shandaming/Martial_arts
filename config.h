@@ -16,6 +16,15 @@
 /* Define to 1 if you have the `SDL2' library (-lSDL2). */
 #define HAVE_LIBSDL2 1
 
+/* Define to 1 if you have the `SDL2_image' library (-lSDL2_image). */
+#define HAVE_LIBSDL2_IMAGE 1
+
+/* Define to 1 if you have the `SDL2_mixer' library (-lSDL2_mixer). */
+#define HAVE_LIBSDL2_MIXER 1
+
+/* Define to 1 if you have the `SDL2_ttf' library (-lSDL2_ttf). */
+#define HAVE_LIBSDL2_TTF 1
+
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */
 #define HAVE_MALLOC 1

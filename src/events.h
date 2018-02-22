@@ -21,9 +21,7 @@ struct Context
 		staging_handlers() {}
 	~Context();
 
-	Context(const Context&) = delete;
-
-	void add_handler(SDL_hander* ptr);
+	void add_handler(SDL_handler* ptr);
 	bool remove_handler(SDL_handler* ptr);
 	void cycle_focus();
 	void set_focus(const SDL_handler* ptr);

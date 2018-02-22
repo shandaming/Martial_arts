@@ -18,7 +18,7 @@ constexpr uint32_t SDL_BLUE_MASK  = 0x000000ff;
 constexpr uint32_t SDL_ALPHA_BITSHIFT = 24;
 constexpr uint32_t SDL_RED_BITSHIFT   = 16;
 constexpr uint32_t SDL_GREEN_BITSHIFT = 8;
-constexpr uint32_t SDL_BLUE_BITSHIT   = 0;
+constexpr uint32_t SDL_BLUE_BITSHIFT   = 0;
 
 constexpr uint32_t RGBA_ALPHA_MASK = 0x000000ff;
 constexpr uint32_t RGBA_RED_MASK   = 0xff000000;
@@ -37,7 +37,7 @@ struct Color
 	Color() : r(255), g(255), b(255), a(ALPHA_OPAQUE) {}
 
 	Color(uint8_t r_val, uint8_t g_val, uint8_t b_val, 
-			uint8_t a_val = ALPHA_OPAQUE) : r(r_val), g(g_val), b(b_bal), 
+			uint8_t a_val = ALPHA_OPAQUE) : r(r_val), g(g_val), b(b_val), 
 	        a(a_val) {}
 
 	// Implemented in sdl/utils.cpp to avoid dependency nightmares
@@ -48,14 +48,14 @@ struct Color
 	 * format. An empty string results in white. Otherwise, omitting
 	 * components other than alpha is an error.
 	 */
-	static Color from_rgba_string(const std::String& c);
+	static Color from_rgba_string(const std::string& c);
 
 	/*
 	 * Creates a new opaque Color object from a string variable in "R G B"
 	 * format. An empty string results in white. Otherwise, omitting 
 	 * components is an error.
 	 */
-	static Color from_rgb_string(const std::String& c);
+	static Color from_rgb_string(const std::string& c);
 
 	/*
 	 * Create a new Color object from a string variable in hex format.
@@ -171,13 +171,16 @@ inline std::ostream& operator<<(std::ostream& s, const Color& c)
 	return s;
 }
 
-template<>
-struct Hash<Color>
+namespace std
 {
-	size_t operator()(const Color& c) const
-	{
-		return c.to_rgba_bytes();
-	}
-};
+        template<>
+        struct hash<Color>
+        {
+	        size_t operator()(const Color& c) const
+	        {
+		        return c.to_rgba_bytes();
+	        }
+        };
+}
 
 #endif

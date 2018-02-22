@@ -17,7 +17,7 @@ struct Font_id
 	explicit Font_id(Subset_id subset, int size) : subset(subset), 
 	size(size), style(TTF_STYLE_NORMAL) {} 
 	explicit Font_id(Subset_id subset, int size, int style) :
-		subset(sebset), size(size), style(style) {}
+		subset(subset), size(size), style(style) {}
 
 	bool operator==(const Font_id& id) const
 	{

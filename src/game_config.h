@@ -9,6 +9,8 @@
 #include <vector>
 #include "version.h"
 
+#define VERSION "1.13.10+dev"
+
 namespace game_config
 {
 	extern const std::string version;
@@ -18,6 +20,8 @@ namespace game_config
 	extern std::string game_program_dir;
 
 	extern const Version_info game_version;
+
+        extern const std::string revision;
 }
 
 #endif

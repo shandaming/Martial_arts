@@ -9,6 +9,8 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <iostream>
+#include "cmdln.h"
 
 class Commandline_options
 {
@@ -16,6 +18,16 @@ class Commandline_options
 				const Commandline_options& cmdline_opts);
 	public:
 		Commandline_options(const std::vector<std::string>& args);
+
+                bool parse_commandline( 
+									const int flags = 0,
+									const int start_pos = 1);
+
+                bool check_parse_status(const Commandline::Parse_status& 
+										status);
+
+                void print_usage();
+                void print_header();
 
 		// Non-empty if --bunzip2 was given on the command line.
 		// Uncompresses a .bz2 file and exits.
@@ -56,23 +68,6 @@ class Commandline_options
 		// True if --debug was given on the command line. Enables debug mode
 		bool debug;
 
-		// True if --debug-lua was given in the commandline. Enables some
-		// Lua debugging mechanisms.
-		bool debug_lua;
-
-#ifdef DEBUG_WINDOW_LAYOUT_GRAPHS
-		// Non-empty if --debug-dot-domain was given on the command line.
-		std::optional<std::string> debug_dot_domain;
-
-		// Non-empty if --debug-dot-level was given on the command line.
-		std::optional<std::string> debug_dot_level;
-#endif
-
-		// Non-empty if --editor was given on the command line. Goes 
-		// directly into editor. If string is longer than 0. it contains
-		// path to the file to edit.
-		std::optional<std::string> editor;
-
 		// True if --fps was given on the command line. Shows number of fps.
 		bool fps;
 
@@ -99,27 +94,11 @@ class Commandline_options
 		// Contains parsed arguments of --log-* (e.g. --log-debug)
 		// Vector of pairs (severity, log_domain)
 		std::optional<std::vector<std::pair<int, std::string>>> log;
-
-		// Non-empty if --log-strict was given
-		std::optional<int> log_strict_level;
-
-		// Non-empty if --load was given on the command line. Savegame
-		// specified to load after start.
-		std::optional<std::string> load;
-
-		// Non-empty if --logdomains was given on the command line. Prints
-		// possible logdomains filtered by given string and exits.
-		std::optional<std::string> logdomains;
-
-		// True if --log-precise was given on the command line. Shows 
-		// timestamps in log with more precision.
-		bool log_precise_timestamps;
-
-		// True if --multiplayer was given on the command line. Goes 
-		// directly into multiplayer mode.
-		bool multiplayer;
 	private:
 		std::string args0_;
+                std::vector<std::string> args_;
+
+                Commandline cmdline_;
 };
 
 #endif

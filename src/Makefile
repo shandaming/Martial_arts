@@ -99,7 +99,19 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_Martial_arts_new_legend_OBJECTS = main.$(OBJEXT) log.$(OBJEXT)
+am__dirstamp = $(am__leading_dot)dirstamp
+am_Martial_arts_new_legend_OBJECTS = main.$(OBJEXT) log.$(OBJEXT) \
+	events.$(OBJEXT) game_config.$(OBJEXT) version.$(OBJEXT) \
+	filesystem.$(OBJEXT) commandline_options.$(OBJEXT) \
+	cmdln.$(OBJEXT) game_launcher.$(OBJEXT) config.$(OBJEXT) \
+	video.$(OBJEXT) tooltips.$(OBJEXT) \
+	serialization/string_utils.$(OBJEXT) \
+	serialization/unicode.$(OBJEXT) font/font_config.$(OBJEXT) \
+	font/marked-up_text.$(OBJEXT) font/sdl_ttf.$(OBJEXT) \
+	font/text.$(OBJEXT) font/text_cache.$(OBJEXT) \
+	sdl/surface.$(OBJEXT) sdl/exception.$(OBJEXT) \
+	sdl/rect.$(OBJEXT) sdl/texture.$(OBJEXT) sdl/utils.$(OBJEXT) \
+	sdl/window.$(OBJEXT) sdl/point.$(OBJEXT)
 Martial_arts_new_legend_OBJECTS =  \
 	$(am_Martial_arts_new_legend_OBJECTS)
 Martial_arts_new_legend_DEPENDENCIES =
@@ -132,6 +144,18 @@ AM_V_CXXLD = $(am__v_CXXLD_$(V))
 am__v_CXXLD_ = $(am__v_CXXLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+AM_V_CC = $(am__v_CC_$(V))
+am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
+am__v_CC_0 = @echo "  CC      " $@;
+am__v_CC_1 = 
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CCLD = $(am__v_CCLD_$(V))
+am__v_CCLD_ = $(am__v_CCLD_$(AM_DEFAULT_VERBOSITY))
+am__v_CCLD_0 = @echo "  CCLD    " $@;
+am__v_CCLD_1 = 
 SOURCES = $(Martial_arts_new_legend_SOURCES)
 DIST_SOURCES = $(Martial_arts_new_legend_SOURCES)
 am__can_run_installinfo = \
@@ -174,7 +198,7 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -O2
+CXXFLAGS = -g -O0
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -191,7 +215,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lSDL2 
+LIBS = -lSDL2_ttf -lSDL2_mixer -lSDL2_image -lSDL2 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/mylw/cpp/Martial_arts/missing makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -253,10 +277,38 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign subdir-objects
-Martial_arts_new_legend_SOURCES = main.cpp 		\
-				log.cpp	
+Martial_arts_new_legend_SOURCES = main.cpp 		        \
+				log.cpp                         \
+                                events.cpp                      \
+                                game_config.cpp                 \
+                                version.cpp                     \
+                                filesystem.cpp                  \
+                                commandline_options.cpp         \
+                                cmdln.cpp                       \
+                                game_launcher.cpp               \
+                                config.cpp                      \
+                                video.cpp                       \
+                                color.h                         \
+                                tooltips.cpp                    \
+                                                                \
+                                serialization/string_utils.cpp  \
+                                serialization/unicode.cpp       \
+                                                                \
+                                font/font_config.cpp            \
+                                font/marked-up_text.cpp         \
+                                font/sdl_ttf.cpp                \
+                                font/text.cpp                   \
+                                font/text_cache.cpp             \
+                                                                \
+                                sdl/surface.cpp                 \
+                                sdl/exception.cpp               \
+                                sdl/rect.cpp                    \
+                                sdl/texture.cpp                 \
+                                sdl/utils.cpp                   \
+                                sdl/window.cpp                  \
+                                sdl/point.cpp
 
-Martial_arts_new_legend_LDADD = -lSDL2_image -lSDL2_ttf -lSDL2_mixer
+Martial_arts_new_legend_LDADD = -lstdc++fs 
 AM_CXXFLAGS = -std=c++17
 all: all-am
 
@@ -333,6 +385,49 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+serialization/$(am__dirstamp):
+	@$(MKDIR_P) serialization
+	@: > serialization/$(am__dirstamp)
+serialization/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) serialization/$(DEPDIR)
+	@: > serialization/$(DEPDIR)/$(am__dirstamp)
+serialization/string_utils.$(OBJEXT): serialization/$(am__dirstamp) \
+	serialization/$(DEPDIR)/$(am__dirstamp)
+serialization/unicode.$(OBJEXT): serialization/$(am__dirstamp) \
+	serialization/$(DEPDIR)/$(am__dirstamp)
+font/$(am__dirstamp):
+	@$(MKDIR_P) font
+	@: > font/$(am__dirstamp)
+font/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) font/$(DEPDIR)
+	@: > font/$(DEPDIR)/$(am__dirstamp)
+font/font_config.$(OBJEXT): font/$(am__dirstamp) \
+	font/$(DEPDIR)/$(am__dirstamp)
+font/marked-up_text.$(OBJEXT): font/$(am__dirstamp) \
+	font/$(DEPDIR)/$(am__dirstamp)
+font/sdl_ttf.$(OBJEXT): font/$(am__dirstamp) \
+	font/$(DEPDIR)/$(am__dirstamp)
+font/text.$(OBJEXT): font/$(am__dirstamp) \
+	font/$(DEPDIR)/$(am__dirstamp)
+font/text_cache.$(OBJEXT): font/$(am__dirstamp) \
+	font/$(DEPDIR)/$(am__dirstamp)
+sdl/$(am__dirstamp):
+	@$(MKDIR_P) sdl
+	@: > sdl/$(am__dirstamp)
+sdl/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) sdl/$(DEPDIR)
+	@: > sdl/$(DEPDIR)/$(am__dirstamp)
+sdl/surface.$(OBJEXT): sdl/$(am__dirstamp) \
+	sdl/$(DEPDIR)/$(am__dirstamp)
+sdl/exception.$(OBJEXT): sdl/$(am__dirstamp) \
+	sdl/$(DEPDIR)/$(am__dirstamp)
+sdl/rect.$(OBJEXT): sdl/$(am__dirstamp) sdl/$(DEPDIR)/$(am__dirstamp)
+sdl/texture.$(OBJEXT): sdl/$(am__dirstamp) \
+	sdl/$(DEPDIR)/$(am__dirstamp)
+sdl/utils.$(OBJEXT): sdl/$(am__dirstamp) sdl/$(DEPDIR)/$(am__dirstamp)
+sdl/window.$(OBJEXT): sdl/$(am__dirstamp) \
+	sdl/$(DEPDIR)/$(am__dirstamp)
+sdl/point.$(OBJEXT): sdl/$(am__dirstamp) sdl/$(DEPDIR)/$(am__dirstamp)
 
 Martial_arts_new_legend$(EXEEXT): $(Martial_arts_new_legend_OBJECTS) $(Martial_arts_new_legend_DEPENDENCIES) $(EXTRA_Martial_arts_new_legend_DEPENDENCIES) 
 	@rm -f Martial_arts_new_legend$(EXEEXT)
@@ -340,12 +435,39 @@ Martial_arts_new_legend$(EXEEXT): $(Martial_arts_new_legend_OBJECTS) $(Martial_a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f font/*.$(OBJEXT)
+	-rm -f sdl/*.$(OBJEXT)
+	-rm -f serialization/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/cmdln.Po
+include ./$(DEPDIR)/commandline_options.Po
+include ./$(DEPDIR)/config.Po
+include ./$(DEPDIR)/events.Po
+include ./$(DEPDIR)/filesystem.Po
+include ./$(DEPDIR)/game_config.Po
+include ./$(DEPDIR)/game_launcher.Po
 include ./$(DEPDIR)/log.Po
 include ./$(DEPDIR)/main.Po
+include ./$(DEPDIR)/tooltips.Po
+include ./$(DEPDIR)/version.Po
+include ./$(DEPDIR)/video.Po
+include font/$(DEPDIR)/font_config.Po
+include font/$(DEPDIR)/marked-up_text.Po
+include font/$(DEPDIR)/sdl_ttf.Po
+include font/$(DEPDIR)/text.Po
+include font/$(DEPDIR)/text_cache.Po
+include sdl/$(DEPDIR)/exception.Po
+include sdl/$(DEPDIR)/point.Po
+include sdl/$(DEPDIR)/rect.Po
+include sdl/$(DEPDIR)/surface.Po
+include sdl/$(DEPDIR)/texture.Po
+include sdl/$(DEPDIR)/utils.Po
+include sdl/$(DEPDIR)/window.Po
+include serialization/$(DEPDIR)/string_utils.Po
+include serialization/$(DEPDIR)/unicode.Po
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -478,6 +600,12 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f font/$(DEPDIR)/$(am__dirstamp)
+	-rm -f font/$(am__dirstamp)
+	-rm -f sdl/$(DEPDIR)/$(am__dirstamp)
+	-rm -f sdl/$(am__dirstamp)
+	-rm -f serialization/$(DEPDIR)/$(am__dirstamp)
+	-rm -f serialization/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -487,7 +615,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) font/$(DEPDIR) sdl/$(DEPDIR) serialization/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -533,7 +661,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
+	-rm -rf ./$(DEPDIR) font/$(DEPDIR) sdl/$(DEPDIR) serialization/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

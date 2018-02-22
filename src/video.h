@@ -1,11 +1,15 @@
 /*
- * Copyright (C) 2017 by Shan Daming <shandaming@hotmail.com>
+ * Copyright (C) 2017-2018 by Shan Daming <shandaming@hotmail.com>
  */
 
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <memory>
+#include <vector>
+#include <cassert>
 #include "sdl/window.h"
+#include "sdl/texture.h"
 
 class Video
 {
@@ -40,7 +44,7 @@ class Video
 		 */
 		void init_window();
 
-		void set_mode(int x, int y, Mode_EVENT mode); // ??
+		void set_mode(int x, int y, const MODE_EVENT mode); // ??
 
 		void set_fullscreen(bool ison);
 
@@ -51,7 +55,7 @@ class Video
 		 *                     size of the framebuffer, false otherwise.
 		 */
 		void set_resolution(const std::pair<int, int>& res);
-		void set_resolution(unsigned int ,width, unsigned int height);
+		void set_resolution(unsigned int width, unsigned int height);
 
 		std::pair<int, int> current_resolution();
 
@@ -121,6 +125,8 @@ class Video
 		void set_window_icon(SDL_Surface* icon);
 
 		void clear_screen();
+
+                SDL_Rect screen_area();
 
 		Window* get_window();
 

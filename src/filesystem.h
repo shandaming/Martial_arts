@@ -7,7 +7,8 @@
 
 #include <fstream>
 #include <iostream>
-#include <filesystem>
+#include <experimental/filesystem>
+#include <system_error>
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
@@ -16,6 +17,8 @@
 #include <cassert>
 #include <mutex>
 #include "exceptions.h"
+#include "game_config.h"
+#include "version.h"
 
 int file_exists(const std::string& file);
 
@@ -36,13 +39,13 @@ namespace filesystem
 	using scoped_ostream = std::unique_ptr<std::ostream>;
 
 	/* An exception object used when an IO erro occurs. */
-	struct IO_excetpion : public Error
+	struct Io_exception : public Error
 	{
-		IO_exception() : Error("") {}
-		IO_exception(const std::string& msg) : Error(msg) {}
+		Io_exception() : Error("") {}
+		Io_exception(const std::string& msg) : Error(msg) {}
 	};
 
-	void set_user_data_dir(const std::string& path);
+	void set_user_data_dir(std::string newprefdir);
 
 	std::string get_cwd();
 	std::string get_exe_dir();
@@ -67,9 +70,9 @@ namespace filesystem
 
 	/* Basic disk I/O - read file. */
 	std::string read_file(const std::string& name);
-	std::unique_ptr<std::istream>& istream_file(const std::string& fname, 
+	scoped_istream istream_file(const std::string& fname, 
 			bool treat_failure_as_error = true);
-	std::unique_ptr<std::ostream>& ostream_file(const std::string& name, 
+	scoped_ostream ostream_file(const std::string& name, 
 			bool create_firectory = true);
 	/* Throws io_exection if an erro occurs. */
 	void write_file(const std::string& name, const std::string& data); //

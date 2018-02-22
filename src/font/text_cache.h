@@ -11,7 +11,7 @@
 class Text_cache
 {
 	public:
-		Text_cache() : cache_(), max_size_(50) {}
+		Text_cache() {}
 
 		static Text_surface& find(const Text_surface& t);
 		static void resize(unsigned int size);

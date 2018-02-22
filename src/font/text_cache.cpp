@@ -6,7 +6,6 @@
 #include "text_cache.h"
 
 text_list Text_cache::cache_;
-
 unsigned int Text_cache::max_size = 50;
 
 void Text_cache::resize(unsigned int size)

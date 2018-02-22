@@ -9,6 +9,7 @@
 #include <string>
 #include "font_id.h"
 #include "../sdl/surface.h"
+#include "../color.h"
 
 class Text_surface
 {
@@ -30,7 +31,7 @@ class Text_surface
 
 		bool operator==(const Text_surface& t) const;
 		bool operator!=(const Text_surface& t) const 
-		{ return !operator(t); }
+		{ return !operator==(t); }
 	private:
 		void hash();
 		int hash_;
@@ -44,7 +45,7 @@ class Text_surface
 
 		mutable bool initialized_;
 		mutable std::vector<Text_chunk> chunks_;
-		mutable std::vector<surface> surfs_;
+		mutable std::vector<Surface> surfs_;
 };
 
 #endif

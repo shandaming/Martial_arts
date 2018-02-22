@@ -5,6 +5,8 @@
 #ifndef TOOLTIPS_H
 #define TOOLTIPS_H
 
+#include <map>
+#include "sdl/rect.h"
 #include "sdl/surface.h"
 
 struct Manager
@@ -30,7 +32,7 @@ bool update_tooltip(int id, const SDL_Rect& rect,
 
 void remove_tooltip(int id);
 
-void process(int mousex, mousey);
+void process(int mousex, int mousey);
 
 /*
  * Check if we clicked on a tooltip having an action. If it is,

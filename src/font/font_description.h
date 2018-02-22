@@ -13,9 +13,9 @@
 struct Subset_descriptor
 {
 	Subset_descriptor() : 
-		name(), hold_name(), italic_name(), present_codepoints() {}
+		name(), bold_name(), italic_name(), present_codepoints() {}
 
-	Subset_descriptor(const Config& font) : name(font["font", "name"]),
+	Subset_descriptor(Config& font) : name(font["font", "name"]),
 											bold_name(),
 											italic_name()
 	{
@@ -26,7 +26,7 @@ struct Subset_descriptor
 	}
 
 	std::string name;
-	std::optional<std::string> hold_name;
+	std::optional<std::string> bold_name;
 	std::optional<std::string> italic_name;
 
 	typedef std::pair<int, int> range;

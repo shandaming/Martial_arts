@@ -13,7 +13,7 @@ template<typename S, typename U>
 class Iterator_base
 {
 	public:
-		Iterator_base(const S& str) : current_char(0), end(str.end()),
+		Iterator_base(const S& str) : current_char(0), ed(str.end()),
 			current_substr(std::make_pair(str.begin(), str.end()))
 		{
 			update();
@@ -21,7 +21,7 @@ class Iterator_base
 
 		Iterator_base(typename S::const_iterator const& begin,
 				typename S::const_iterator const& end) : current_char(0),
-				end(end), current_substr(std::make_pair(begin, end))
+				ed(end), current_substr(std::make_pair(begin, end))
 		{
 			update();
 		}
@@ -71,13 +71,13 @@ class Iterator_base
 		void update()
 		{
 			assert(current_substr.first == current_substr.second);
-			if(current_substr.first == end)
+			if(current_substr.first == ed)
 				return;
-			current_char = U::read(current_substr.second, end);
+			current_char = U::read(current_substr.second, ed);
 		}
 
 		uint32_t current_char;
-		typename S::const_iterator end;
+		typename S::const_iterator ed;
 		std::pair<typename S::const_iterator, typename S::const_iterator>
 			current_substr;
 };

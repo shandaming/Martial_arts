@@ -6,6 +6,7 @@
 #define STRING_UTILS_H
 
 #include <string>
+#include <cassert>
 #include <vector>
 #include <algorithm>
 #include <sstream>
@@ -18,7 +19,7 @@ namespace utils
 		STRIP_SPACES = 0x02  // strips leading and trailing blank spaces.
 	};
 
-	void trim(std::string str);
+	void trim(std::string& str);
 
 	/* Splits a (comma-)separated string into a vector of pieces. */
 	std::vector<std::string> split(const std::string& val, char c = ',',

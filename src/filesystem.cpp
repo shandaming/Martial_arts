@@ -3,17 +3,19 @@
  */
 
 #include "filesystem.h"
+#include "log.h"
 
 #define PATH " "
 
-static log::Log_domain log_filesystem("filesystem");
+static lg::Log_domain log_filesystem("filesystem");
 
-using dbg_fs = log_stream(debug, log_filesystem);
-using log_fs = log_stream(info, log_filesystem);
-using wrn_fs = log_stream(warn, log_filesystem);
-using err_fs = log_stream(err, log_filesystem);
+#define DBG_FS LOG_STREAM(lg::debug, log_filesystem)
+#define LOG_FS LOG_STREAM(lg::info, log_filesystem)
+#define WRN_FS LOG_STREAM(lg::warn, log_filesystem)
+#define ERR_FS LOG_STREAM(lg::err, log_filesystem)
 
-using fs = std::filesystem;
+//using fs = std::filesystem;
+namespace fs = std::experimental::filesystem;
 
 static std::mutex mutex;
 
@@ -69,7 +71,7 @@ const char* read_file(const char* file)
 		    buff = (char*)malloc(sizeof(char) * count);
 		    assert(buff);
 		    memset(buff, 0, sizeof(buff));
-			fscanf(fd, "%s", buff);
+		        fscanf(fd, "%s", buff);
 		}
 		fclose(fd);
 	}
@@ -143,54 +145,54 @@ namespace filesystem
 		if(suffix.empty())
 		{
 			std::ostringstream os;
-			os << Game_config::game_version.major_version() << '.' <<
-				Game_config::game_version.minor_version();
-			surffix = os.str();
+			os << game_config::game_version.major_version() << '.' <<
+				game_config::game_version.minor_version();
+			suffix = os.str();
 		}
 
 		return suffix;
 	}
 
-	static inline bool error_except_not_found(const fs::error_code& ec)
+	static inline bool error_except_not_found(const std::error_code& ec)
 	{
-		return (ec && ec.value() != std::errrc::nosuch_file_or_directory);
+		return (ec && ec.value() != static_cast<int>(std::errc::no_such_file_or_directory));
 	}
 	
 	static bool file_exists(const fs::path& fpath)
 	{
-		fs::error_code ec;
+		std::error_code ec;
 		bool exists = fs::exists(fpath, ec);
 		if(error_except_not_found(ec))
-			err_fs << "Failed to check existence of file " << fpath.string()
+			ERR_FS << "Failed to check existence of file " << fpath.string()
 				<< ": " << ec.message() << '\n';
 		return exists;
 	}
 
 	bool looks_like_pbl(const std::string& file)
 	{
-		return utils::wildcard_string_match(utf8::lowercase(file), "*.pbl");
+		return utils::wildcard_string_match(file/*utf8::lowercase(file)*/, "*.pbl");
 	}
 
 	static bool is_legal_file(const std::string& filename)
 	{
-		dbg_fs << "Looking for '" << filename << "'.\n";
+		DBG_FS << "Looking for '" << filename << "'.\n";
 
 		if(filename.empty())
 		{
-			log_fs << " invalid filename\n";
+			LOG_FS << " invalid filename\n";
 			return false;
 		}
 
 		if(filename.find("..") != std::string::npos)
 		{
-			err_fs << "Illegal path '" << filename << 
+			ERR_FS << "Illegal path '" << filename << 
 				"' (\"..\" not allowed).\n";
 			return false;
 		}
 
 		if(filename.find('\\') != std::string::npos)
 		{
-			err_fs << "Illegal path '" << filename <<
+			ERR_FS << "Illegal path '" << filename <<
 				R"end(' ("\" not allowed, for compatibility with GUN/Linux \
 				and macOS).)end" << std::endl;
 			return false;
@@ -198,7 +200,7 @@ namespace filesystem
 
 		if(looks_like_pbl(filename))
 		{
-			err_fs << "Illegal path '" << filename << "' (.pbl files are \
+			ERR_FS << "Illegal path '" << filename << "' (.pbl files are \
 				not allowed)." << std::endl;
 			return false;
 		}
@@ -207,11 +209,11 @@ namespace filesystem
 
 	std::string get_cwd()
 	{
-		fs::error_code ec;
+		std::error_code ec;
 		fs::path cwd = fs::current_path(ec);
 		if(ec)
 		{
-			err_fs << "Failed to get current directory: "<< ec.message()
+			ERR_FS << "Failed to get current directory: "<< ec.message()
 				<< "\n";
 			return "";
 		}
@@ -222,7 +224,7 @@ namespace filesystem
 	{
 		if(fs::exists("/proc/"))
 		{
-			fs::error_code ec;
+			std::error_code ec;
 			fs::path exe = fs::read_symlink(fs::path("/proc/self/exe"), ec);
 			if(ec)
 				return std::string();
@@ -230,7 +232,7 @@ namespace filesystem
 			return exe.parent_path().string();
 		}
 		else
-			return 
+			return get_cwd();
 	}
 
 	std::string directory_name(const std::string& file)
@@ -240,30 +242,30 @@ namespace filesystem
 
 	static bool create_directory_if_missing(const fs::path& dirpath)
 	{
-		fs::error_code ec;
+		std::error_code ec;
 		fs::file_status fs = fs::status(dirpath, ec);
 		if(error_except_not_found(ec))
 		{
-			err_fs << "Failed to retrieve file status for " << 
+			ERR_FS << "Failed to retrieve file status for " << 
 				dirpath.string() << ": " << ec.message() << '\n';
 			return false;
 		}
 		else if(fs::is_directory(fs))
 		{
-			dbg_fs << "directory " << dirpath.string() << 
+			ERR_FS << "directory " << dirpath.string() << 
 				" exists, not creating\n";
 			return true;
 		}
 		else if(fs::exists(fs))
 		{
-			err_fs << "cannot create directory " << dirpath.string() <<
+			ERR_FS << "cannot create directory " << dirpath.string() <<
 				": file exists\n";
 			return false;
 		}
 
 		bool created = fs::create_directory(dirpath, ec);
 		if(ec)
-			err_fs << "Failed to create directory " << dirpath.string() <<
+			ERR_FS << "Failed to create directory " << dirpath.string() <<
 				": " << ec.message() << "\n";
 		return created;
 	}
@@ -271,16 +273,16 @@ namespace filesystem
 	static bool create_directory_if_missing_recursive(
 			const fs::path& dirpath)
 	{
-		dbg_fs << "creating recursive directory: " << dirpath.string() <<
+		DBG_FS << "creating recursive directory: " << dirpath.string() <<
 			"\n";
 
 		if(dirpath.empty())
 			return false;
-		fs::error_code ec;
+		std::error_code ec;
 		fs::file_status fs = fs::status(dirpath);
 		if(error_except_not_found(ec))
 		{
-			err_fs << "Failed to retrieve file status for " << 
+			ERR_FS << "Failed to retrieve file status for " << 
 				dirpath.string() << ": " << ec.message() << '\n';
 			return false;
 		}
@@ -295,7 +297,7 @@ namespace filesystem
 			return create_directory_if_missing(dirpath);
 		else
 		{
-			err_fs << "Counld not create parents to " << dirpath.string() <<
+			ERR_FS << "Counld not create parents to " << dirpath.string() <<
 				'\n';
 			return false;
 		}
@@ -313,7 +315,7 @@ namespace filesystem
 		if(path.empty())
 			return path;
 
-		fs::error_code ec;
+		std::error_code ec;
 		fs::path p = resolve_dot_entries ? fs::canonical(path, ec) :
 			fs::absolute(path);
 
@@ -327,20 +329,20 @@ namespace filesystem
 
 	std::string read_file(const std::string& name)
 	{
-		auto s = istream_file(name);
+		std::unique_ptr<std::istream> s = istream_file(name);
 		std::stringstream ss;
 		ss << s->rdbuf();
 		return ss.str();
 	}
 
-	std::unique_ptr<std::istream>& istream_file(const std::string& name, 
-			bool treat_filure_as_error)
+	scoped_istream istream_file(const std::string& name, 
+			bool treat_failure_as_error)
 	{
-		log_fs << "Streaming " << name << " for reading.\n";
+		LOG_FS << "Streaming " << name << " for reading.\n";
 
 		if(name.empty())
 		{
-			err_fs << "Trying to open file with empty name.\n";
+			ERR_FS << "Trying to open file with empty name.\n";
 
 			std::unique_ptr<std::istream> fs(new std::ifstream());
 			fs->clear(std::ios::failbit);
@@ -352,7 +354,7 @@ namespace filesystem
 			std::ifstream fs(fs::path(name), std::ios::binary);
 
 			if(!fs.is_open() && treat_failure_as_error)
-				err_fs << "Could not open '" << name << "' for reading.\n";
+				ERR_FS << "Could not open '" << name << "' for reading.\n";
 			/* linux:????
 			else if(!is_filename_case_correct(name, fd)) 
 			{
@@ -364,12 +366,13 @@ namespace filesystem
 				return fs;
 			}
 			*/
-			return (new ifstream(fs));
+                        scoped_istream is(new std::ifstream(std::move(fs)));
+			return is;
 		}
 		catch(std::exception&)
 		{
 			if(treat_failure_as_error)
-				err_fs << "Could not open '" << name << "' for reading.\n";
+				ERR_FS << "Could not open '" << name << "' for reading.\n";
 			std::unique_ptr<std::istream> s(new std::ifstream());
 			s->clear(std::ios::failbit);
 
@@ -377,19 +380,20 @@ namespace filesystem
 		}
 	}
 
-	std::unique_ptr<std::ostream> ostream_file(const std::string& name, 
+	scoped_ostream ostream_file(const std::string& name, 
 			bool crate_directory)
 	{
-		log_fs << "streaming " << name << " for writting.\n";
+		LOG_FS << "streaming " << name << " for writting.\n";
 
-		return new std::ofstream(fs::path(name), std::ios::binary);
+                scoped_ostream os(new std::ofstream(fs::path(name), std::ios::binary));
+		return os;
 	}
 
 	/* Throws io_exception if an erro occurs.. */
 	void write_file(const std::string& name, const std::string& data)
 	{
 		auto os = ostream_file(name);
-		os->exceptions(st::ios::goodbit);
+		os->exceptions(std::ios::goodbit);
 
 		constexpr size_t block_size = 4096;
 		char buf[block_size];
@@ -400,8 +404,8 @@ namespace filesystem
 			std::copy(data.begin() + i, data.begin() + i + bytes, buf);
 
 			os->write(buf, bytes);
-			if(os->bad)
-				throw IO_exception("Error writting to file: '" + 
+			if(os->bad())
+				throw Io_exception("Error writting to file: '" + 
 						name + "'");
 		}
 
@@ -411,7 +415,7 @@ namespace filesystem
 	{
 		if(create_directory_if_missing_recursive(user_data_dir))
 		{
-			err_fs << "could not open or create user data directory at " <<
+			ERR_FS << "could not open or create user data directory at " <<
 				user_data_dir.string() << '\n';
 			return;
 		}
@@ -425,13 +429,13 @@ namespace filesystem
 		create_directory_if_missing(user_data_dir / "persist");
 	}
 
-	void set_user_data_dir(const std::string& newprefdir)
+	void set_user_data_dir(std::string newprefdir)
 	{
 	#ifdef PREFERENCES_DIR
 		if(newprefdir.empty())
 			newprefdir = PREFERENCES_DIR;
 	#endif
-		std::string backupprefdir = ".game" + get_version_path_surffix();
+		std::string backupprefdir = ".game" + get_version_path_suffix();
 
 		const char* home_dir = getenv("HOME");
 
@@ -488,12 +492,12 @@ namespace filesystem
 	}
 
 	std::string get_json_location(const std::string& filename,
-			const std::string& current_dir = std::string())
+			const std::string& current_dir)
 	{
 		if(!is_legal_file(filename))
 			return std::string();
 
-		assert(!Game_config::path.empty());
+		assert(!game_config::path.empty());
 
 		fs::path fpath(filename);
 		fs::path result;
@@ -501,7 +505,7 @@ namespace filesystem
 		if(filename[0] == '-')
 		{
 			result /= get_user_data_path() / "data" / filename.substr(1);
-			dbg_fs << " trying '" << result.string() << '\n';
+			DBG_FS << " trying '" << result.string() << '\n';
 		}
 		else if(*fpath.begin() == ".")
 		{
@@ -516,11 +520,11 @@ namespace filesystem
 
 		if(result.empty() || !file_exists(result))
 		{
-			dbg_fs << " not found\n";
+			DBG_FS << " not found\n";
 			result.clear();
 		}
 		else
-			dbg_fs << " found: '" << result.string() << '\n';
+			DBG_FS << " found: '" << result.string() << '\n';
 
 		return result.string();
 	}

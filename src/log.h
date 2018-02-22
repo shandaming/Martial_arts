@@ -6,6 +6,8 @@
 #define LOG_H
 
 #include <iostream>
+#include <iomanip>
+#include <map>
 #include <string>
 #include <sstream>
 #include <utility>
@@ -124,16 +126,9 @@ namespace lg
 	};
 }
 
-template<typename Callabled>
-inline std::ostream log_stream(Callabled& c, const lg::Log_domain& domain)
-{
-	if(std::is_function<decltype(c)>::value)
-	{
-		if(c().dont_log(domain))
-			;
-		else
-			c()(domain);
-	}
-}
+#define LOG_STREAM(level, domain) \
+	if(level().dont_log(domain)) ; \
+	else level()(domain) 
+
 
 #endif

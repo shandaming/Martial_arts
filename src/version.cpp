@@ -17,11 +17,11 @@ Version_info::Version_info(unsigned int major, unsigned int minor,
 	nums_[2] = revision_level;
 }
 
-Vsersion_info::Version_info(const std::string& str) : nums_(3, 0),
+Version_info::Version_info(const std::string& str) : nums_(3, 0),
 	special_(""), special_separator_('\0')
 {
 	std::string v = str;
-	trim(v);
+	utils::trim(v);
 	if(v.empty())
 		return;
 
@@ -56,7 +56,7 @@ Vsersion_info::Version_info(const std::string& str) : nums_(3, 0),
 	else
 		left_side = v;
 
-	const std::vector<std::string> components = split(left_side, '.');
+	const std::vector<std::string> components = utils::split(left_side, '.');
 	size_t s = components.size();
 	if(s == 0)
 		return;
@@ -64,10 +64,11 @@ Vsersion_info::Version_info(const std::string& str) : nums_(3, 0),
 		nums_.resize(s, 0);
 
 	for(size_t i = 0; i < s; ++i)
-		nums_[i] = static_cast<unsigned int>(components[i]);
+		//nums_[i] = static_cast<unsigned int>(components[i]);
+                nums_[i] = atol(components[i].c_str());
 }
 
-std::string version_info::str() const
+std::string Version_info::str() const
 {
 	size_t s = nums_.size();
 	std::ostringstream o;
@@ -158,7 +159,7 @@ bool recursive_order_operation(const std::vector<unsigned int>& l,
 	return ret;
 }
 
-bool version_number_comparison_internal(const Version_info& l,
+bool version_numbers_comparison_internal(const Version_info& l,
 		const Version_info& r, COMP_TYPE o)
 {
 	std::vector<unsigned int> lc = l.components();
@@ -237,7 +238,7 @@ bool operator>(const Version_info& l, const Version_info& r)
 {
 	return version_numbers_comparison_internal(l, r, GT) ||
 		(version_numbers_comparison_internal(l, r, EQUAL) &&
-		 ((r.speical_version().empty() && !l.special_version().empty()) ||
+		 ((r.special_version().empty() && !l.special_version().empty()) ||
 		  (l.special_version() > r.special_version())));
 }
 

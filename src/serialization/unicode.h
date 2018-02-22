@@ -16,7 +16,7 @@ typedef Iterator_base<std::string, Convert_impl<char>::type> iterator;
  *
  * @return str.length() if there are less than @p index characters.
  */
-size_t index(const string& str, const size_t index);
+size_t index(const std::string& str, const size_t index);
 
 /* Length in characters of a UTF-8 string. */
 size_t size(const std::string& str);

@@ -12,7 +12,7 @@ size_t index(const std::string& str, size_t index)
 	try
 	{
 		for(unsigned int chr = 0; chr < index && i < len; ++chr)
-			i += byte_size_from_utf8_first(str[i]);
+			i += UTF8_impl::byte_size_from_utf8_first(str[i]);
 	}catch(...)
 	{
 		throw Error("Invalid UTF-8 string.");

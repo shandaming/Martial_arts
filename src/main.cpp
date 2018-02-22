@@ -2,20 +2,21 @@
  * Copyright (C) 2017 - 2018 by Shan Daming
  */
 
+//#include <iostream>
+#include <signal.h>
 #include "log.h"
 #include "game_config.h"
-//#include "game_launcher.h"
-#include "commandline_options.h"
+#include "game_launcher.h"
 #include "filesystem.h"
-#include <SDL2/SDL.h>
+
 static lg::Log_domain log_config("config");
 
-#define log_config log_stream(lg::info, log_config)
-#define log_general log_stream(lg::info, lg::general())
+#define LOG_CONFIG LOG_STREAM(lg::info, log_config)
+#define LOG_GENERAL LOG_STREAM(lg::info, lg::general())
 
 static void safe_exit(int res)
 {
-	log_general << "exiting with code " << res << "\n";
+	LOG_GENERAL << "exiting with code " << res << "\n";
 	exit(res);
 }
 
@@ -30,13 +31,14 @@ static int do_gameloop(std::vector<std::string>& args)
 	srand(time(nullptr));
 
 	Commandline_options cmdline_opts = Commandline_options(args);
+        cmdline_opts.parse_commandline();
 	game_config::game_program_dir = filesystem::directory_name(args[0]);
 
 	// int finished = process_command_args(cmdine_opts);
 	// if(finished == -1)
 	//	return finished;
 	
-	//std::unique_ptr<Game_launcher> game(new Game_launcher(cmdline_opts, 
+	std::unique_ptr<Game_launcher> game(new Game_launcher(cmdline_opts, 
 				args[0].c_str()));
 	int start_ticks = SDL_GetTicks();
 
@@ -90,9 +92,9 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		std::out << "JY " << game_config::revison << "\n";
+		std::cout << "JY " << game_config::revision << "\n";
 		time_t t = time(nullptr);
-		std::cout << std::put_time(localtime(&t), %c %Z) << "\n";
+		std::cout << std::put_time(localtime(&t), "%c %Z") << "\n";
 
 		auto exe_dir = filesystem::get_exe_dir();
 		if(!exe_dir.empty())
@@ -123,7 +125,7 @@ int main(int argc, char* argv[])
 
 		int res = do_gameloop(args);
 		safe_exit(res);
-	}catch()
+	}
 	catch(...)
 	{}
 

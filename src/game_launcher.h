@@ -5,6 +5,12 @@
 #ifndef GAME_LAUNCHER_H
 #define GAME_LAUNCHER_H
 
+#include "commandline_options.h"
+#include "video.h"
+#include "config.h"
+#include "font/font_config.h"
+#include "events.h"
+
 class Game_launcher
 {
 	public:
@@ -49,7 +55,7 @@ class Game_launcher
 			multiplayer_server_ = server; 
 		}
 
-		bool play_multiplayer(Select& res);
+		//bool play_multiplayer(Select& res);
 		bool play_multiplayer_commandline();
 		bool change_language();
 
@@ -57,8 +63,8 @@ class Game_launcher
 
 		enum class Reload_game_data { RELOAD_DATA, NO_RELOAD_DATA };
 
-		void launch_game(Reload_game_data& reload = 
-				Reload_game_data::Reload_data);
+		//void launch_game(Reload_game_data& reload = 
+				//Reload_game_data::Reload_data);
 		void play_replay();
 
 		void start_game();
@@ -71,27 +77,27 @@ class Game_launcher
 
 		const std::unique_ptr<Video> video_;
 
-		font::Mannager font_mannager_;
+		font::Manager font_manager_;
 
-		const preferences::Manager prefs_manager_;
-		const image::Manager image_manager_;
-		const events::Event_context main_event_context_;
-		const hotkey::Manager hotkey_manager_;
-		sound::Music_thinker music_thinker_;
-		sound::Music_muter music_muter_;
+		//const preferences::Manager prefs_manager_;
+		//const image::Manager image_manager_;
+		const Event_context main_event_context_;
+		//const hotkey::Manager hotkey_manager_;
+		//sound::Music_thinker music_thinker_;
+		//sound::Music_muter music_muter_;
 
 		std::string test_scenario_;
 
 		std::string screenshot_map_, screenshot_filename_;
 
-		Saved_game state_;
+		//Saved_game state_;
 		bool play_replay_;
 
 		std::string multiplayer_server_;
 		bool jump_to_multiplayer_;
-		Jump_to_campaign_info jump_to_campaign_;
+		//Jump_to_campaign_info jump_to_campaign_;
 
-		std::unique_ptr<savegame::Load_game_metadata> load_data_;
+		//std::unique_ptr<savegame::Load_game_metadata> load_data_;
 };
 
 #endif

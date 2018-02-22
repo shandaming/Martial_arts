@@ -8,7 +8,7 @@
 #include <vector>
 #include <utility>
 #include <cmath>
-#include "io.h"
+#include "filesystem.h"
 
 enum class Type : uint8_t
 {
@@ -62,27 +62,10 @@ class Config
 		template<typename... Args>
 		std::string operator[](Args&&... keys);
 
+                void open(const std::string& fiename);
+
 		Node* new_item();
 		void json_delete(Node* j);
-
-		int get_node_count(Node* item)
-		{
-			int i = 0;
-
-			while(item)
-			{
-				++i;
-				Node* c = item->next;
-				if(item->child)
-				{
-					++i;
-					i += get_node_count(item->child);
-				}
-
-				item = c;
-			}
-			return i;
-		}
 
 		void suffix_object(Node* prev, Node* item);
 

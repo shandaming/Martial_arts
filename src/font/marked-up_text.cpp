@@ -35,7 +35,7 @@ std::string::const_iterator parse_markup(std::string::const_iterator it1,
 			case NORMAL_TEXT:
 				if(color) *color = NORMAL_COLOR;
 				break;
-			case BALCK_TEXT:
+			case BLACK_TEXT:
 				if(color) *color = BLACK_COLOR;
 				break;
 			case GRAY_TEXT:
@@ -52,7 +52,7 @@ std::string::const_iterator parse_markup(std::string::const_iterator it1,
 				break;
 			case NULL_MARKUP:
 				return it1 + 1;
-			case COLOR_TEXT:
+			case COLOR_TEXT:{
 				auto start = it1;
 				// Very primitive parsing for rgb value should look like
 				// <213, 14, 151>
@@ -98,9 +98,10 @@ std::string::const_iterator parse_markup(std::string::const_iterator it1,
 					// stop parsing and do not consume any chars
 					return start;
 				if(it1 == it2) return it1;
-				break;
+				break;}
 			default:
 				return it1;
+                                break;
 		}
 		++it1;
 	}

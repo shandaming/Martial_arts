@@ -6,8 +6,8 @@
 #define TEXT_H
 
 #include <functional>
-#include <pango/pango.h>
-#include <pango/pangocairo.h>
+#include <pango-1.0/pango/pango.h>
+#include <pango-1.0/pango/pangocairo.h>
 #include "font_options.h"
 #include "../color.h"
 #include "../sdl/surface.h"

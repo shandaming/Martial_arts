@@ -213,7 +213,7 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -O2
+CXXFLAGS = -g -O0
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -230,7 +230,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lSDL2 
+LIBS = -lSDL2_ttf -lSDL2_mixer -lSDL2_image -lSDL2 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/mylw/cpp/Martial_arts/missing makeinfo
 MKDIR_P = /bin/mkdir -p

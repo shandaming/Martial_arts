@@ -5,7 +5,6 @@
 #include <cfloat>
 #include <climits>
 #include "config.h"
-#include "filesystem.h"
 
 template<typename T>
 static T skip(const T& value)
@@ -41,6 +40,12 @@ Config::~Config()
 	filesystem::write_file(file_, out);
 
 	json_delete(root_);
+}
+
+void Config::open(const std::string& fiename)
+{
+	std::string text = filesystem::read_file(file_);
+	root_ = parse(text);
 }
 
 Config::Node* Config::new_item()
@@ -713,7 +718,12 @@ std::string Config::print_value(Config::Node* item, bool b, int depth, int fmt)
 std::string Config::print_array(Config::Node* item, int depth, int fmt)
 {
 	// How many entries in the array?
-	int numentries = get_node_count(item);
+	int numentries = 0;
+        Config::Node* c = item->child;
+
+        // Count the number of entries.
+	while (c)
+		numentries++, c = c->next;
 
 	std::string out;
 	// Explicitly handle numentries == 0
@@ -753,7 +763,12 @@ std::string Config::print_array(Config::Node* item, int depth, int fmt)
 std::string Config::print_object(Config::Node* item, int depth, int fmt)
 {
 	std::string out;
-	int numentries = get_node_count(item);
+	int numentries = 0;
+        Config::Node* c = item->child;
+
+        // Count the number of entries.
+	while (c)
+		++numentries, c = c->next;
 
 	if(!numentries)
 	{

@@ -5,7 +5,7 @@
 #ifndef MATH_H
 #define MATH_H
 
-#include <cmatch>
+#include <cmath>
 #include <limits>
 
 template<typename T>
@@ -127,7 +127,7 @@ inline unsigned int count_leading_zeros(N n)
 	//
 	// This is necessary because 'n' may be widened (or, alas, shrunk);
 	// and thus the information of 'n''s true width may be lost.
-	return count_leading_zero_impl(n, bit_width(n));
+	return count_leading_zeros_impl(n, bit_width(n));
 }
 
 template<typename N>

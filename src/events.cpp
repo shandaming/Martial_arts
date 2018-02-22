@@ -184,12 +184,12 @@ void SDL_handler::join(Context& c)
 void SDL_handler::join_same(SDL_handler* parent)
 {
 	if(has_joined_)
-		leave; // should not be in multiple event contexts.
+		leave(); // should not be in multiple event contexts.
 
-	std::reverse(event_contexts.begin(), event_contexts.end());
+	std::reverse(std::begin(event_contexts), std::end(event_contexts));
 	for(auto& context : event_contexts)
 	{
-		handler_list& handlers = context_handlers;
+		handler_list& handlers = context.handlers;
 		if(std::find(handlers.begin(), handlers.end(), parent) != 
 				handlers.end())
 		{
@@ -197,7 +197,7 @@ void SDL_handler::join_same(SDL_handler* parent)
 			return;
 		}
 	}
-	std::reverse(event_contexts.begin(), event_contexts.end());
+	std::reverse(std::begin(event_contexts), std::end(event_contexts));
 
 	join(event_contexts.back());
 }
@@ -206,19 +206,19 @@ void SDL_handler::leave()
 {
 	sdl_handler_vector members = handler_members();
 	if(members.empty())
-		assert(event_contexts.emtpy() == false);
+		assert(event_contexts.empty() == false);
 
 	for(auto m : members)
 		m->leave();
 
-	std::reverse(event_contexts.begin(), event_contexts.end());
+	std::reverse(std::begin(event_contexts), std::end(event_contexts));
 	for(auto& c : event_contexts)
 	{
 		if(c.remove_handler(this))
 			break;
 	}
 
-	std::reverse(event_contexts.begin(), event_contexts.end());
+	std::reverse(std::begin(event_contexts), std::end(event_contexts));
 
 	has_joined_ = false;
 }
