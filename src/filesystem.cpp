@@ -491,6 +491,11 @@ namespace filesystem
 		return user_data_dir;
 	}
 
+	std::string get_user_data_dir()
+	{
+		return get_user_data_path().string();
+	}
+
 	std::string get_json_location(const std::string& filename,
 			const std::string& current_dir)
 	{
@@ -527,5 +532,133 @@ namespace filesystem
 			DBG_FS << " found: '" << result.string() << '\n';
 
 		return result.string();
+	}
+
+	/*
+	 * The paths manager is responsible for recording the various paths that
+	 * binary files may be located at.
+	 * It should be passed a config boejct which holds binary path 
+	 * information.
+	 * This is in the format
+	 *
+	 * binary_path
+	 * {
+	 *		path = <path>
+	 * }
+	 */
+
+	namespace 
+	{
+		std::set<string> binary_paths;
+
+		typedef std::map<std::string, std::vector<std::string>> path_map;
+		path_map binary_paths_cache;
+	}
+
+	static void init_binary_paths()
+	{
+		if(binary_paths.empty())
+			binary_paths.insert("");
+	}
+
+	Binary_paths_manager::Binary_paths_manager() : paths_() {}
+
+	Binary_paths_manager::Binary_paths_manager(const Config& cfg) : paths_()
+	{
+		set_paths(cfg);
+	}
+
+	Binary_paths_manager::Binary_paths_manager()
+	{
+		cleanup();
+	}
+
+	void Binary_paths_manager::set_paths(const Config& cfg)
+	{
+		cleanup();
+		init_binary_paths();
+
+		for(auto& bp : )
+	}
+
+	void Binary_paths_manager::cleanup()
+	{
+		binary_paths_cache.clear();
+
+		for(auto it = paths_.begin(); it != paths_.end(); ++it)
+			binary_paths.erase(*it);
+	}
+
+	void clear_binary_paths_cache()
+	{
+		binary_paths_cache.clear();
+	}
+
+	const std::vector<std::string>& get_binary_paths(
+			const std::string& type)
+	{
+		auto it = binary_paths_cache.find(type);
+		if(it != binary_paths_cache.end())
+			return it->second;
+
+		if(type.find("..") != std::string::npos)
+		{
+			// Not an assertion, as language.cpp is passing user data as 
+			// type.
+			ERR_FS << "Invalid type '" << type << "' for binary paths\n";
+			static std::vector<std::string> dummy;
+			return dummy;
+		}
+
+		std::vector<std::string>& res = binary_paths_cache[type];
+
+		init_binary_paths();
+
+		for(auto& path : binary_paths)
+		{
+			res.push_back(get_user_data_dir() + "/" + path + type + "/");
+			if(!game_config::path.empty())
+				res.push_back(game_config::path + "/" + path + type + "/");
+		}
+
+		// not found in "/type" directory. try main directory
+		res.push_back(get_user_data_dir() + "/");
+
+		if(!game_config::path.empty())
+			res.push_back(game_config::path + "/");
+		return res;
+	}
+
+	std::string get_binary_file_location(const std::string& type,
+										const std::string& filename)
+	{
+		// We define "..." as "remove everything before" this is needed 
+		// becase on the once hand allowing "..." would be security risk but
+		// especially for terrains the c++ engine puts a hardcoded 
+		// "terrain/" before filename and there would be no way to "escape"
+		// from "terrain/". This is not the best solution but we cannot 
+		// remove it whithout another solution (subtypess maybe?).
+
+		std::string::size_type pos = filename.rfind("../");
+		if(pos != std::string::npos)
+			return get_binary_file_location(type, filename.substr(pos + 3));
+
+		if(!is_legal_file(filename))
+			return std::string();
+
+		for(const std::string& bp : get_binary_paths(type))
+		{
+			fs::path bpath(bp);
+			bpath /= filename;
+			DBG_FS << "  checking '" << bp << "'\n";
+			if(file_exists(bpath))
+			{
+				DBG_FS << "  found at '" << bpath.string() << "'\n";
+				return bpath.string();
+			}
+		}
+
+		DBG_FS << "  not found\n";
+		return std::string();
 	}
 }

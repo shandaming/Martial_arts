@@ -47,6 +47,8 @@ namespace filesystem
 
 	void set_user_data_dir(std::string newprefdir);
 
+	std::string get_user_data_dir();
+
 	std::string get_cwd();
 	std::string get_exe_dir();
 
@@ -83,6 +85,51 @@ namespace filesystem
 	 */
 	std::string get_json_location(const std::string& filename,
 			const std::string& current_dir = std::string());
+
+	/*
+	 * The paths manager is responsible for recording the various paths that
+	 * binary files may be located at.
+	 * It should be passed a config boejct which holds binary path 
+	 * information.
+	 * This is in the format
+	 *
+	 * binary_path
+	 * {
+	 *		path = <path>
+	 * }
+	 */
+	struct Binary_paths_manager
+	{
+			Binary_paths_manager();
+			Binary_paths_manger(const Config& cfg);
+			~Binary_paths_manager();
+
+			Binary_paths_manager(const Binary_paths_manager&) = delete;
+			Binary_paths_manager& operator=(
+					conts Binary_paths_manager&) = delete;
+
+			void set_paths(const Config& cfg);
+		private:
+			void cleanup();
+
+			std::vector<std::string> paths_;
+	};
+
+	void clear_binary_paths_cache();
+
+	/*
+	 * Returns a vector with all possible paths to a given type of binary,
+	 * e.g. 'images', 'sounds', etc.
+	 */
+	const std::vector<std::string>& get_binary_paths(
+			const std::string& type);
+
+	/*
+	 * Returns a complete path to the actual file of a given @a type or an 
+	 * empty string if the file isn't present.
+	 */
+	std::string get_binary_file_location(const std::string& type,
+										const std::string& filename);
 }
 
 #endif

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2017 by Shan Daming
  */
+
 #include <strings.h> // linux header file
 #include <cfloat>
 #include <climits>

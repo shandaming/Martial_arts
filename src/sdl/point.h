@@ -3,28 +3,20 @@
 */
 
 #include <iostream>
+#include <tuple>
 #include <SDL2/SDL.h>
 
 /** Holds a 2D Point. */
 struct Point
 {
-	Point()
-		: x(0)
-		, y(0)
-	{
-	}
+	Point() : x(0), y(0)
+	{}
 
-	Point(const int x_, const int y_)
-		: x(x_)
-		, y(y_)
-	{
-	}
+	Point(const int x_, const int y_) : x(x_), y(y_)
+	{}
 
-	Point(const SDL_Point& p)
-		: x(p.x)
-		, y(p.y)
-	{
-	}
+	Point(const SDL_Point& p) : x(p.x), y(p.y)
+	{}
 
 	/** x coordinate. */
 	int x;
@@ -47,7 +39,7 @@ struct Point
 
 	bool operator<(const Point& point) const
 	{
-		return x < point.x || (x == point.x && y < point.y);
+		return std::tie(x, y) < std::tie(point.x, point.y);
 	}
 
 	bool operator<=(const Point& point) const

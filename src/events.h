@@ -12,6 +12,16 @@
 #include <cassert>
 #include <SDL2/SDL.h>
 
+// our user-defined double-click event type
+#define DOUBLE_CLICK_EVENT SDL_USEREVENT
+#define TIMER_EVENT (SDL_USEREVENT + 1)
+#define HOVER_REMOVE_POPUP_EVENT (SDL_USEREVENT + 2)
+#define DRAW_EVENT (SDL_USEREVENT + 3)
+#define CLOSE_WINDOW_EVENT (SDL_USEREVENT + 4)
+#define SHOW_HELPTIP_EVENT (SD_USEREVENT + 5)
+#define DRAW_ALL_EVENT (SDL_USEREVENT + 6)
+#define INVOKE_FUNCTION_EVENT (SDL_USEREVENT + 7)
+
 class SDL_handler;
 typedef std::list<SDL_handler*> handler_list;
 
@@ -86,6 +96,12 @@ class SDL_handler
 		bool has_joined_global_;
 };
 
+void focus_handler(const SDL_handler* ptr);
+
+bool has_focus(const SDL_handler* ptr, const SDL_Event* event);
+
+void call_in_main_thread(const std::function<void(void)>& f);
+
 typedef std::vector<SDL_handler*> sdl_handler_vector;
 
 /*
@@ -104,5 +120,48 @@ struct Event_context
 	Event_context();
 	~Event_context();
 };
+
+/* causes events to be dispatched to all handler objects */
+void pump();
+
+// look for resize events and update references to the screen area
+void peek_for_resize();
+
+struct Pump_info
+{
+		Pump_info() : resize_dimensions(), ticks_(0) {}
+		std::pair<int, int> resize_dimensions;
+		int ticks(unsigned* refresh_counter = nullptr, 
+				unsigned refresh_rate = 1);
+	private:
+		int ticks_; // 0 if not calculated
+};
+
+class Pump_monitor
+{
+	public:
+		Pump_monitor();
+		virtual ~Pump_monitor();
+		virtual void process(Pump_info& info) = 0;
+};
+
+void raise_process_event();
+void raise_resize_event();
+void raise_draw_event();
+void raise_draw_all_event();
+void raise_volatile_draw_event();
+void raise_volatile_draw_all_event();
+void raise_volatile_undraw_event();
+void raise_help_string_event(int mousex, int mousey);
+
+/*
+ * Is the event an input event ?
+ *
+ * @returns whether or not the event is an input event
+ */
+bool is_input(const SDL_Event& event);
+
+// Discards all input events
+void discard_input();
 
 #endif

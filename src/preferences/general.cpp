@@ -3,6 +3,13 @@
  */
 
 #include "general.h"
+#include "../log.h"
+
+static lg::Log_domain log_config("config");
+#define ERR_CFG LOG_STREAM(lg::err, log_config)
+
+static lg::Log_domain log_filesystem("filesystem");
+#define ERR_FS LOG_STREAM(lg::err, log_filesystem)
 
 extern Config prefs;
 
@@ -30,3 +37,6 @@ int font_scaled(int size)
 {
 	return size * font_scaling() / 100;
 }
+
+namespace preferences
+{}

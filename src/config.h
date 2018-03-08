@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2017 by Shan Daming
  */
+
 #ifndef CONFIG_H
 #define CONFIG_H
 
