@@ -4,19 +4,18 @@
 
 #include "window.h"
 #include "exception.h"
+#include "renderer_utils.h"
 
 Window::Window(const std::string& title, int x, int y, int w, int h,
-		Uint32 window_flags, Uint32 render_flags) : 
+		uint32_t window_flags, uint32_t render_flags) : 
 		window_(SDL_CreateWindow(title.c_str(), x, y, w, h, window_flags)),
-		pixel_format_(SDL_PIXELFORMAT_UNKNOWN)
+		info_()
 {
 	if(!window_)
 		throw Exception("Failed to create a SDL_Window object.", true);
 
 	if(!SDL_CreateRenderer(window_, -1, render_flags))
 		throw Exception("Failed to create a SDL_Renderer object.", true);
-
-	SDL_RendererInfo info;
 
 	if(SDL_GetRendererInfo(*this, &info) != 0)
 		throw Exception("Failed to retrieve the information of the \
@@ -26,8 +25,15 @@ Window::Window(const std::string& title, int x, int y, int w, int h,
 		throw Exception("The renderer has no texture information \
 				available.\n", false);
 
+	if(!(info_.flags & SDL_RENDERER_TARGETTEXTURE))
+		throw Exception("Render-to-texture not supported or enabled!", 
+				false);
+
 	SDL_SetRenderDrawBlendMode(*this, SDL_BLENDMODE_BLEND);
-	pixel_format_ = info.texture_formats[0];
+	
+	// In fullscreen mode, do not minimize on focus loss.
+	// Minimizing was reported as bug #1609 with blocker priority.
+	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 
 	fill(0, 0, 0);
 	render();
@@ -42,6 +48,22 @@ Window::~Window()
 void Window::set_size(int w, int h)
 {
 	SDL_SetWindowSize(window_, w, h);
+}
+
+SDL_Point Window::get_size()
+{
+	SDL_Point res;
+	SDL_GetWindowSize(*this, &res.x, &res.y);
+
+	return res;
+}
+
+SDL_Point Window::get_output_size()
+{
+	SDL_Point res;
+	SDL_GetRendererOutputSize(*this, &res.x, &res.y);
+
+	return res;
 }
 
 void Window::center()
@@ -72,7 +94,7 @@ void Window::full_screen()
 
 void Window::fill(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-	SDL_SetRenderDrawColor(*this, r, g, b, a);
+	set_draw_color(*this, r, g, b, a);
 	if(SDL_RenderClear(*this) != 0)
 		throw Exception("Failed to clear the SDL_Renderer object.", true);
 }
@@ -87,12 +109,12 @@ void Window::set_title(const std::string& title)
 	SDL_SetWindowTitle(window_, title.c_str());
 }
 
-void Window::set_icon(SDL_Surface* icon)
+void Window::set_icon(Surface& icon)
 {
 	SDL_SetWindowIcon(window_, icon);
 }
 
-int Window::get_flags()
+uint32_t Window::get_flags()
 {
 	return SDL_GetWindowFlags(window_);
 }

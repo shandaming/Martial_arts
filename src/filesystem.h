@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <cassert>
 #include <mutex>
+#include "config.h"
 #include "exceptions.h"
 #include "game_config.h"
 #include "version.h"
@@ -38,6 +39,10 @@ namespace filesystem
 	using scoped_istream = std::unique_ptr<std::istream>;
 	using scoped_ostream = std::unique_ptr<std::ostream>;
 
+	typedef unique_ptr<SDL_RWops, void(*)(SDL_RWops*)> Rwops_ptr;
+	Rwops_ptr make_read_RWops(const std::string& path);
+	Rwops_ptr make_write_RWops(const std::string& path);
+
 	/* An exception object used when an IO erro occurs. */
 	struct Io_exception : public Error
 	{
@@ -52,6 +57,14 @@ namespace filesystem
 	std::string get_cwd();
 	std::string get_exe_dir();
 
+	/*
+	 * 返回文件的基本文件名，并删除目录名，相当于一个可以移植的basename()
+	 * 函数。
+	 * 如果@remove_extension = true，则文件扩展名将从返回值中除去
+	 */
+	std::string base_name(const std::string& file, const bool remove_extension = false);
+
+	// 返回文件的目录名，并剥离文件名，等同于便携式dirname()函数
 	std::string directory_name(const std::string& file);
 
 	/*
@@ -101,12 +114,12 @@ namespace filesystem
 	struct Binary_paths_manager
 	{
 			Binary_paths_manager();
-			Binary_paths_manger(const Config& cfg);
+			Binary_paths_manager(const Config& cfg);
 			~Binary_paths_manager();
 
 			Binary_paths_manager(const Binary_paths_manager&) = delete;
 			Binary_paths_manager& operator=(
-					conts Binary_paths_manager&) = delete;
+					const Binary_paths_manager&) = delete;
 
 			void set_paths(const Config& cfg);
 		private:

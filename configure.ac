@@ -31,6 +31,8 @@ AC_CHECK_LIB(SDL2_image, IMG_Init,, AC_MSG_ERROR([Unable to find SDL2_image libr
 AC_CHECK_LIB(SDL2_mixer, Mix_Init,, AC_MSG_ERROR([Unable to find SDL2_mixer library.]))
 AC_CHECK_LIB(SDL2_ttf, TTF_Init,, AC_MSG_ERROR([Unable to find SDL2_ttf library.]))
 
+AC_CHECK_LIB(pango-1.0, pango_font_description_new,, AC_MSG_ERROR([Unable to find pango library.]))
+
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h strings.h unistd.h])
 

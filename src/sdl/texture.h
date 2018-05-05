@@ -1,59 +1,48 @@
 ﻿/*
- * Copyright (C) 2017 by Shan Daming <shandaming@hotmail.com>
+ * Copyright (C) 2017-2018 by Shan Daming <shandaming@hotmail.com>
  */
 
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include <memory>
 #include <SDL2/SDL.h>
-#include "window.h"
+#include "surface.h"
 
 class Texture
 {
 	public:
-		Texture() : texture_(nullptr) {}
+		Texture();
+		Texture(int w, int h, SDL_TextureAccess access);
+		explicit Texture(SDL_Texture* t);
+		explicit Texture(const Surface& surf);
 
-		Texture(SDL_Texture* t) : texture_(t) {}
+		Texture(const Texture&) = delete;
+		Texture& operator=(const Texture&) = delete;
 
-		void create_texture_from_surface(SDL_Renderer* r,
-				SDL_Surface* s)
+		Texture(Texture&& t);
+		Texture& operator=(Texture&& t);
+
+		struct Info
 		{
-			if(texture_)
-				free_texture();
-			if(s && r)
-			{
-				texture_ = SDL_CreateTextureFromSurface(r, s);
-				SDL_FreeSurface(s);
-				s = nullptr;
-			}
-		}
+			explicit Info(SDL_Texture* t);
 
-		Texture(const Texture& t) { texture_ = t.get(); }
-		Texture& operator=(const Texture& t) { texture_ = t.get(); }
+			Uint32 format;
+			int access;
+			int w;
+			int h;
+		};
 
-		~Texture()
-		{
-			free_texture();
-		}
+		const Info get_info() const { return Info(*this); }
+
+		void reset();
+		void reset(int w, int h, SDL_TextureAccess access);
+
+		void assign(SDL_Texture* t);
 
 		operator SDL_Texture*() const
 		{
-			return texture_;
-		}
-
-		SDL_Texture* get() const
-		{
-			return texture_;
-		}
-
-		void assign(SDL_Texture* texture)
-		{
-			texture_ = texture;
-		}
-
-		SDL_Texture* operator->() const
-		{
-			return texture_;
+			return texture_.get();
 		}
 
 		bool null() const
@@ -61,66 +50,9 @@ class Texture
 			return texture_ == nullptr;
 		}
 	private:
-		void free_texture()
-		{
-			if(texture_)
-				SDL_DestroyTexture(texture_);
-		}
+		void finalize();
 
-		SDL_Texture* texture_;
-};
-
-bool operator<(const Texture& a, const Texture& b);
-
-struct Texture_restorer
-{
-	public:
-		Texture_restorer() = default;
-
-		explicit Texture_restorer(class Video* target, const SDL_Rect& rect);
-
-		~Texture_restorer();
-
-		void restore() const;
-		void restore(SDL_Rect const& dst) const;
-
-		void update();
-
-		void cancel();
-
-		const SDL_Rect& area() const
-		{
-			return rect_;
-		}
-	private:
-		class Video* target_;
-		SDL_Rect rect_;
-
-		Texture texture_;
-};
-
-struct Clip_rect_setter
-{
-	Clip_rect_setter(Window& w, const SDL_Rect* r, bool operate = true) : renderer_(w), rect_(), operate_(operate)
-	{
-		if(operate_)
-		{
-			SDL_RenderGetClipRect(renderer_, &rect_);
-			SDL_Rect final_rect;
-			SDL_IntersectRect(&rect_, r, &final_rect);
-			SDL_RenderSetClipRect(renderer_, &final_rect);
-		}
-	}
-
-	~Clip_rect_setter()
-	{
-		if(operate_)
-			SDL_RenderSetClipRect(renderer_, &rect_);
-	}
-private:
-	SDL_Renderer* renderer_;
-	SDL_Rect rect_;
-	const bool operate_;
+		std::shared_ptr<SDL_Texture> texture_;
 };
 
 #endif

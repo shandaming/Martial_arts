@@ -50,7 +50,8 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
- /usr/include/c++/7/exception /usr/include/c++/7/bits/exception.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar2.h /usr/include/c++/7/exception \
+ /usr/include/c++/7/bits/exception.h \
  /usr/include/c++/7/bits/exception_ptr.h \
  /usr/include/c++/7/bits/exception_defines.h \
  /usr/include/c++/7/bits/cxxabi_init_exception.h \
@@ -120,16 +121,20 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  /usr/include/x86_64-linux-gnu/sys/types.h \
  /usr/include/x86_64-linux-gnu/sys/select.h \
  /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h \
  /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
  /usr/include/x86_64-linux-gnu/bits/sysmacros.h /usr/include/alloca.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h \
  /usr/include/c++/7/bits/std_abs.h /usr/include/c++/7/cstdio \
  /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
  /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
- /usr/include/c++/7/cerrno /usr/include/errno.h \
- /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
- /usr/include/x86_64-linux-gnu/asm/errno.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio2.h /usr/include/c++/7/cerrno \
+ /usr/include/errno.h /usr/include/x86_64-linux-gnu/bits/errno.h \
+ /usr/include/linux/errno.h /usr/include/x86_64-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/c++/7/bits/basic_string.tcc \
  /usr/include/c++/7/bits/locale_classes.tcc \
@@ -194,8 +199,11 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  /usr/include/SDL2/SDL_stdinc.h /usr/include/SDL2/SDL_config.h \
  /usr/include/SDL2/SDL_platform.h /usr/include/SDL2/begin_code.h \
  /usr/include/SDL2/close_code.h /usr/include/c++/7/stdlib.h \
- /usr/include/string.h /usr/include/strings.h /usr/include/inttypes.h \
- /usr/include/c++/7/math.h /usr/include/c++/7/cmath /usr/include/math.h \
+ /usr/include/string.h /usr/include/strings.h \
+ /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
+ /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+ /usr/include/inttypes.h /usr/include/c++/7/math.h \
+ /usr/include/c++/7/cmath /usr/include/math.h \
  /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
  /usr/include/x86_64-linux-gnu/bits/huge_val.h \
@@ -210,6 +218,7 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
  /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+ /usr/include/x86_64-linux-gnu/bits/mathinline.h \
  /usr/include/c++/7/bits/specfun.h /usr/include/c++/7/tr1/gamma.tcc \
  /usr/include/c++/7/tr1/special_function_util.h \
  /usr/include/c++/7/tr1/bessel_function.tcc \
@@ -247,7 +256,38 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  /usr/include/SDL2/SDL_render.h /usr/include/SDL2/SDL_shape.h \
  /usr/include/SDL2/SDL_system.h /usr/include/SDL2/SDL_timer.h \
  /usr/include/SDL2/SDL_version.h sdl/texture.h sdl/window.h config.h \
- filesystem.h /usr/include/c++/7/fstream \
+ font/font_config.h /usr/include/c++/7/set \
+ /usr/include/c++/7/bits/stl_set.h /usr/include/c++/7/bits/stl_multiset.h \
+ font/font_options.h font/sdl_ttf.h /usr/include/SDL2/SDL_ttf.h \
+ /usr/include/SDL2/SDL.h font/text_cache.h /usr/include/c++/7/list \
+ /usr/include/c++/7/bits/stl_list.h /usr/include/c++/7/bits/list.tcc \
+ font/text_surface.h font/font_id.h font/../sdl/surface.h \
+ font/../sdl/../video.h font/../color.h font/constants.h \
+ font/marked-up_text.h font/standard_colors.h font/font_description.h \
+ font/../config.h font/error.h font/../exceptions.h \
+ /usr/include/c++/7/cstring /usr/include/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd.h font/../tooltips.h \
+ font/../sdl/rect.h font/../sdl/point.h font/../sdl/../color.h \
+ font/../sdl/surface.h font/../sdl/utils.h font/../sdl/../version.h \
+ font/../sdl/rect.h font/../preferences/general.h \
+ font/../serialization/unicode.h \
+ font/../serialization/ucs4_iterator_base.h /usr/include/c++/7/iterator \
+ /usr/include/c++/7/bits/stream_iterator.h \
+ font/../serialization/ucs4_convert_impl.h \
+ font/../serialization/../utils/math.h \
+ font/../serialization/../exceptions.h \
+ font/../serialization/string_utils.h events.h /usr/include/c++/7/deque \
+ /usr/include/c++/7/bits/stl_deque.h /usr/include/c++/7/bits/deque.tcc \
+ /usr/include/c++/7/functional /usr/include/c++/7/bits/std_function.h \
+ /usr/include/c++/7/unordered_map /usr/include/c++/7/bits/hashtable.h \
+ /usr/include/c++/7/bits/hashtable_policy.h \
+ /usr/include/c++/7/bits/unordered_map.h filesystem.h \
+ /usr/include/c++/7/fstream \
  /usr/include/x86_64-linux-gnu/c++/7/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/7/bits/c++io.h \
  /usr/include/c++/7/bits/fstream.tcc \
@@ -261,34 +301,9 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \
- /usr/include/linux/falloc.h /usr/include/c++/7/mutex \
- /usr/include/c++/7/bits/std_mutex.h exceptions.h \
- /usr/include/c++/7/cstring /usr/include/unistd.h \
- /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
- /usr/include/x86_64-linux-gnu/bits/environments.h \
- /usr/include/x86_64-linux-gnu/bits/confname.h \
- /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
- /usr/include/x86_64-linux-gnu/bits/getopt_core.h font/font_config.h \
- /usr/include/c++/7/set /usr/include/c++/7/bits/stl_set.h \
- /usr/include/c++/7/bits/stl_multiset.h font/font_options.h \
- font/sdl_ttf.h /usr/include/SDL2/SDL_ttf.h /usr/include/SDL2/SDL.h \
- font/text_cache.h /usr/include/c++/7/list \
- /usr/include/c++/7/bits/stl_list.h /usr/include/c++/7/bits/list.tcc \
- font/text_surface.h font/font_id.h font/../sdl/surface.h \
- font/../sdl/../video.h font/../color.h font/constants.h \
- font/marked-up_text.h font/standard_colors.h font/font_description.h \
- font/../config.h font/error.h font/../exceptions.h font/../tooltips.h \
- font/../sdl/rect.h font/../sdl/point.h font/../sdl/../color.h \
- font/../sdl/surface.h font/../sdl/utils.h font/../sdl/../version.h \
- font/../sdl/rect.h font/../preferences/general.h \
- font/../serialization/unicode.h \
- font/../serialization/ucs4_iterator_base.h /usr/include/c++/7/iterator \
- /usr/include/c++/7/bits/stream_iterator.h \
- font/../serialization/ucs4_convert_impl.h \
- font/../serialization/../utils/math.h \
- font/../serialization/../exceptions.h \
- font/../serialization/string_utils.h events.h /usr/include/c++/7/deque \
- /usr/include/c++/7/bits/stl_deque.h /usr/include/c++/7/bits/deque.tcc
+ /usr/include/linux/falloc.h /usr/include/x86_64-linux-gnu/bits/fcntl2.h \
+ /usr/include/c++/7/mutex /usr/include/c++/7/bits/std_mutex.h \
+ exceptions.h
 
 /usr/include/stdc-predef.h:
 
@@ -407,6 +422,8 @@ log.h:
 /usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /usr/include/c++/7/exception:
 
@@ -586,13 +603,19 @@ log.h:
 
 /usr/include/x86_64-linux-gnu/bits/select.h:
 
+/usr/include/x86_64-linux-gnu/bits/select2.h:
+
 /usr/include/x86_64-linux-gnu/sys/sysmacros.h:
 
 /usr/include/x86_64-linux-gnu/bits/sysmacros.h:
 
 /usr/include/alloca.h:
 
+/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
+
 /usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h:
 
 /usr/include/c++/7/bits/std_abs.h:
 
@@ -607,6 +630,10 @@ log.h:
 /usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
 
 /usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:
 
 /usr/include/c++/7/cerrno:
 
@@ -818,6 +845,10 @@ sdl/window.h:
 
 /usr/include/strings.h:
 
+/usr/include/x86_64-linux-gnu/bits/strings_fortified.h:
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h:
+
 /usr/include/inttypes.h:
 
 /usr/include/c++/7/math.h:
@@ -853,6 +884,8 @@ sdl/window.h:
 /usr/include/x86_64-linux-gnu/bits/mathcalls.h:
 
 /usr/include/x86_64-linux-gnu/bits/iscanonical.h:
+
+/usr/include/x86_64-linux-gnu/bits/mathinline.h:
 
 /usr/include/c++/7/bits/specfun.h:
 
@@ -972,62 +1005,6 @@ sdl/window.h:
 
 config.h:
 
-filesystem.h:
-
-/usr/include/c++/7/fstream:
-
-/usr/include/x86_64-linux-gnu/c++/7/bits/basic_file.h:
-
-/usr/include/x86_64-linux-gnu/c++/7/bits/c++io.h:
-
-/usr/include/c++/7/bits/fstream.tcc:
-
-/usr/include/c++/7/experimental/filesystem:
-
-/usr/include/c++/7/experimental/bits/fs_fwd.h:
-
-/usr/include/c++/7/experimental/bits/fs_path.h:
-
-/usr/include/c++/7/codecvt:
-
-/usr/include/c++/7/experimental/bits/fs_dir.h:
-
-/usr/include/c++/7/experimental/bits/fs_ops.h:
-
-/usr/include/x86_64-linux-gnu/sys/stat.h:
-
-/usr/include/x86_64-linux-gnu/bits/stat.h:
-
-/usr/include/fcntl.h:
-
-/usr/include/x86_64-linux-gnu/bits/fcntl.h:
-
-/usr/include/x86_64-linux-gnu/bits/fcntl-linux.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h:
-
-/usr/include/linux/falloc.h:
-
-/usr/include/c++/7/mutex:
-
-/usr/include/c++/7/bits/std_mutex.h:
-
-exceptions.h:
-
-/usr/include/c++/7/cstring:
-
-/usr/include/unistd.h:
-
-/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
-
-/usr/include/x86_64-linux-gnu/bits/environments.h:
-
-/usr/include/x86_64-linux-gnu/bits/confname.h:
-
-/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
-
-/usr/include/x86_64-linux-gnu/bits/getopt_core.h:
-
 font/font_config.h:
 
 /usr/include/c++/7/set:
@@ -1076,6 +1053,22 @@ font/error.h:
 
 font/../exceptions.h:
 
+/usr/include/c++/7/cstring:
+
+/usr/include/unistd.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+
+/usr/include/x86_64-linux-gnu/bits/environments.h:
+
+/usr/include/x86_64-linux-gnu/bits/confname.h:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_core.h:
+
+/usr/include/x86_64-linux-gnu/bits/unistd.h:
+
 font/../tooltips.h:
 
 font/../sdl/rect.h:
@@ -1117,3 +1110,59 @@ events.h:
 /usr/include/c++/7/bits/stl_deque.h:
 
 /usr/include/c++/7/bits/deque.tcc:
+
+/usr/include/c++/7/functional:
+
+/usr/include/c++/7/bits/std_function.h:
+
+/usr/include/c++/7/unordered_map:
+
+/usr/include/c++/7/bits/hashtable.h:
+
+/usr/include/c++/7/bits/hashtable_policy.h:
+
+/usr/include/c++/7/bits/unordered_map.h:
+
+filesystem.h:
+
+/usr/include/c++/7/fstream:
+
+/usr/include/x86_64-linux-gnu/c++/7/bits/basic_file.h:
+
+/usr/include/x86_64-linux-gnu/c++/7/bits/c++io.h:
+
+/usr/include/c++/7/bits/fstream.tcc:
+
+/usr/include/c++/7/experimental/filesystem:
+
+/usr/include/c++/7/experimental/bits/fs_fwd.h:
+
+/usr/include/c++/7/experimental/bits/fs_path.h:
+
+/usr/include/c++/7/codecvt:
+
+/usr/include/c++/7/experimental/bits/fs_dir.h:
+
+/usr/include/c++/7/experimental/bits/fs_ops.h:
+
+/usr/include/x86_64-linux-gnu/sys/stat.h:
+
+/usr/include/x86_64-linux-gnu/bits/stat.h:
+
+/usr/include/fcntl.h:
+
+/usr/include/x86_64-linux-gnu/bits/fcntl.h:
+
+/usr/include/x86_64-linux-gnu/bits/fcntl-linux.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h:
+
+/usr/include/linux/falloc.h:
+
+/usr/include/x86_64-linux-gnu/bits/fcntl2.h:
+
+/usr/include/c++/7/mutex:
+
+/usr/include/c++/7/bits/std_mutex.h:
+
+exceptions.h:

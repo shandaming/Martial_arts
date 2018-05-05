@@ -6,13 +6,13 @@
 #define WINDOW_H
 
 #include <string>
-#include <SDL2/SDL.h>
+#include "surface.h"
 
 class Window
 {
 	public:
 		Window(const std::string& title, int x, int y, int w, int h, 
-				Uint32 window_flags,Uint32 render_flags);
+				uint32_t window_flags, uint32_t render_flags);
 
 		~Window();
 
@@ -35,25 +35,32 @@ class Window
 
 		void full_screen();
 
-		void fill(Uint8 r, Uint8 b, Uint8 g, Uint8 a = 0);
+		// Clears the contents of the winodw with a given color
+		void fill(uint8_t r, uint8_t b, uint8_t g, uint8_t a = 0);
 
 		void render();
 
 		void set_title(const std::string& title);
 
-		void set_icon(SDL_Surface* icon);
+		void set_icon(Surface& icon);
 
-		int get_flags();
+		uint32_t get_flags();
 
 		void set_minimum_size(int min_w, int min_h);
 
 		int get_display_index();
 
+		// Gets the renderer info for this window
+		const SDL_RendererInfo& get_renderer_info() const
+		{
+			return info_;
+		}
+
 		operator SDL_Window*();
 		operator SDL_Renderer*();
 	private:
 		SDL_Window* window_;
-		Uint32 pixel_format_;
+		SDL_RendererInfo info_;
 };
 
 #endif

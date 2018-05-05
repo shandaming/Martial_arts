@@ -5,22 +5,18 @@
 #ifndef FONT_CONFIG_H
 #define FONT_CONFIG_H
 
-#include <set>
 #include "font_options.h"
-#include "sdl_ttf.h"
+//#include "sdl_ttf.h"
 
 namespace font
 {
 	struct Manager
 	{
-		Manager() {}
-		~Manager() {}
+		Mannager() = default;
+		~Manager() = default;
 
 		Manager(const Manager&) = delete;
 		Manager& operator=(const Manager&) = delete;
-	private:
-		// Initialize sdl_ttf concurrent with font::Manager lifetime.
-		SDL_ttf sdl_ttf_initializer_;
 	};
 
 	/*
@@ -32,7 +28,8 @@ namespace font
 	bool load_font_config();
 
 	/* Returns the currently defined fonts. */
-	const std::string& get_font_families();
+	const std::string& get_font_families(const Family_class& fc = 
+			FANG_SONG);
 
 	/* Test if a font file exists */
 	bool check_font_file(const std::string& name);

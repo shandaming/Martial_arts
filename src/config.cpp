@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <climits>
 #include "config.h"
+#include "filesystem.h"
 
 template<typename T>
 static T skip(const T& value)

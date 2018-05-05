@@ -3,8 +3,36 @@
  */
 
 #include "unicode.h"
-#include "../utils/math.h"
-#include "../exceptions.h"
+#include "utils/math.h"
+#include "exceptions.h"
+#include "log"
+
+static lg::Log_domain log_engine("engine");
+#define ERR_GENERAL LOG_STREAM(lg::err, lg::general())
+
+namespace utf8
+{
+	utf8::String lowercase(const utf8::String& str)
+	{
+		if(!str.empty())
+		{
+			utf8::Iterator iter(str);
+			utf8::String res;
+
+			for(; iter != utf8::Iterator::end(str); ++iter)
+			{
+				ucs4::Char uchar = *iter;
+				// If wchar_t is less than 32 bits wide, we cannot apply 
+				// tolower() to all codepoints
+				if(uchar <= static_cast<ucs4::Char>(std::numeric_limits<wchar_t>::max()))
+					uchar = tolower(static_cast<wchar_t>(uchar));
+				res += unicode_cast<utf8::String>(uchar);
+			}
+
+			res.append(iter.substr().second, str.end());
+			return res;
+		}
+	}
 
 size_t index(const std::string& str, size_t index)
 {
@@ -12,10 +40,10 @@ size_t index(const std::string& str, size_t index)
 	try
 	{
 		for(unsigned int chr = 0; chr < index && i < len; ++chr)
-			i += UTF8_impl::byte_size_from_utf8_first(str[i]);
-	}catch(...)
+			i += ucs4_convert_impl::Utf8_impl::byte_size_from_utf8_first(str[i]);
+	}catch(Invalid_utf8_exception&)
 	{
-		throw Error("Invalid UTF-8 string.");
+		ERR_GENERAL << "Invalid UTF-8 string.\n";
 	}
 	return i;
 }
@@ -26,10 +54,10 @@ size_t size(const std::string& str)
 	try
 	{
 		for(chr = 0; i < len; ++chr)
-			i += UTF8_impl::byte_size_from_utf8_first(str[i]);
-	}catch(...)
+			i += ucs4_convert_impl::Utf8_impl::byte_size_from_utf8_first(str[i]);
+	}catch(Invalid_utf8_exception&)
 	{
-		throw Error("Invalid UTF-8 string.");
+		ERR_GENERAL << "Invalid UTF-8 string.\n";
 	}
 	return chr;
 }
@@ -53,4 +81,15 @@ std::string& erase(std::string& str, size_t start, size_t len)
 std::string& truncate(std::string& str, size_t size)
 {
 	return erase(str, size);
+}
+
+void truncate_as_ucs4(utf8::String& str, const size_t size)
+{
+	ucs4::String str = unicode_cast<ucs4::String>(str);
+	if(str.size() > size)
+	{
+		str.resize(size);
+		str = unicode_cast<utf8::String>(str);
+	}
+}
 }

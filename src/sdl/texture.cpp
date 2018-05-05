@@ -3,59 +3,87 @@
  */
 
 #include "texture.h"
+#include "../video.h"
+#include "../log.h"
 
-Texture_restorer::Texture_restorer() : target_(nullptr), rect_(empty_rect), texture_(nullptr) {}
+static lg::Log_domain log_sdl("SDL");
+#define ERR_SDL LOG_STREAM(lg::err, log_sdl)
 
-Texture_restorer::Texture_restorer(Video* target, const SDL_Rect& rect) : target_(target), rect_(rect), texture_(nullptr)
+namespace
 {
-	update();
+	constexpr int default_texture_format = SDL_PIXELFORMAT_ARGB8888;
+
+	void cleanup_texture(SDL_Texture* t)
+	{
+		if(t)
+			SDL_DestroyTexture(t);
+	}
 }
 
-Texture_restorer::~Texture_restorer()
+Texture::Texture() : texture_(nullptr) {}
+
+Texture::Texture(SDL_Texture* t) : texture_(t, &cleanup_texture)
 {
-	restore();
+	finalize();
 }
 
-void Texture_restorer::restore(SDL_Renderer* r, SDL_Rect const& dst) const
+Texture::Texture(const Surface& surf) : texture_(nullptr)
 {
-	if(texture_.null())
+	SDL_Renderer* r = Video::get_singleton().get_renderer();
+	if(!r)
 		return;
 
-	SDL_Rect dst2 = intersect_rects(dst, rect_);
-	if(dst2.w == 0 || dst2.h == 0)
+	texture_.reset(SDL_CreateTextureFromSurface(r, surf), &cleanup_texture);
+	if(!texture_)
+		ERR_SDL << "When creating texture from surface: " << SDL_GetError()
+			<< std::endl;
+}
+
+Texture::Texture(int w, int h, SDL_TextureAccess access) : texture_(nullptr)
+{
+	reset(w, h, access);
+}
+
+void Texture::finalize()
+{
+	set_texture_blend_mode(*this, SDL_BLENDMODE_BLEND);
+}
+
+void Texture::reset()
+{
+	if(texture_)
+		texture_.reset();
+}
+
+void Texture::reset(int w, int h, SDL_TextureAccess access)
+{
+	reset();
+	SDL_Renderer* r = Video::get_singleton().get_renderer();
+	if(!r)
 		return;
 
-	SDL_Rect src = dst2;
-	src.x = rect_.x;
-	src.y = rect_.y;
+	texture_.reset(SDL_CreateTexture(r, default_texture_fromat, access, w
+				h), &cleanup_texture);
+	if(!texture_)
+		ERR_SDL << "When creating texture: " << SDL_GetError() << std::endl;
 
-	sdl_render_copy(r, target_->get_texture(), &src, &dst2);
+	finalize();
 }
 
-void Texture_restorer::restore(SDL_Renderer* r) const
+void Texture::assign(SDL_Texture* t) 
 {
-	if(texture_.null())
-		return;
-
-	SDL_Rect dst = rect_;
-
-	sdl_render_copy(r, target_->get_texture(), nullptr,&dst);
+	texture_.reset(t, &cleanup_texture);
 }
 
-void Texture_restorer::update()
+Texture(Texture&& t) : texture_(std::move(t)) {}
+
+Texture& operator=(Texture&& t)
 {
-	if(rect_.w <= 0 || rect_.h <= 0)
-		texture_.free_texture();
-	else
-		texture_.assign(get_texture_portion(target_->get_texture(), rect_));
+	texture_ = std::move(t);
+	return *this;
 }
 
-void Texture_restorer::cancel()
+Texture::Info::Info(SDL_Texture* t) : format(0), access(0), w(0), h(0)
 {
-	texture_.assgin(nullptr);
-}
-
-bool operator<(const Texture& a, const Texture& b)
-{
-	return a.get() < b.get();
+	SDL_QueryTexture(t, &format, &w, &h);
 }

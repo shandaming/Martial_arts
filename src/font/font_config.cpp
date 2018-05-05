@@ -7,10 +7,10 @@
 
 static lg::Log_domain log_font("font");
 
-#define DBG LOG_STREAM(lg::debug, log_font)
-#define LOG LOG_STREAM(lg::info, log_font)
-#define WRN LOG_STREAM(lg::warn, log_font)
-#define ERR LOG_STREAM(lg::err, log_font)
+#define DBG_FT LOG_STREAM(lg::debug, log_font)
+#define LOG_FT LOG_STREAM(lg::info, log_font)
+#define WRN_FT LOG_STREAM(lg::warn, log_font)
+#define ERR_FT LOG_STREAM(lg::err, log_font)
 
 namespace font
 {
@@ -43,11 +43,10 @@ namespace font
 		return true;
 	}
 
-	static void add_font_to_fontlist(Config& fonts_config,
-			std::vector<Subset_descriptor>& fontlist)
-	{
-		fontlist.push_back(Subset_descriptor(fonts_config));
-	}
+	std::string family_order_sans;
+	std::string family_order_mono;
+	std::string family_order_light;
+	std::string family_order_script;
 
 	bool load_font_config()
 	{
@@ -58,7 +57,7 @@ namespace font
 					"hardwired/fonts.cfg");
 			if(cfg_path.empty())
 			{
-				ERR << "Could not resolve path to fonts.cfg, \
+				ERR_FT << "Could not resolve path to fonts.cfg, \
 					file not found\n";
 				return false;
 			}
@@ -66,25 +65,47 @@ namespace font
 		}
 		catch(...)
 		{
-			ERR << "could not read fonts.cfg\n";
+			ERR_FT << "could not read fonts.cfg\n";
 			return false;
 		}
 
 		std::set<std::string> known_fonts;
 		
-		known_fonts.insert(cfg["fonts", "name"]);
-		known_fonts.insert(cfg["fonts", "bold_name"]);
-		known_fonts.insert(cfg["fonts", "italic_name"]);
+		family_order_sans = cfg["family_order"];
+		family_order_mono = cfg["family_order_monospace"];
+		family_order_light = cfg["family_order_light"];
+		family_order_script = cfg["family_order_script"];
 
-		std::vector<Subset_descriptor> fontlist;
+		if(family_order_mono.empty())
+		{
+			ERR_FT << "No monospace font family order defined, falling back\
+				to sans serif order\n";
+			family_order_mono = family_order_sans;
+		}
 
-		for(auto& font : known_fonts)
-			add_font_to_fontlist(cfg, fontlist);
+		if(family_order_light.empty())
+		{
+			ERR_FT << "No light font family order defined, falling back\
+				to sans serif order\n";
+			family_order_light = family_order_sans;
+		}
 
-		if(fontlist.empty())
-			return false;
+		if(family_order_script.empty())
+		{
+			ERR_FT << "No script font family order defined, falling back\
+				to sans serif order\n";
+			family_order_script = family_order_sans;
+		}
 
-		SDL_ttf::set_font_list(fontlist);
 		return true;
+	}
+
+	const std::string& get_font_families(const Family_class& fc)
+	{
+		switch(fc)
+		{
+			default:
+				return Family_class::FANG_SONG;
+		}
 	}
 }

@@ -13,6 +13,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H 1
 
+/* Define to 1 if you have the `pango-1.0' library (-lpango-1.0). */
+#define HAVE_LIBPANGO_1_0 1
+
 /* Define to 1 if you have the `SDL2' library (-lSDL2). */
 #define HAVE_LIBSDL2 1
 
