@@ -7,6 +7,12 @@
 
 namespace gui
 {
+	class Manager
+	{
+		Manager();
+		~Manager();
+	};
+
 	namespace event
 	{
 		/*

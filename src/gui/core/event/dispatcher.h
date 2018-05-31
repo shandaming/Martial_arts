@@ -99,7 +99,7 @@ namespace gui
 				event == REQUEST_PLACEMENT;
 		}
 
-		constexpr bool is_raw_event(const Ui_event event)
+		constexpr bool is_raw_event_event(const Ui_event event)
 		{
 			return event == SDL_RAW_EVENT;
 		}
@@ -546,6 +546,18 @@ namespace gui
 
 					std::map<Ui_event, Signal_type<T>> queue;
 				};
+
+				/*
+				 * 注册一个热键.
+				 * @todo add a static function register_global_hotkey.
+				 * 一旦完成，execute_hotkey将首先尝试执行全局热键，如果失败
+				 * 则尝试此调度程序中的热键
+				 */
+				void register_hotkey(const hotkey::Hotkey_command id,
+						const Hotkey_function& function);
+
+				// 执行一个热键
+				bool execute_hotkey(const hotkey::Hotkey_command id);
 			private:
 				// 调度程序的鼠标行为
 				Mouse_behavior mouse_behavior_;
@@ -588,6 +600,39 @@ namespace gui
 				// 在调度程序里注册的热键
 				std::map<hotkey::Hotkey_command, Hotkey_function> hotkeys_;
 		};
+
+		/*
+		 * 可以使用这些helpers轻松的将回调添加到调度程序中，这只是所有其他
+		 * 人可以使用的常见列表
+		 */
+
+		/*
+		 * 连接键盘上的'snooping'信号
+		 * 这个回调函数在部件本身之前被调用，允许你监听输入或者过滤它
+		 */
+		void connect_signal_pre_key_press(Dispatcher& dispatcher,
+				const Signal_keyboard_function& signal);
+
+		// 连接信号处理程序以进行鼠标左键单击
+		void connect_signal_mouse_left_click(Dispatcher& dispatcher, 
+				const Signal_function& signal);
+
+		// 断开鼠标左键单击的信号处理程序
+		void disconnect_signal_mouse_left_click(Dispatcher& dispatcher,
+				const Signal_function& signal);
+
+		/*
+		 * 连接双击鼠标左键的信号处理程序
+		 * 我不太确定为什么这种方式可以在切换面板的队列位置上工作，但它确实
+		 * 如此，如果它稍后成为问题（即，如果这与其他小部件一起使用并且不起
+		 * 作用），将会重新访问。
+		 */
+		void connect_singal_mouse_left_double_click(Dispatcher& dispatcher,
+				const Signal_function& signal);
+
+		// 连接信号处理程序以便在修改时获得通知
+		void connect_signal_notify_modified(Dispatcher& dispatcher,
+				const Signal_notification_function& signal);
 	}
 }
 

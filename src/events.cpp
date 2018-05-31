@@ -27,30 +27,6 @@ namespace
 		bool finished;
 		const std::function<void(void)>& f;
 	};
-
-	template<typename T>
-	struct Reversion
-	{
-		T& iterable;
-	};
-
-	template<typename T>
-	auto begin(Reversion<T>& t)
-	{
-		return std::rbegin(t.iterable);
-	}
-
-	template<typename T>
-	auto end(Reversion<T>& t)
-	{
-		return std::rend(t.iterable);
-	}
-
-	template<typename T>
-	Reversion<T> reverse(T&& iterable)
-	{
-		return {iterable};
-	}
 }
 
 
