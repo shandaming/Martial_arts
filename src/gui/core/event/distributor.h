@@ -233,6 +233,44 @@ namespace gui
 				 *						小部件，尚未添加到链中。
 				 */
 				void keyboard_add_to_chain(Widget* widget);
+
+				// Remove the widget from the keyboard chain.
+				void keyboard_remove_from_chain(Widget* widget);
+
+				// Return the widget currently capturing keyboard in
+				Widget* keyboard_focus() const;
+			private:
+				// 保存键盘焦点的小部件
+				Widget* keyboard_focus_;
+
+				/*
+				 * 回退键盘焦点项目
+				 *
+				 * 当关注的小部件没有处理键盘事件(或没有处理键盘焦点)时，它
+				 * 将发送此向量中的所有小部件，该命令从rbegin()到rend()，如
+				 * 果keyboard_focus_在向量中，它将不会获得2次事件，添加到向
+				 * 量的第一项应该是窗口，所以它将成为最后一个处理程序，并可
+				 * 以分配注册的热键。
+				 */
+				std::vector<Widget*> keyboard_focus_chain_;
+
+				// 处理某些事件并将他们发送到适当的小部件的函数集 ，这些函数
+				// 由SDL事件处理函数调用
+				
+				void signal_handler_sdl_key_down(const SDL_Keycode key,
+						const SDL_Keymod modifier, 
+						const std::string& unicode);
+
+				void signal_handler_sdl_text_input(const std::string& unicode, int32_t start, int32_t len);
+				void signal_handler_sdl_text_editiong(const std::string& unicode, int32_t start, int32_t len);
+
+				template<typename Fcn, typename P1, typename P2, 
+					typename P3>
+				void signal_handler_keyboard_internal(event::Ui_event evt, 
+						P1&& p1, P2&& p2, P3&& p3);
+
+				void signal_handler_notify_removal(Dispatcher& widget,
+						const Ui_event event);
 		};
 	}
 }
