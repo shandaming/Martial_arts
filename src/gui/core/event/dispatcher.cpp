@@ -148,5 +148,11 @@ namespace gui
 		{
 			dispatcher.connect_signal<NOTIFY_MODIFIED>(signal);
 		}
+
+void connect_signal_on_draw(Dispatcher& dispatcher, 
+		const Signal_function& signal)
+{
+	dispatcher.connect_signal<DRAW>(signal, Dispatcher::front_child);
+}
 	}
 }
