@@ -31,6 +31,12 @@ namespace utils
 	 */
 	bool wildcard_string_match(const std::string& str, 
 								const std::string& match);
+
+template<typename T, typename... Args>
+inline std::string string_format(T&& fmt, Args&&... args)
+{
+	return sprintf(std::forward<T>(fmt), std::forward<Args>(args)...);
+}
 }
 
 #endif
