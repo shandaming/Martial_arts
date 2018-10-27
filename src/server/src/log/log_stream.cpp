@@ -4,6 +4,11 @@
 
 #include "log_stream.h"
 
+namespace
+{
+Async_log* log = nullptr;
+}
+
 namespace lg
 {
 namespace detail
@@ -65,6 +70,13 @@ template class Log_buffer<large_buffer>;
 }
 
 
+void init_log(const std::string& file, int rolle_size)
+{
+	if(log == nullptr)
+	{
+		log = new Async_log(file, rolle_size);
+	}
+}
 
 
 void Log_stream::static_check()
@@ -83,6 +95,14 @@ void Log_stream::format_integer(T v)
     size_t len = convert(buffer_.current(), v);
     buffer_.add(len);
   }
+}
+
+Log_stream() : log_(nullptr)
+{
+	if(log_ == nullptr)
+	{
+		log_ = log;
+	}
 }
 
 inline Log_stream& Log_stream::operator<<(bool v)
@@ -179,21 +199,6 @@ inline Log_stream& Log_stream::operator<<(const std::string& v)
 	buffer_.append(v.c_str(), v.size());
 	return *this;
 }
-
-inline Log_stream& Log_stream::operator<<(const void* p)
-{
-  uintptr_t v = reinterpret_cast<uintptr_t>(p);
-  if (buffer_.avail() >= max_numeric_size)
-  {
-    char* buf = buffer_.current();
-    buf[0] = '0';
-    buf[1] = 'x';
-    size_t len = convertHex(buf+2, v);
-    buffer_.add(len+2);
-  }
-  return *this;
-}
-
 
 
 template<typename T>

@@ -81,7 +81,7 @@ class Log_stream
 public:
 	typedef detail::Log_buffer<detail::small_buffer> Buffer;
 	
-	Log_stream() {}
+	Log_stream();
 
 	Log_stream(const Log_stream&) = delete;
 	Log_stream& operator=(const Log_stream&) = delete;
@@ -103,27 +103,20 @@ public:
 
 	Log_stream& operator<<(const std::string& v);
 
-	Log_stream& operator<<(const void*);
-
-	Log_stream& operator<<(const Buffer& v)
-	{
-		*this << v.to_string();
-		return *this;
-	}
-
-	void append(const char* data, int len) { buffer_.append(data, len); }
-	const Buffer& buffer() const { return buffer_; }
-	void reset_buffer() { buffer_.reset(); }
+	void append(const char* data, int len) { buffer_->append(data, len); }
 private:
 	void static_check();
 
 	template<typename T>
 	void format_integer(T);
 
-	Buffer buffer_;
+	//Buffer buffer_; // 将要替换成异步日志类
+	static Async_log* log_;
 
 	static const int max_numeric_size = 32;
 };
+
+void init_log(const std::string& file, int rolle_size);
 
 class Fmt 
 {
@@ -146,5 +139,7 @@ inline Log_stream& operator<<(Log_stream& s, const Fmt& fmt)
 }
 
 } // end namespace lg
+
+#define LOG_INIT(filename, rolle_size) lg::init_log(filename, rolle_size)
 
 #endif

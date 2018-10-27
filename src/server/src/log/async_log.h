@@ -58,25 +58,27 @@ private:
 
 	void thread_func();
 
-	typedef muduo::detail::FixedBuffer<muduo::detail::large_buffer> Buffer;
-	typedef Ptr_vector<Buffer> BufferVector;
-	typedef BufferVector::auto_type BufferPtr;
+	typedef lg::Log_buffer<lg::detail::large_buffer> Buffer;
+	typedef Ptr_vector<Buffer> Buffer_vector;
+	typedef Buffer_vector::auto_type BufferPtr;
 
 	const int flush_interval_;
 	bool running_;
 	string basename_;
 	off_t roll_size_;
   
-	muduo::Count_down_latch latch_;
+	Count_down_latch latch_;
 
-	std::thread thread_;
+	std::thread* thread_;
 	std::mutex mutex_;
 	std::condition_variable cond_;
 
 	BufferPtr current_buffer_;
 	BufferPtr next_buffer_;
-	BufferVector buffers_;
+	Buffer_vector buffers_;
 };
+
+#define LOG_INIT(filename, roll_size) static Async_log async_log(filename, roll_size);
 }
 
 #endif

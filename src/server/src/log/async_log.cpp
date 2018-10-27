@@ -51,7 +51,7 @@ Async_log::Async_log(const string& basename, off_t roll_size,
 
 void Async_log::append(const char* logline, int len)
 {
-	std::scoped_lock<std::mutex> lock(mutex_);
+	std::lock_graud<std::mutex> lock(mutex_);
 	if (current_buffer_->avail() > len) // 当前缓存有空间
 	{
 		current_buffer_->append(logline, len);

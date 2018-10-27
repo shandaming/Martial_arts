@@ -27,8 +27,11 @@ public:
     NUM_LOG_LEVELS,
   };
 
-static Logger* instance();
-
+ Logger(const fs::path& file, int line);
+  Logger(const fs::path& file, int line, LogLevel level);
+  Logger(const fs::path& file, int line, LogLevel level, const char* func);
+  Logger(const fs::path& file, int line, bool toAbort);
+~Logger();
 
   Log_stream& stream() { return stream_; }
 
@@ -39,22 +42,12 @@ static Logger* instance();
   typedef void (*Flush_func)();
   static void set_output(Output_func);
   static void set_flush(Flush_func);
-  //static void set_time_zone(const Time_zone& tz);
-
-void write(const fs::path& file, int line);
-void write(const fs::path& file, int line, Log_level level);
-void write(const fs::path& file, int line, Log_level level, const char* func);
-void write(const fs::path& file, int line, bool to_abort);
-
 private:
-	Logger();
-  ~Logger();
-
-
   //typedef Logger::Log_level Log_level;
   void init(Log_level level, int old_errno, const fs::path& file, int line);
   void format_time();
   void finish();
+
 
   Timestamp time_;
   Log_stream stream_;
@@ -90,18 +83,18 @@ T* CheckNotNull(const fs::path& file, int line, const char *names, T* ptr)
 } // end namespace lg
 
 #define LOG_TRACE if (lg::Logger::log_level() <= lg::Logger::TRACE) \
-  lg::Logger::instance()->write(__FILE__, __LINE__, lg::Logger::TRACE, __func__).stream()
+  lg::Logger(__FILE__, __LINE__, lg::Logger::TRACE, __func__).stream()
 
 #define LOG_DEBUG if (lg::Logger::log_level() <= lg::Logger::DEBUG) \
-  lg::Logger::instance()->write(__FILE__, __LINE__, lg::Logger::DEBUG, __func__).stream()
+  lg::Logger(__FILE__, __LINE__, lg::Logger::DEBUG, __func__).stream()
 
 #define LOG_INFO if (lg::Logger::log_level() <= lg::Logger::INFO) \
-  lg::Logger::instance()->write(__FILE__, __LINE__).stream()
+  lg::Logger(__FILE__, __LINE__).stream()
 
-#define LOG_WARN lg::Logger::instance()->write(__FILE__, __LINE__, lg::Logger::WARN).stream()
-#define LOG_ERROR lg::Logger::instance()->write(__FILE__, __LINE__, lg::Logger::ERROR).stream()
-#define LOG_FATAL lg::Logger::instance()->write(__FILE__, __LINE__, lg::Logger::FATAL).stream()
-#define LOG_SYSERR lg::Logger::instance()->write(__FILE__, __LINE__, false).stream()
-#define LOG_SYSFATAL lg::Logger::instance()->write(__FILE__, __LINE__, true).stream()
+#define LOG_WARN lg::Logger(__FILE__, __LINE__, lg::Logger::WARN).stream()
+#define LOG_ERROR lg::Logger(__FILE__, __LINE__, lg::Logger::ERROR).stream()
+#define LOG_FATAL lg::Logger(__FILE__, __LINE__, lg::Logger::FATAL).stream()
+#define LOG_SYSERR lg::Logger(__FILE__, __LINE__, false).stream()
+#define LOG_SYSFATAL lg::Logger(__FILE__, __LINE__, true).stream()
 
 #endif

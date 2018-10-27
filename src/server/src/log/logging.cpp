@@ -6,6 +6,9 @@
 
 namespace
 {
+constexpr MAX_ERROR_BUF = 64;
+ __thread char error_buf[MAX_ERROR_BUF];
+
   extern __thread int t_cachedTid;
   extern __thread char t_tidString[32];
   extern __thread int t_tidStringLength;
@@ -33,14 +36,9 @@ void CurrentThread::cacheTid()
 
 namespace lg
 {
-
-__thread char t_errnobuf[512];
-__thread char t_time[64];
-__thread time_t t_lastSecond;
-
-const char* strerror_tl(int savedErrno)
+const char* strerror_tl(int saved_errno)
 {
-  return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
+  return strerror_r(saved_errno, t_errnobuf, sizeof t_errnobuf);
 }
 
 Logger::Log_level initLogLevel()
@@ -55,7 +53,7 @@ Logger::Log_level initLogLevel()
 
 Logger::Log_level g_log_level = initLogLevel();
 
-const char* LogLevelName[Logger::NUM_LOG_LEVELS] =
+const char* Log_level_name[Logger::NUM_LOG_LEVELS] =
 {
   "TRACE ",
   "DEBUG ",
@@ -63,20 +61,6 @@ const char* LogLevelName[Logger::NUM_LOG_LEVELS] =
   "WARN  ",
   "ERROR ",
   "FATAL ",
-};
-
-// helper class for known string length at compile time
-struct T
-{
-  T(const char* str, unsigned len)
-    :str_(str),
-     len_(len)
-  {
-    assert(strlen(str) == len_);
-  }
-
-  const char* str_;
-  const unsigned len_;
 };
 
 inline Log_stream& operator<<(Log_stream& s, T v)
@@ -94,117 +78,79 @@ inline Log_stream& operator<<(Log_stream& s, const Logger::Source_file& v)
 void defaultOutput(const char* msg, int len)
 {
   size_t n = fwrite(msg, 1, len, stdout);
-  //FIXME check n
-  (void)n;
-}
-
-void defaultFlush()
-{
-  fflush(stdout);
 }
 
 Logger::Output_func g_output = defaultOutput;
-Logger::Flush_func g_flush = defaultFlush;
-Time_zone g_logTimeZone;
 
 }
 
-
-Logger* Logger::instance() { static Logger logger; return &logger; }
-
 void Logger::init(Log_level level, int old_errno, const fs::path& file, int line)
 {
-	time_ = Timestamp::now();
-	level_ = level;
-	line_ = line;
-	basename_ = file.c_string();
-
   format_time();
   CurrentThread::tid();
-  stream_ << T(CurrentThread::tidString(), CurrentThread::tidStringLength());
-  stream_ << T(LogLevelName[level], 6);
+  stream_ << get_current_thread_id();
+  stream_ << Log_level_name[level];
   if (old_errno != 0)
   {
     stream_ << strerror_tl(old_errno) << " (errno=" << old_errno << ") ";
   }
 }
 
-void Logger::format_time()
+std::string Logger::format_time()
 {
-  int64_t microSecondsSinceEpoch = time_.microSecondsSinceEpoch();
+  int64_t microSecondsSinceEpoch = Timestamp::now().microSecondsSinceEpoch();
   time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / Timestamp::kMicroSecondsPerSecond);
   int microseconds = static_cast<int>(microSecondsSinceEpoch % Timestamp::kMicroSecondsPerSecond);
+
+std::ostringstream os;
   if (seconds != t_lastSecond)
   {
     t_lastSecond = seconds;
     struct tm tm_time;
-    if (g_logTimeZone.valid())
-    {
-      tm_time = g_logTimeZone.toLocalTime(seconds);
-    }
-    else
-    {
-      ::gmtime_r(&seconds, &tm_time); // FIXME Time_zone::fromUtcTime
-    }
 
-    int len = snprintf(t_time, sizeof(t_time), "%4d%02d%02d %02d:%02d:%02d",
-        tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-        tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec);
-    assert(len == 17); (void)len;
+	os << std::put_time(std::localtime(&tm), "&F &T");
+    assert(os.str().size() == 19); (void)len;
   }
 
-  if (g_logTimeZone.valid())
-  {
-    Fmt us(".%06d ", microseconds);
-    assert(us.length() == 8);
-    stream_ << T(t_time, 17) << T(us.data(), 8);
-  }
-  else
-  {
-    Fmt us(".%06dZ ", microseconds);
-    assert(us.length() == 9);
-    stream_ << T(t_time, 17) << T(us.data(), 9);
-  }
+	os << format_string(".%06d", microseconds);
+	stream << os;
 }
 
-void Logger::finish()
+void Logger::finish(const fs::path& file, int line)
 {
-  stream_ << " - " << __FILE__ << ':' << __LINE__ << '\n';
+  stream_ << " - " << file.c_string() << ':' << line << '\n';
 }
 
-void Logger::write(const fs::path& file, int line)
-  : impl_(INFO, 0, __FILE__, __LINE__)
+
+Logger::Logger(const fs::path& file, int line)
 {
-  Timestamp time_;
-  Log_stream stream_;
-  Log_level level_;
-  int line_;
-  fs::path basename_;
+init(INFO, 0, file, line);
 }
 
-void Logger::write(const fs::path& file, int line, Log_level level, const char* func)
-{
-  init(leve, 0, file, line);
-}
-
-void Logger::write(const fs::path& file, int line, Log_level level)
+Logger::Logger(const fs::path& file, int line, LogLevel level)
 {
 init(level, 0, file, line);
 }
 
-void Logger::write(const fs::path& file, int line, bool to_abort)
+Logger::Logger(const fs::path& file, int line, LogLevel level, const char* func)
+{
+  init(leve, 0, file, line);
+	stream_ << func << ' ';
+}
+
+Logger::Logger(const fs::path& file, int line, bool toAbort)
 {
 init(to_abort?FATAL:ERROR, errno, file, line);
 }
 
 Logger::~Logger()
 {
-  impl_.finish();
-  const Log_stream::Buffer& buf(stream().buffer());
-  g_output(buf.data(), buf.length());
-  if (impl_.level_ == FATAL)
+  finish();
+  //const Log_stream::Buffer& buf(stream().buffer());
+  //g_output(buf.data(), buf.length());
+  if (level_ == FATAL)
   {
-    g_flush();
+     fflush(stdout);
     abort();
   }
 }
@@ -216,17 +162,13 @@ void Logger::set_log_level(Logger::Log_level level)
 
 void Logger::set_output(Output_func out)
 {
-  g_output = out;
+  //g_output = out;
 }
 
 void Logger::set_flush(Flush_func flush)
 {
-  g_flush = flush;
+  //g_flush = flush;
 }
 
-void Logger::set_time_zone(const Time_zone& tz)
-{
-  g_logTimeZone = tz;
-}
 
-} // end namespac lg
+} // end namespac
