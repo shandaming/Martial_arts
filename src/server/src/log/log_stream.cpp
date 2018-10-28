@@ -75,6 +75,7 @@ void init_log(const std::string& file, int rolle_size)
 	if(log == nullptr)
 	{
 		log = new Async_log(file, rolle_size);
+		log->start();
 	}
 }
 
@@ -200,6 +201,7 @@ inline Log_stream& Log_stream::operator<<(const std::string& v)
 	return *this;
 }
 
+void Log_stream::append(const char* data, int len) { log_->append(data, len); }
 
 template<typename T>
 Fmt::Fmt(const char* fmt, T val)

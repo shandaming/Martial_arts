@@ -76,6 +76,8 @@ void Log_buffer<SIZE>::cookie_end() {}
 
 } // namespace detail
 
+class Async_log;
+
 class Log_stream
 {
 public:
@@ -103,7 +105,7 @@ public:
 
 	Log_stream& operator<<(const std::string& v);
 
-	void append(const char* data, int len) { buffer_->append(data, len); }
+	void append(const char* data, int len); 
 private:
 	void static_check();
 

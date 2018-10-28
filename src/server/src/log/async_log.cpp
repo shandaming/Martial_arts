@@ -30,7 +30,7 @@ int Count_down_latch::get_count() const
 
 
 
-Async_log::Async_log(const string& basename, off_t roll_size, 
+Async_log::Async_log(const std::string& basename, off_t roll_size, 
 		int flush_interval) 
 	: flush_interval_(flush_interval), 
 	running_(false),

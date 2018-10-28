@@ -5,6 +5,9 @@
 #ifndef LOG_ASYNC_LOG_H
 #define LOG_ASYNC_LOG_H
 
+#include <string>
+#include <condition_variable>
+
 namespace lg
 {
 class Count_down_latch
@@ -26,7 +29,7 @@ private:
 class Async_log
 {
 public:
-	Async_log(const string& basename, off_t roll_size, 
+	Async_log(const std::string& basename, off_t roll_size, 
 			int flush_interval = 3);
 
 	~Async_log()

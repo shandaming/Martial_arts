@@ -213,8 +213,9 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  /usr/include/c++/7/condition_variable net/event_loop.h \
  common/ptr_vector.h net/acceptor.h net/socket.h net/inet_address.h \
  exceptions.h net/tcp_connection.h net/buffer.h \
- /usr/include/c++/7/cassert /usr/include/assert.h \
- /usr/include/c++/7/cstring /usr/include/string.h /usr/include/strings.h \
+ /usr/include/c++/7/algorithm /usr/include/c++/7/cassert \
+ /usr/include/assert.h /usr/include/c++/7/cstring /usr/include/string.h \
+ /usr/include/strings.h \
  /usr/include/x86_64-linux-gnu/bits/strings_fortified.h \
  /usr/include/x86_64-linux-gnu/bits/string_fortified.h
 
@@ -793,6 +794,8 @@ exceptions.h:
 net/tcp_connection.h:
 
 net/buffer.h:
+
+/usr/include/c++/7/algorithm:
 
 /usr/include/c++/7/cassert:
 

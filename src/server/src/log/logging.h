@@ -28,8 +28,8 @@ public:
   };
 
  Logger(const fs::path& file, int line);
-  Logger(const fs::path& file, int line, LogLevel level);
-  Logger(const fs::path& file, int line, LogLevel level, const char* func);
+  Logger(const fs::path& file, int line, Log_level level);
+  Logger(const fs::path& file, int line, Log_level level, const char* func);
   Logger(const fs::path& file, int line, bool toAbort);
 ~Logger();
 
