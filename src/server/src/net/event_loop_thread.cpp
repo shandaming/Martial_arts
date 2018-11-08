@@ -7,7 +7,7 @@
 namespace net
 {
 Event_loop_thread::Event_loop_thread(const Thread_init_callback& cb,
-                                 const string& name)
+                                 const std::string& name)
   : loop_(NULL),
     exiting_(false),
     //thread_(cb),

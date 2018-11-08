@@ -34,3 +34,16 @@ Thread::Thread(const std::string& name) : thread_(nullptr) {}
 std::string Thread::get_name() { return thread_name; }
 
 pid_t Thread::get_id() { return cached_tid; }
+
+pid_t get_current_thread_id()
+{
+	if(cached_tid == 0)
+	{
+		cached_tid = gettid();
+		tid_string = std::move(format_string("%5d ", cached_tid));
+	}
+	else
+	{
+		return cached_tid;
+	}
+}

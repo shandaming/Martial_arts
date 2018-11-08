@@ -6,7 +6,6 @@
 #define NET_EVENT_LOOP_THREADPOOL_H
 
 #include "event_loop_thread.h"
-#include "common/ptr_vector.h"
 
 namespace net
 {
@@ -39,7 +38,7 @@ namespace net
 			bool started_;
 			size_t num_threads_;
 			int next_;
-			Ptr_vector<Event_loop_thread> threads_;
+			std::vector<std::unique_ptr<Event_loop_thread>> threads_;
 			std::vector<Event_loop*> loops_;
 	};
 }

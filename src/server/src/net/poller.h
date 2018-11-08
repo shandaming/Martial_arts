@@ -22,15 +22,15 @@ class Event_loop;
 
 		  /// Polls the I/O events.
 		  /// Must be called in the loop thread.
-		  virtual Timestamp poll(int timeoutMs, Channel_list* activeChannels) = 0;
+		  virtual Timestamp poll(int timeoutMs, Channel_list* activeChannels);
 
 		  /// Changes the interested I/O events.
 		  /// Must be called in the loop thread.
-		  virtual void update_channel(Channel* channel) = 0;
+		  virtual void update_channel(Channel* channel);
 
 		  /// Remove the channel, when it destructs.
 		  /// Must be called in the loop thread.
-		  virtual void remove_channel(Channel* channel) = 0;
+		  virtual void remove_channel(Channel* channel);
 
 		  virtual bool has_channel(Channel* channel) const;
 

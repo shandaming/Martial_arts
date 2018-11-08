@@ -2,15 +2,18 @@
  * Copyright (C) 2018
  */
 
+#include <cassert>
+//#include <memory>
+
 #include "event_loop_threadpool.h"
 
 namespace net
 {
-Event_loop_threadpool::Event_loop_threadpool(Event_loop* base_loop, const string& nameArg)
+Event_loop_threadpool::Event_loop_threadpool(Event_loop* base_loop, const std::string& nameArg)
   : base_loop_(base_loop),
     name_(nameArg),
     started_(false),
-    numThreads_(0),
+    num_threads_(0),
     next_(0)
 {
 }
@@ -30,9 +33,9 @@ void Event_loop_threadpool::start(const Thread_init_callback& cb)
   for (size_t i = 0; i < num_threads_; ++i)
   {
     char buf[name_.size() + 32];
-    snprintf(buf, sizeof buf, "%s%d", name_.c_str(), i);
+    snprintf(buf, sizeof buf, "%s%lu", name_.c_str(), i);
     Event_loop_thread* t = new Event_loop_thread(cb, buf);
-    threads_.push_back(t);
+    threads_.emplace_back(std::unique_ptr<Event_loop_thread>(t));
     loops_.push_back(t->start_loop());
   }
   if (num_threads_ == 0 && cb)
@@ -52,7 +55,7 @@ Event_loop* Event_loop_threadpool::get_next_loop()
     // round-robin
     loop = loops_[next_];
     ++next_;
-    if (implicit_cast<size_t>(next_) >= loops_.size())
+    if (static_cast<size_t>(next_) >= loops_.size())
     {
       next_ = 0;
     }

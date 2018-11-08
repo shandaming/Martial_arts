@@ -4,12 +4,15 @@
 
 #include <sys/eventfd.h>
 #include <unistd.h>
+#include <cassert>
 
 #include "event_loop.h"
+#include "log/logging.h"
+#include "common/thread.h"
 
 namespace
 {
-Event_loop* thread_local loop_in_this_thread = 0;
+thread_local net::Event_loop* loop_in_this_thread = nullptr;
 
 constexpr int poll_time_ms = 10000;
 
@@ -18,12 +21,12 @@ int create_event_fd()
 	int event_fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
 	if (event_fd < 0)
 	{
-		LOG_SYSERR << "create_event_fd failed! thread id=" << thread_id_;
+		LOG_SYSERR << "create_event_fd failed! thread id=" << get_current_thread_id();
 		abort();
 	}
 	return event_fd;
 }
-
+/*
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 class IgnoreSigPipe
 {
@@ -37,6 +40,7 @@ public:
 #pragma GCC diagnostic error "-Wold-style-cast"
 
 IgnoreSigPipe initObj;
+*/
 }
 
 namespace net
@@ -58,12 +62,12 @@ Event_loop::Event_loop() : looping_(false), quit_(false),
     current_active_channel_(NULL)
 {
 	LOG_DEBUG << "Event_loop created " << this << " in thread " << 
-		threadId_;
+		get_current_thread_id();
 
 	if (loop_in_this_thread)
 	{
 		LOG_FATAL << "Another Event_loop " << loop_in_this_thread
-				 << " exists in this thread " << thread_id_;
+				 << " exists in this thread " << get_current_thread_id();
 	}
 	else
 	{
@@ -72,7 +76,7 @@ Event_loop::Event_loop() : looping_(false), quit_(false),
 	wakeup_channel_->set_read_callback(
 		std::bind(&Event_loop::handle_read, this));
 	// we are always reading the wakeupfd
-	wakeup_channel_->enable_reading();
+	wakeup_channel_->enable_read();
 }
 
 Event_loop::~Event_loop()
@@ -98,17 +102,17 @@ void Event_loop::loop()
 		active_channels_.clear();
 		poll_return_time_ = poller_->poll(poll_time_ms, &active_channels_);
 		++iteration_;
-		if (Logger::logLevel() <= Logger::TRACE)
+		if (lg::Logger::log_level() <= lg::Logger::TRACE)
 		{
 		print_active_channels();
 		}
 		// TODO sort channel by priority
 		event_handling_ = true;
 
-		for(auto& it : active_channels)
+		for(auto& it : active_channels_)
 		{
-			current_active_channel_ = &it;
-			current_active_channel_->handle_event(poll_return_time_);
+			current_active_channel_ = it;
+			current_active_channel_->handle_event(std::move(poll_return_time_));
 		}
 		current_active_channel_ = NULL;
 		event_handling_ = false;
@@ -131,7 +135,7 @@ void Event_loop::quit()
 	}
 }
 
-size_t Event_loop::queue_size() const
+size_t Event_loop::queue_size()
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	return pending_functors_.size();
@@ -163,19 +167,19 @@ void Event_loop::queue_in_loop(Functor&& cb)
 
 Timer_id Event_loop::run_at(const Timestamp& time, Timer_callback&& cb)
 {
-	return timer_queue_->addTimer(std::move(cb), time, 0.0);
+	return timer_queue_->add_timer(std::move(cb), time, 0.0);
 }
 
 Timer_id Event_loop::run_after(double delay, Timer_callback&& cb)
 {
-	Timestamp time(addTime(Timestamp::now(), delay));
+	Timestamp time(add_time(Timestamp::now(), delay));
 	return run_at(time, std::move(cb));
 }
 
 Timer_id Event_loop::run_every(double interval, Timer_callback&& cb)
 {
-	Timestamp time(addTime(Timestamp::now(), interval));
-	return timer_queue_->addTimer(std::move(cb), time, interval);
+	Timestamp time(add_time(Timestamp::now(), interval));
+	return timer_queue_->add_timer(std::move(cb), time, interval);
 }
 
 void Event_loop::cancel(Timer_id timerId)

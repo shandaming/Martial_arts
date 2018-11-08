@@ -44,7 +44,7 @@ public:
 
 	int64_t iteration() const { return iteration_; }
 
-	size_t queue_size() const;
+	size_t queue_size();
 
 	void run_in_loop(Functor&& cb);
 	void queue_in_loop(Functor&& cb);
@@ -101,9 +101,9 @@ private:
   	Timestamp poll_return_time_;
   	Scoped_ptr<Poller> poller_;
   	Scoped_ptr<Timer_queue> timer_queue_;
-  	int wakeupFd_;
+  	int wakeup_fd_;
 
-  	Scoped_ptr<Channel> wakeupChannel_;
+  	Scoped_ptr<Channel> wakeup_channel_;
   	std::any context_;
 
   	// scratch variables
