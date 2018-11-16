@@ -32,8 +32,8 @@ namespace net
 
 			std::string to_string() const;
 
-			sockaddr get_sockaddr() const;
-			sockaddr_in get_sockaddr_in() const { return addr_; }
+			//sockaddr get_sockaddr();
+			sockaddr_in get_addr() const { return addr_; }
 
 			bool is_loopback() const;
 

@@ -210,20 +210,20 @@ bool Event_loop::has_channel(Channel* channel)
 {
 	assert(channel->owner_loop() == this);
 	assert_in_loop_thread();
-	return poller_->has_hhannel(channel);
+	return poller_->has_channel(channel);
 }
 
 void Event_loop::abort_not_in_loop_thread()
 {
 	LOG_FATAL << "Event_loop::abortNotInLoopThread - Event_loop " << this
             << " was created in threadId_ = " << thread_id_
-            << ", current thread id = " <<  CurrentThread::tid();
+            << ", current thread id = " <<  get_current_thread_id();
 }
 
 void Event_loop::wakeup()
 {
 	uint64_t one = 1;
-	ssize_t n = sockets::write(wakeup_fd_, &one, sizeof one);
+	ssize_t n = write(wakeup_fd_, &one, sizeof one);
 	if (n != sizeof one)
 	{
 		LOG_ERROR << "Event_loop::wakeup() writes " << n << " bytes instead of 8";
@@ -233,7 +233,7 @@ void Event_loop::wakeup()
 void Event_loop::handle_read()
 {
 	uint64_t one = 1;
-	ssize_t n = sockets::read(wakeup_fd_, &one, sizeof one);
+	ssize_t n = read(wakeup_fd_, &one, sizeof one);
 	if (n != sizeof one)
 	{
 		LOG_ERROR << "Event_loop::handleRead() reads " << n << " bytes instead of 8";
@@ -261,7 +261,8 @@ void Event_loop::print_active_channels() const
 {
 	for(auto& it : active_channels_)
 	{
-		const Channel* ch = &it;
+		const Channel* ch = it;
 		LOG_TRACE << "{" << ch->revents_to_string() << "} ";
 	}
+}
 } // namespace net

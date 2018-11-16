@@ -5,6 +5,8 @@
 #ifndef COMMON_SCOPED_PTR_H
 #define COMMON_SCOPED_PTR_H
 
+#include <cassert>
+
 template<typename T>
 class Scoped_ptr
 {
@@ -33,7 +35,7 @@ public:
 
 	T* operator->() const
 	{
-		static_assert(ptr_ != nullptr);
+		assert(ptr_ != nullptr);
 		return ptr_;
 	}
 

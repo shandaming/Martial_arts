@@ -2,7 +2,14 @@
  * Copyright (C) 2018
  */
 
+#include <sys/epoll.h>
+#include <unistd.h>
+
+#include <cassert>
+
 #include "poller.h"
+#include "net/event_loop.h"
+#include "log/logging.h"
 
 namespace
 {
@@ -42,7 +49,7 @@ Timestamp Poller::poll(int timeoutMs, Channel_list* active_channels)
   {
     LOG_TRACE << num_events << " events happened";
     fill_active_channels(num_events, active_channels);
-    if (implicit_cast<size_t>(num_events) == events_.size())
+    if (static_cast<size_t>(num_events) == events_.size())
     {
       events_.resize(events_.size()*2);
     }
@@ -66,13 +73,13 @@ Timestamp Poller::poll(int timeoutMs, Channel_list* active_channels)
 void Poller::fill_active_channels(int num_events,
                                      Channel_list* active_channels) const
 {
-  assert(implicit_cast<size_t>(num_events) <= events_.size());
+  assert(static_cast<size_t>(num_events) <= events_.size());
   for (int i = 0; i < num_events; ++i)
   {
     Channel* channel = static_cast<Channel*>(events_[i].data.ptr);
 #ifndef NDEBUG
     int fd = channel->fd();
-    ChannelMap::const_iterator it = channels_.find(fd);
+    Channel_map::const_iterator it = channels_.find(fd);
     assert(it != channels_.end());
     assert(it->second == channel);
 #endif
@@ -132,7 +139,7 @@ void Poller::remove_channel(Channel* channel)
   LOG_TRACE << "fd = " << fd;
   assert(channels_.find(fd) != channels_.end());
   assert(channels_[fd] == channel);
-  assert(channel->isNoneEvent());
+  assert(channel->is_none_event());
   int index = channel->index();
   assert(index == kAdded || index == kDeleted);
   size_t n = channels_.erase(fd);
@@ -153,8 +160,8 @@ void Poller::update(int operation, Channel* channel)
   event.events = channel->events();
   event.data.ptr = channel;
   int fd = channel->fd();
-  LOG_TRACE << "epoll_ctl op = " << operationToString(operation)
-    << " fd = " << fd << " event = { " << channel->eventsToString() << " }";
+  LOG_TRACE << "epoll_ctl op = " << operation_to_string(operation)
+    << " fd = " << fd << " event = { " << channel->events_to_string() << " }";
   if (epoll_ctl(epollfd_, operation, fd, &event) < 0)
   {
     if (operation == EPOLL_CTL_DEL)
@@ -187,7 +194,7 @@ const char* Poller::operation_to_string(int op)
 bool Poller::has_channel(Channel* channel) const
 {
   assert_in_loop_thread();
-  ChannelMap::const_iterator it = channels_.find(channel->fd());
+  Channel_map::const_iterator it = channels_.find(channel->fd());
   return it != channels_.end() && it->second == channel;
 }
 

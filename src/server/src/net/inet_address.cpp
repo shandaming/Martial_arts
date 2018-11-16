@@ -3,26 +3,32 @@
  */
 
 #include <arpa/inet.h>
-#include "netaddr.h"
+
+#include <cstring>
+
 #include "inet_address.h"
 
 static const in_addr_t inaddr_any = INADDR_ANY;
 static const in_addr_t inaddr_loopback = INADDR_LOOPBACK;
 
+namespace
+{
+constexpr int buf_len = 128;
+}
 namespace net
 {
 	Inet_address::Inet_address()
 	{
-		memset(addr_, 0, sizeof(addr_));
-		addr_.sin_addr.s_addr = htol(INADDR_ANY);
+		memset(&addr_, 0, sizeof(addr_));
+		addr_.sin_addr.s_addr = htonl(INADDR_ANY);
 		addr_.sin_family = AF_INET;
 		addr_.sin_port = htonl(0);
 	}
 
 	Inet_address::Inet_address(const std::string& str, uint16_t port)
 	{
-		memset(addr_, 0, sizeof(addr_));
-		inet_pton(AF_INET, str.c_str(), addr_);
+		memset(&addr_, 0, sizeof(addr_));
+		inet_pton(AF_INET, str.c_str(), &addr_);
 		addr_.sin_family = AF_INET;
 		addr_.sin_port = htonl(port);
 	}
@@ -30,7 +36,7 @@ namespace net
 	Inet_address::Inet_address(const Inet_address& other) : 
 		addr_(other.addr_) {}
 
-	Inet_address& Inet_address::operator=(const Inet_address& addr) 
+	Inet_address& Inet_address::operator=(const Inet_address& other) 
 	{
 		addr_ = other.addr_;
 		return *this;
@@ -52,11 +58,12 @@ namespace net
 
 	std::string Inet_address::to_string() const
 	{
-		const char* ip = inet_ntop(AF_INET, addr_, buf, buf_len);
+		char buf[buf_len] = {0};
+		const char* ip = inet_ntop(AF_INET, &addr_, buf, buf_len);
 		return ip;
 	}
-
-sockaddr Inet_address::get_sockaddr() const 
+/*
+sockaddr Inet_address::get_sockaddr()
 {
 	return reinterpret_cast<sockaddr>(addr_) 
 }
@@ -67,14 +74,15 @@ sockaddr Inet_address::get_sockaddr() const
 			ipv4_address_.is_loopback() : ipv6_address_.is_loopback();
 	}
 
+
 	bool operator==(const Inet_address& l, const Inet_address& r)
 	{
-		if(addr_.)
-		return l.ipv4_address_ == r.ipv4_address_;
+		return l.addr_ == r.addr_;
 	}
 
 	bool operator!=(const Inet_address& l, const Inet_address& r)
 	{
 		return !operator==(l, r);
 	}
+*/
 }

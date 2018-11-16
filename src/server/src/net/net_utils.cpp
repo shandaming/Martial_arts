@@ -9,10 +9,12 @@
 #include <unistd.h>
 
 #include "net_utils.h"
-#include "log/loging.h"
+#include "log/logging.h"
 
 namespace
 {
+constexpr int buf_len = 128;
+
 bool set_nonblock(int sockfd)
 {
 	int flags = fcntl(sockfd, F_GETFL, 0);
@@ -59,7 +61,7 @@ int create_tcp_socket(int domain)
 
 bool bind_socket(int sockfd, const sockaddr_in& addr)
 {
-	if(bind(sockfd, reinterpret_cast<sockaddr*>(&addr), sizeof(sockaddr_in)) == -1)
+	if(bind(sockfd, reinterpret_cast<const sockaddr*>(&addr), sizeof(sockaddr_in)) == -1)
 	{
 		LOG_SYSFATAL << "bind_socket failed!";
 		return false;
@@ -69,7 +71,7 @@ bool bind_socket(int sockfd, const sockaddr_in& addr)
 
 bool listen_socket(int sockfd)
 {
-	if(listen(fd, SOMAXCONN) == -1)
+	if(listen(sockfd, SOMAXCONN) == -1)
 	{
 		LOG_SYSFATAL << "listen_socket failed!";
 		return false;
@@ -79,7 +81,7 @@ bool listen_socket(int sockfd)
 
 bool connect_server(int sockfd, const sockaddr_in& addr)
 {
-	if(connect(sockfd, reinterpret_cast<sockaddr*>(&addr), 
+	if(connect(sockfd, reinterpret_cast<const sockaddr*>(&addr), 
 				static_cast<socklen_t>(sizeof(sockaddr_in))) == -1)
 	{
 		return false;
@@ -95,7 +97,7 @@ int accept_net_connection(int sockfd, sockaddr_in& addr)
 	{
 		int saved_errno = errno;
 		
-		LOG_SYSERR << "accept_net_connection failed!"
+		LOG_SYSERR << "accept_net_connection failed!";
 
 		switch(saved_errno)
 		{
@@ -111,7 +113,6 @@ int accept_net_connection(int sockfd, sockaddr_in& addr)
 			case EFAULT:
 			case EINVAL:
 			case ENOBUFS:
-			case ENOMEM:
 			case ENOMEM:
 			case ENOTSOCK:
 			case EOPNOTSUPP:
@@ -147,7 +148,7 @@ void shutdown_write(int sockfd)
 
 std::string get_hostname()
 {
-	char buf[UCHAR_MAX] = {0};
+	char buf[buf_len] = {0};
 	if(gethostname(buf, sizeof buf) == 0)
 	{
 		return buf;

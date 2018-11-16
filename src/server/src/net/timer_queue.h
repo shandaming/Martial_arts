@@ -25,7 +25,7 @@ public:
 	Timer_id add_timer(Timer_callback&& cb, Timestamp when, 
 			double interval);
 
-	void cancel(Timer_id timerId);
+	void cancel(const Timer_id& timerId);
 private:
 	typedef std::pair<Timestamp, Timer*> Entry;
 	typedef std::set<Entry> Timer_list;

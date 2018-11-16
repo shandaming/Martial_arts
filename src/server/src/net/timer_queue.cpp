@@ -110,7 +110,7 @@ Timer_id Timer_queue::add_timer(const Timer_callback&& cb, Timestamp when,
 	return Timer_id(timer, timer->sequence());
 }
 
-void Timer_queue::cancel(Timer_id timerId)
+void Timer_queue::cancel(const Timer_id& timerId)
 {
 	loop_->run_in_loop(std::bind(&Timer_queue::cancel_in_loop, this, 
 				timerId));

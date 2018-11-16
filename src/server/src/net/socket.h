@@ -21,7 +21,7 @@ public:
 
 	bool bind(const Inet_address& addr);
 	bool listen();
-	int accept(const Inet_address& addr);
+	int accept(Inet_address& addr);
 
 	void shutdown_write();
 
