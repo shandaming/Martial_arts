@@ -2,8 +2,11 @@
  * Copyright (C) 2018
  */
 
+#include <netinet/tcp.h>
+
 #include "socket.h"
 #include "net_utils.h"
+#include "log/logging.h"
 
 namespace net
 {
@@ -29,7 +32,7 @@ int Socket::accept(Inet_address& addr)
 
 void Socket::shutdown_write()
 {
-	shutdown_write(fd_);
+	net::shutdown_write(fd_);
 }
 
 void Socket::set_reuse_addr()

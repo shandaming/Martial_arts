@@ -25,6 +25,11 @@ namespace net
 		addr_.sin_port = htonl(0);
 	}
 
+Inet_address::Inet_address(const sockaddr_in& addr) 
+{
+	memcpy(&addr_, &addr, sizeof(sockaddr_in));
+}
+
 	Inet_address::Inet_address(const std::string& str, uint16_t port)
 	{
 		memset(&addr_, 0, sizeof(addr_));

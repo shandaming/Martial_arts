@@ -155,4 +155,28 @@ std::string get_hostname()
 	}
 	return "unknown host";
 }
+
+sockaddr_in get_local_addr(int sockfd)
+{
+  sockaddr_in localaddr;
+  memset(&localaddr, 0, sizeof localaddr);
+  socklen_t addrlen = static_cast<socklen_t>(sizeof localaddr);
+  if (getsockname(sockfd, reinterpret_cast<sockaddr*>(&localaddr), &addrlen) < 0)
+  {
+    LOG_SYSERR << "sockets::get_local_addr";
+  }
+return localaddr;
+}
+
+sockaddr_in get_peer_addr(int sockfd)
+{
+  sockaddr_in peeraddr;
+  memset(&peeraddr, 0, sizeof peeraddr);
+  socklen_t addrlen = static_cast<socklen_t>(sizeof peeraddr);
+  if (getpeername(sockfd, reinterpret_cast<sockaddr*>(&peeraddr), &addrlen) < 0)
+  {
+    LOG_SYSERR << "sockets::getPeerAddr";
+  }
+return peeraddr;
+}
 } // namespace net

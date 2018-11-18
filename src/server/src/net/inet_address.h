@@ -18,6 +18,7 @@ namespace net
 			friend bool operator!=(const Inet_address& l, const Inet_address& r);
 		public:
 			Inet_address();
+			Inet_address(const sockaddr_in& addr);
 			explicit Inet_address(const std::string& str, uint16_t port);
 
 			Inet_address(const Inet_address& other);
