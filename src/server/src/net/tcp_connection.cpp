@@ -304,7 +304,7 @@ void Tcp_connection::stop_read_in_loop()
   }
 }
 
-void Tcp_connection::connectEstablished()
+void Tcp_connection::connect_established()
 {
   loop_->assert_in_loop_thread();
   assert(state_ == kConnecting);

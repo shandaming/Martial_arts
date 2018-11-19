@@ -77,7 +77,7 @@ Tcp_connection(Event_loop* loop,
   { close_callback_ = cb; }
 
   // called when TcpServer accepts a new connection
-  void connectEstablished();   // should be called only once
+  void connect_established();   // should be called only once
   // called when TcpServer has removed me from its map
 void connect_destroyed(); // should be called only once
 private:

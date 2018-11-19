@@ -35,16 +35,16 @@ class Buffer;
 class Tcp_connection;
 typedef std::shared_ptr<Tcp_connection> Tcp_connection_ptr;
 typedef std::function<void()> Timer_callback;
-typedef std::function<void (const Tcp_connection&)> Connection_callback;
-typedef std::function<void (const Tcp_connection&)> Close_callback;
-typedef std::function<void (const Tcp_connection&)> Write_complete_callback;
-typedef std::function<void (const Tcp_connection&, size_t)> High_water_mark_callback;
+typedef std::function<void (const Tcp_connection_ptr&)> Connection_callback;
+typedef std::function<void (const Tcp_connection_ptr&)> Close_callback;
+typedef std::function<void (const Tcp_connection_ptr&)> Write_complete_callback;
+typedef std::function<void (const Tcp_connection_ptr&, size_t)> High_water_mark_callback;
 
 // the data has been read to (buf, len)
-typedef std::function<void (const Tcp_connection&, Buffer*, Timestamp)> Message_callback;
+typedef std::function<void (const Tcp_connection_ptr&, Buffer*, Timestamp)> Message_callback;
 
-void default_connection_callback(const Tcp_connection& conn);
-void default_message_callback(const Tcp_connection& conn,
+void default_connection_callback(const Tcp_connection_ptr& conn);
+void default_message_callback(const Tcp_connection_ptr& conn,
 
 Buffer* buffer, Timestamp receiveTime);
 
