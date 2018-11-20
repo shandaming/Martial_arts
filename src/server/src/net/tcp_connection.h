@@ -5,10 +5,19 @@
 #ifndef NET_TCP_CONNECTION_H
 #define NET_TCP_CONNECTION_H
 
+#include <any>
+
 #include "buffer.h"
+#include "net/inet_address.h"
+#include "net/net_utils.h"
+#include "net/socket.h"
+#include "net/channel.h"
+#include "common/scoped_ptr.h"
 
 namespace net
 {
+class Event_loop;
+
 class Tcp_connection
 {
 public:

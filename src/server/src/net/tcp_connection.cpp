@@ -3,50 +3,51 @@
  */
 
 #include "tcp_connection.h"
+#include "log/logging.h"
 
 namespace net
 {
-void muduo::net::defaultConnectionCallback(const Tcp_connection_ptr& conn)
+void default_connection_callback(const Tcp_connection_ptr& conn)
 {
-  LOG_TRACE << conn->localAddress().toIpPort() << " -> "
-            << conn->peerAddress().toIpPort() << " is "
+  LOG_TRACE << conn->local_address().to_ip_port() << " -> "
+            << conn->peer_address().to_ip_port() << " is "
             << (conn->connected() ? "UP" : "DOWN");
   // do not call conn->forceClose(), because some users want to register message callback only.
 }
 
-void muduo::net::defaultMessageCallback(const Tcp_connection_ptr&,
+void default_message_callback(const Tcp_connection_ptr&,
                                         Buffer* buf,
                                         Timestamp)
 {
-  buf->retrieveAll();
+  buf->retrieve_all();
 }
 
 Tcp_connection::Tcp_connection(Event_loop* loop,
-                             const string& name,
+                             const std::string& name,
                              int sockfd,
                              const Inet_address& local_addr,
                              const Inet_address& peer_addr)
-  : loop_(CHECK_NOTNULL(loop)),
+  : loop_(loop),
     name_(name),
     state_(kConnecting),
     reading_(true),
     socket_(new Socket(sockfd)),
     channel_(new Channel(loop, sockfd)),
-    local_ddr_(local_addr),
-    peer_ddr_(peer_addr),
+    local_addr_(local_addr),
+    peer_addr_(peer_addr),
     high_water_mark_(64*1024*1024)
 {
   channel_->set_read_callback(
-      std::bind(&Tcp_connection::handle_read, this, _1));
+      std::bind(&Tcp_connection::handle_read, this, std::placeholders::_1));
   channel_->set_write_callback(
       std::bind(&Tcp_connection::handle_write, this));
   channel_->set_close_callback(
       std::bind(&Tcp_connection::handle_close, this));
-  channel_->setErrorCallback(
+  channel_->set_error_callback(
       std::bind(&Tcp_connection::handle_error, this));
   LOG_DEBUG << "Tcp_connection::ctor[" <<  name_ << "] at " << this
             << " fd=" << sockfd;
-  socket_->set_keep_alive(true);
+  socket_->set_keep_alive();
 }
 
 Tcp_connection::~Tcp_connection()

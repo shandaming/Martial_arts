@@ -33,6 +33,8 @@ namespace net
 
 			std::string to_string() const;
 
+			std::string to_ip_port() const;
+
 			//sockaddr get_sockaddr();
 			sockaddr_in get_addr() const { return addr_; }
 

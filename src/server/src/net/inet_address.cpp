@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "inet_address.h"
+#include "common/string_utils.h"
 
 static const in_addr_t inaddr_any = INADDR_ANY;
 static const in_addr_t inaddr_loopback = INADDR_LOOPBACK;
@@ -66,6 +67,14 @@ Inet_address::Inet_address(const sockaddr_in& addr)
 		char buf[buf_len] = {0};
 		const char* ip = inet_ntop(AF_INET, &addr_, buf, buf_len);
 		return ip;
+	}
+
+	std::string Inet_address::to_ip_port() const
+	{
+		//return string_format("%s:%u", to_string().c_str(), to_port());
+		char buf[buf_len] = {0};
+		sprintf(buf, "%s:%u", to_string().c_str(), to_port());
+		return buf;
 	}
 /*
 sockaddr Inet_address::get_sockaddr()

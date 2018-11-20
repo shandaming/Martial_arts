@@ -5,7 +5,6 @@
 #include "tcp_server.h"
 #include "net/net_utils.h"
 #include "net/tcp_connection.h"
-#include "common/string_utils.h"
 #include "log/logging.h"
 
 namespace net
@@ -13,7 +12,7 @@ namespace net
 Tcp_server::Tcp_server(Event_loop* loop, const Inet_address& listen_addr,
 		const std::string& nameArg, Option option) : 
 	loop_(loop),
-    ip_port_(string_format("%s:%u", listen_addr.to_string(), listen_addr.to_port())),
+    ip_port_(listen_addr.to_ip_port()),
     name_(nameArg),
     acceptor_(new Acceptor(loop, listen_addr, option == kReusePort)),
     thread_pool_(new Event_loop_threadpool(loop, name_)),
@@ -73,7 +72,7 @@ void Tcp_server::new_connection(int sockfd, const Inet_address& peer_addr)
 
 	LOG_INFO << "Tcp_server::new_connection [" << name_
 		<< "] - new connection [" << conn_name
-        << "] from " << string_format("%s:%u", peer_addr.to_string().c_str(), peer_addr.to_port());
+        << "] from " << peer_addr.to_ip_port();
 	Inet_address localAddr(get_local_addr(sockfd));
 	// FIXME poll with zero timeout to double confirm the new connection
 	// FIXME use make_shared if necessary

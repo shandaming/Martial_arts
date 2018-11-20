@@ -98,7 +98,7 @@ net/inet_address.o: net/inet_address.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/errno.h /usr/include/linux/errno.h \
  /usr/include/x86_64-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- /usr/include/c++/7/bits/basic_string.tcc
+ /usr/include/c++/7/bits/basic_string.tcc common/string_utils.h
 
 /usr/include/stdc-predef.h:
 
@@ -365,3 +365,5 @@ net/inet_address.h:
 /usr/include/asm-generic/errno-base.h:
 
 /usr/include/c++/7/bits/basic_string.tcc:
+
+common/string_utils.h:
