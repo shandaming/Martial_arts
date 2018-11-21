@@ -18,7 +18,7 @@ namespace net
 {
 class Event_loop;
 
-class Tcp_connection
+class Tcp_connection : public std::enable_shared_from_this<Tcp_connection>
 {
 public:
 Tcp_connection(Event_loop* loop,
@@ -27,6 +27,9 @@ Tcp_connection(Event_loop* loop,
                 const Inet_address& local_addr,
                 const Inet_address& peer_addr);
   ~Tcp_connection();
+
+Tcp_connection(const Tcp_connection&) = delete;
+Tcp_connection& operator=(const Tcp_connection&) = delete;
 
   Event_loop* get_loop() const { return loop_; }
   const std::string& name() const { return name_; }
@@ -102,7 +105,7 @@ private:
   // void shutdownAndForceCloseInLoop(double seconds);
   void force_close_in_loop();
   void set_state(StateE s) { state_ = s; }
-  const char* stateToString() const;
+  const char* state_to_string() const;
   void start_read_in_loop();
   void stop_read_in_loop();
 

@@ -28,6 +28,8 @@ ssize_t write(int fd, const void *buf, size_t count);
 void close_sockfd(int sockfd);
 void shutdown_write(int sockfd);
 
+int get_socket_error(int sockfd);
+
 sockaddr_in get_local_addr(int sockfd);
 sockaddr_in get_peer_addr(int sockfd);
 

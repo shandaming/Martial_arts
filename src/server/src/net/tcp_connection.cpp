@@ -4,6 +4,7 @@
 
 #include "tcp_connection.h"
 #include "log/logging.h"
+#include "net/event_loop.h"
 
 namespace net
 {
@@ -54,29 +55,29 @@ Tcp_connection::~Tcp_connection()
 {
   LOG_DEBUG << "Tcp_connection::dtor[" <<  name_ << "] at " << this
             << " fd=" << channel_->fd()
-            << " state=" << stateToString();
+            << " state=" << state_to_string();
   assert(state_ == kDisconnected);
 }
-
+/*
 bool Tcp_connection::getTcpInfo(struct tcp_info* tcpi) const
 {
   return socket_->getTcpInfo(tcpi);
 }
 
-string Tcp_connection::getTcpInfoString() const
+std::string Tcp_connection::getTcpInfoString() const
 {
   char buf[1024];
   buf[0] = '\0';
   socket_->getTcpInfoString(buf, sizeof buf);
   return buf;
-}
+}*/
 
 void Tcp_connection::send(const void* data, int len)
 {
-  send(StringPiece(static_cast<const char*>(data), len));
+  send(std::string(static_cast<const char*>(data), len));
 }
 
-void Tcp_connection::send(const StringPiece& message)
+void Tcp_connection::send(const std::string& message)
 {
   if (state_ == kConnected)
   {
@@ -86,10 +87,10 @@ void Tcp_connection::send(const StringPiece& message)
     }
     else
     {
+	void (Tcp_connection::*fp)(const std::string& message) = &Tcp_connection::send_in_loop;
       loop_->run_in_loop(
-          std::bind(&Tcp_connection::send_in_loop,
-                      this,     // FIXME
-                      message.as_string()));
+          std::bind(fp, this, 
+                      message));
                     //std::forward<string>(message)));
     }
   }
@@ -107,8 +108,9 @@ void Tcp_connection::send(Buffer* buf)
     }
     else
     {
+void (Tcp_connection::*fp)(const std::string& message) = &Tcp_connection::send_in_loop;
       loop_->run_in_loop(
-          std::bind(&Tcp_connection::send_in_loop,
+          std::bind(fp,
                       this,     // FIXME
                       buf->retrieve_all_as_string()));
                     //std::forward<string>(message)));
@@ -116,7 +118,7 @@ void Tcp_connection::send(Buffer* buf)
   }
 }
 
-void Tcp_connection::send_in_loop(const StringPiece& message)
+void Tcp_connection::send_in_loop(const std::string& message)
 {
   send_in_loop(message.data(), message.size());
 }
@@ -133,9 +135,9 @@ void Tcp_connection::send_in_loop(const void* data, size_t len)
     return;
   }
   // if no thing in output queue, try writing directly
-  if (!channel_->is_writing() && output_buffer_.readable_bytes() == 0)
+  if (!channel_->is_write() && output_buffer_.readable_bytes() == 0)
   {
-    nwrote = sockets::write(channel_->fd(), data, len);
+    nwrote = net::write(channel_->fd(), data, len);
     if (nwrote >= 0)
     {
       remaining = len - nwrote;
@@ -168,10 +170,10 @@ void Tcp_connection::send_in_loop(const void* data, size_t len)
     {
       loop_->queue_in_loop(std::bind(high_water_mark_callback_, shared_from_this(), oldLen + remaining));
     }
-    outputBuffer_.append(static_cast<const char*>(data)+nwrote, remaining);
-    if (!channel_->is_writing())
+    output_buffer_.append(static_cast<const char*>(data)+nwrote, remaining);
+    if (!channel_->is_write())
     {
-      channel_->enableWriting();
+      channel_->enable_write();
     }
   }
 }
@@ -190,7 +192,7 @@ void Tcp_connection::shutdown()
 void Tcp_connection::shutdown_in_loop()
 {
   loop_->assert_in_loop_thread();
-  if (!channel_->is_writing())
+  if (!channel_->is_write())
   {
     // we are not writing
     socket_->shutdown_write();
@@ -272,7 +274,7 @@ const char* Tcp_connection::state_to_string() const
 
 void Tcp_connection::set_tcp_no_delay(bool on)
 {
-  socket_->set_tcp_no_delay(on);
+  socket_->set_tcp_no_delay();
 }
 
 void Tcp_connection::start_read()
@@ -283,9 +285,9 @@ void Tcp_connection::start_read()
 void Tcp_connection::start_read_in_loop()
 {
   loop_->assert_in_loop_thread();
-  if (!reading_ || !channel_->is_reading())
+  if (!reading_ || !channel_->is_read())
   {
-    channel_->enable_reading();
+    channel_->enable_read();
     reading_ = true;
   }
 }
@@ -298,9 +300,9 @@ void Tcp_connection::stop_read()
 void Tcp_connection::stop_read_in_loop()
 {
   loop_->assert_in_loop_thread();
-  if (reading_ || channel_->is_reading())
+  if (reading_ || channel_->is_read())
   {
-    channel_->disable_reading();
+    channel_->disable_read();
     reading_ = false;
   }
 }
@@ -311,7 +313,7 @@ void Tcp_connection::connect_established()
   assert(state_ == kConnecting);
   set_state(kConnected);
   channel_->tie(shared_from_this());
-  channel_->enable_reading();
+  channel_->enable_read();
 
   connection_callback_(shared_from_this());
 }
@@ -353,9 +355,9 @@ void Tcp_connection::handle_read(Timestamp receive_time)
 void Tcp_connection::handle_write()
 {
   loop_->assert_in_loop_thread();
-  if (channel_->is_writing())
+  if (channel_->is_write())
   {
-    ssize_t n = sockets::write(channel_->fd(),
+    ssize_t n = net::write(channel_->fd(),
                                output_buffer_.peek(),
                                output_buffer_.readable_bytes());
     if (n > 0)
@@ -363,7 +365,7 @@ void Tcp_connection::handle_write()
       output_buffer_.retrieve(n);
       if (output_buffer_.readable_bytes() == 0)
       {
-        channel_->disable_writing();
+        channel_->disable_write();
         if (write_complete_callback_)
         {
           loop_->queue_in_loop(std::bind(write_complete_callback_, shared_from_this()));
@@ -393,22 +395,22 @@ void Tcp_connection::handle_write()
 void Tcp_connection::handle_close()
 {
   loop_->assert_in_loop_thread();
-  LOG_TRACE << "fd = " << channel_->fd() << " state = " << stateToString();
+  LOG_TRACE << "fd = " << channel_->fd() << " state = " << state_to_string();
   assert(state_ == kConnected || state_ == kDisconnecting);
   // we don't close fd, leave it to dtor, so we can find leaks easily.
   set_state(kDisconnected);
   channel_->disable_all();
 
   Tcp_connection_ptr guard_this(shared_from_this());
-  connectionCallback_(guard_this);
+  connection_callback_(guard_this);
   // must be the last line
   close_callback_(guard_this);
 }
 
 void Tcp_connection::handle_error()
 {
-  int err = sockets::getSocketError(channel_->fd());
+  int err = net::get_socket_error(channel_->fd());
   LOG_ERROR << "Tcp_connection::handle_error [" << name_
-            << "] - SO_ERROR = " << err << " " << strerror_tl(err);
+            << "] - SO_ERROR = " << err << " " << strerror(err);
 }
 } // end namespace net
