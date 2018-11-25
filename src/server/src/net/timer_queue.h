@@ -8,6 +8,7 @@
 #include <set>
 
 #include "net/channel.h"
+#include "net/timer.h"
 
 namespace net
 {
@@ -33,7 +34,7 @@ private:
 	typedef std::set<Active_timer> Active_timer_set;
 
 	void add_timer_in_loop(Timer* timer);
-	void cancel_in_loop(Timer_id timerId);
+	void cancel_in_loop(const Timer_id timerId);
 	// called when timerfd alarms
 	void handleRead();
 	// move out all expired timers

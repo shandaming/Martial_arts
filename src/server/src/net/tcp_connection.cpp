@@ -5,6 +5,7 @@
 #include "tcp_connection.h"
 #include "log/logging.h"
 #include "net/event_loop.h"
+#include "common/weak.h"
 
 namespace net
 {

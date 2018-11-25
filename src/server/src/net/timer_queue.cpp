@@ -45,7 +45,7 @@ void read_timerfd(int timerfd, Timestamp now)
 	ssize_t n = read(timerfd, &howmany, sizeof howmany);
 
 	LOG_TRACE << "Timer_queue::handleRead() " << howmany << " at " << 
-		now.toString();
+		now.to_string();
 
 	if (n != sizeof howmany)
 	{
@@ -73,15 +73,15 @@ namespace net
 {
 Timer_queue::Timer_queue(Event_loop* loop) :
 	loop_(loop),
-    timerfd_(create_timerfd()),
+    timerfd_(detail::create_timerfd()),
     timerfd_channel_(loop, timerfd_),
     timers_(),
     calling_expired_timers_(false)
 {
-	timerfd_channel_.setReadCallback(std::bind(&Timer_queue::handleRead, 
+	timerfd_channel_.set_read_callback(std::bind(&Timer_queue::handleRead, 
 			  this));
 	// we are always reading the timerfd, we disarm it with timerfd_settime.
-	timerfd_channel_.enable_reading();
+	timerfd_channel_.enable_read();
 }
 
 Timer_queue::~Timer_queue()
@@ -90,19 +90,19 @@ Timer_queue::~Timer_queue()
 	timerfd_channel_.remove();
 	close(timerfd_);
 	// do not remove channel, since we're in Event_loop::dtor();
-	for(auto& it : timers)
+	for(auto& it : timers_)
 	{
 		delete it.second;
 	}
 }
 
-Timer_id Timer_queue::add_timer(const Timer_callback&& cb, Timestamp when,
+Timer_id Timer_queue::add_timer(Timer_callback&& cb, Timestamp when,
 		double interval)
 {
 	Timer* timer = new Timer(std::move(cb), when, interval);
 	if(timer == nullptr)
 	{
-		return timer_id();
+		return Timer_id();
 	}
 
 	loop_->run_in_loop(std::bind(&Timer_queue::add_timer_in_loop, this, 
@@ -127,7 +127,7 @@ void Timer_queue::add_timer_in_loop(Timer* timer)
 	}
 }
 
-void Timer_queue::cancel_in_loop(Timer_id timerId)
+void Timer_queue::cancel_in_loop(const Timer_id timerId)
 {
 	loop_->assert_in_loop_thread();
 
