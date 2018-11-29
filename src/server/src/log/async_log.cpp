@@ -2,7 +2,13 @@
  * Copyright (C) 2018
  */
 
+#include <mutex>
+#include <functional>
+#include <cassert>
+
 #include "async_log.h"
+#include "log_file.h"
+#include "common/timestamp.h"
 
 namespace lg
 {
@@ -10,8 +16,8 @@ Count_down_latch::Count_down_latch(int count) : count_(count) {}
 
 void Count_down_latch::wait()
 {
-	std::scoped_lock<std::mutex> lock(mutex_);
-	condition_.wait(lock, []{ return count_ > 0; });
+	std::unique_lock<std::mutex> lock(mutex_);
+	condition_.wait(lock, [this]{ return count_ > 0; });
 }
 
 void Count_down_latch::count_down()
@@ -36,10 +42,10 @@ Async_log::Async_log(const std::string& basename, off_t roll_size,
 	running_(false),
     basename_(basename),
     roll_size_(roll_size),
-    thread_(std::bind(&Async_log::thread_func, this), "Logging"),
+    //thread_(std::bind(&Async_log::thread_func, this), "Logging"),
     latch_(1),
     mutex_(),
-    cond_(mutex_),
+    //cond_(mutex_),
     current_buffer_(new Buffer),
     next_buffer_(new Buffer),
     buffers_()
@@ -51,7 +57,7 @@ Async_log::Async_log(const std::string& basename, off_t roll_size,
 
 void Async_log::append(const char* logline, int len)
 {
-	std::lock_graud<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(mutex_);
 	if (current_buffer_->avail() > len) // 当前缓存有空间
 	{
 		current_buffer_->append(logline, len);
@@ -64,7 +70,7 @@ void Async_log::append(const char* logline, int len)
 		if (next_buffer_) // 有二级缓存
 		{
 			// 当前缓存指向二级缓存
-			current_buffer_ = boost::ptr_container::move(next_buffer_);
+			current_buffer_ = std::move(next_buffer_);
 		}
 		else
 		{
@@ -83,13 +89,13 @@ void Async_log::thread_func()
 	Log_file output(basename_, roll_size_, false);
 
 	// 2个缓存
-	BufferPtr new_buffer1(new Buffer);
-	BufferPtr new_buffer2(new Buffer);
+	Buffer_ptr new_buffer1(new Buffer);
+	Buffer_ptr new_buffer2(new Buffer);
 	new_buffer1->bzero();
 	new_buffer2->bzero();
 
 	// 将要写的缓存
-	BufferVector buffers_to_write;
+	Buffer_vector buffers_to_write;
 	buffers_to_write.reserve(16);
 
 	while (running_)
@@ -104,21 +110,21 @@ void Async_log::thread_func()
 
       			if (buffers_.empty())  // unusual usage!
       			{
-        			cond_.waitForSeconds(flush_interval_);
+        			//cond_.waitForSeconds(flush_interval_);
       			}
 
 			// 无论current_buffer_满还是不满，都天骄到buffers里
 			buffers_.emplace_back(current_buffer_.release());
 
 			// current_buffer_指向新的缓存
-			current_buffer_ = boost::ptr_container::move(new_buffer1);
+			current_buffer_ = std::move(new_buffer1);
 
 			// 将buffers_交换到要写的缓存里
 			buffers_to_write.swap(buffers_);
 			if (!next_buffer_)
 			{
 				// next_buffer_指向二级缓存
-				next_buffer_ = boost::ptr_container::move(new_buffer2);
+				next_buffer_ = std::move(new_buffer2);
 			}
 		}
 
@@ -127,9 +133,9 @@ void Async_log::thread_func()
 		if (buffers_to_write.size() > 25)
 		{
 			char buf[256];
-			snprintf(buf, sizeof buf, "Dropped log messages at %s, 
+			snprintf(buf, sizeof buf, "Dropped log messages at %s, \
 					%zd larger buffers\n", 
-					Timestamp::now().toFormattedString().c_str(),
+					Timestamp::now().to_formatted_string().c_str(),
 					buffers_to_write.size()-2);
 			fputs(buf, stderr);
 			output.append(buf, static_cast<int>(strlen(buf)));
@@ -139,7 +145,7 @@ void Async_log::thread_func()
 		for (size_t i = 0; i < buffers_to_write.size(); ++i)
 		{
 			// FIXME: use unbuffered stdio FILE ? or use ::writev ?
-			output.append(buffers_to_write[i].data(), buffers_to_write[i].length());
+			output.append(buffers_to_write[i]->data(), buffers_to_write[i]->length());
 		}
 
 		if (buffers_to_write.size() > 2)
@@ -151,14 +157,16 @@ void Async_log::thread_func()
 		if (!new_buffer1)
 		{
 			assert(!buffers_to_write.empty());
-			new_buffer1 = buffers_to_write.pop_back();
+			new_buffer1 = std::move(buffers_to_write.back());
+			buffers_to_write.pop_back();
 			new_buffer1->reset();
 		}
 
 		if (!new_buffer2)
 		{
 			assert(!buffers_to_write.empty());
-			new_buffer2 = buffers_to_write.pop_back();
+			new_buffer2 = std::move(buffers_to_write.back());
+			buffers_to_write.pop_back();
 			new_buffer2->reset();
 		}
 

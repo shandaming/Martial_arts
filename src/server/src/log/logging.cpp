@@ -2,26 +2,20 @@
  * Copyright (C) 2018
  */
 
+#include <cassert>
+
 #include "logging.h"
+#include "common/thread.h"
 
 namespace
 {
-constexpr MAX_ERROR_BUF = 64;
+constexpr int MAX_ERROR_BUF = 64;
  __thread char error_buf[MAX_ERROR_BUF];
-
+/*
   extern __thread int t_cachedTid;
   extern __thread char t_tidString[32];
   extern __thread int t_tidStringLength;
 extern __thread const char* t_threadName;
-
- inline int tid()
-  {
-    if (__builtin_expect(t_cachedTid == 0, 0))
-    {
-      cacheTid();
-    }
-    return t_cachedTid;
-	}
 
 void CurrentThread::cacheTid()
 {
@@ -32,13 +26,24 @@ void CurrentThread::cacheTid()
   }
 }
 
+
+ inline int tid()
+  {
+    if (__builtin_expect(t_cachedTid == 0, 0))
+    {
+      cacheTid();
+    }
+    return t_cachedTid;
+	}
+*/
+
 }
 
 namespace lg
 {
 const char* strerror_tl(int saved_errno)
 {
-  return strerror_r(saved_errno, t_errnobuf, sizeof t_errnobuf);
+  return strerror_r(saved_errno, error_buf, sizeof error_buf);
 }
 
 Logger::Log_level initLogLevel()
@@ -63,6 +68,7 @@ const char* Log_level_name[Logger::NUM_LOG_LEVELS] =
   "FATAL ",
 };
 
+/*
 inline Log_stream& operator<<(Log_stream& s, T v)
 {
   s.append(v.str_, v.len_);
@@ -74,6 +80,7 @@ inline Log_stream& operator<<(Log_stream& s, const Logger::Source_file& v)
   s.append(v.data_, v.size_);
   return s;
 }
+*/
 
 void defaultOutput(const char* msg, int len)
 {
@@ -82,12 +89,11 @@ void defaultOutput(const char* msg, int len)
 
 Logger::Output_func g_output = defaultOutput;
 
-}
 
-void Logger::init(Log_level level, int old_errno, const fs::path& file, int line)
+void Logger::init(Logger::Log_level level, int old_errno, const fs::path& file, int line)
 {
   format_time();
-  CurrentThread::tid();
+  //CurrentThread::tid();
   stream_ << get_current_thread_id();
   stream_ << Log_level_name[level];
   if (old_errno != 0)
@@ -96,11 +102,11 @@ void Logger::init(Log_level level, int old_errno, const fs::path& file, int line
   }
 }
 
-std::string Logger::format_time()
+void Logger::format_time()
 {
-  int64_t microSecondsSinceEpoch = Timestamp::now().microSecondsSinceEpoch();
-  time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / Timestamp::kMicroSecondsPerSecond);
-  int microseconds = static_cast<int>(microSecondsSinceEpoch % Timestamp::kMicroSecondsPerSecond);
+  int64_t microSecondsSinceEpoch = Timestamp::now().micro_seconds_since_epoch();
+  time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / Timestamp::kMicro_seconds_per_second);
+  int microseconds = static_cast<int>(microSecondsSinceEpoch % Timestamp::kMicro_seconds_per_second);
 
 std::ostringstream os;
   if (seconds != t_lastSecond)
@@ -127,12 +133,12 @@ Logger::Logger(const fs::path& file, int line)
 init(INFO, 0, file, line);
 }
 
-Logger::Logger(const fs::path& file, int line, LogLevel level)
+Logger::Logger(const fs::path& file, int line, Logger::LogLevel level)
 {
 init(level, 0, file, line);
 }
 
-Logger::Logger(const fs::path& file, int line, LogLevel level, const char* func)
+Logger::Logger(const fs::path& file, int line, Logger::LogLevel level, const char* func)
 {
   init(leve, 0, file, line);
 	stream_ << func << ' ';
@@ -145,7 +151,7 @@ init(to_abort?FATAL:ERROR, errno, file, line);
 
 Logger::~Logger()
 {
-  finish();
+  finish(basename_, line_);
   //const Log_stream::Buffer& buf(stream().buffer());
   //g_output(buf.data(), buf.length());
   if (level_ == FATAL)

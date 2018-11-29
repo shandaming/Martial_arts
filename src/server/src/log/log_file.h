@@ -5,6 +5,9 @@
 #ifndef LOG_LOG_FILE_H
 #define LOG_LOG_FILE_H
 
+#include <string>
+#include <memory>
+
 namespace lg
 {
 class Append_file
@@ -30,7 +33,7 @@ private:
 class Log_file
 {
 public:
-	Log_file(const string& basename, off_t roll_size,
+	Log_file(const std::string& basename, off_t roll_size,
 			bool thread_safe = true,
 			int flush_interval = 3,
 			int check_every_n = 1024);
@@ -41,9 +44,9 @@ public:
 private:
 	void append_unlocked(const char* logline, int len);
 
-	static string get_log_filename(const string& basename, time_t* now);
+	static std::string get_log_filename(const std::string& basename, time_t* now);
 
-	const string basename_;
+	const std::string basename_;
 	const off_t roll_size_;
 	const int flush_interval_;
 	const int check_every_n_;
@@ -56,7 +59,7 @@ private:
 	time_t start_of_period_;
 	time_t last_roll_;
 	time_t last_flush_;
-	Scoped_ptr<Append_file> file_;
+	std::unique_ptr<Append_file> file_;
 
 	const static int k_roll_per_seconds_ = 60*60*24;
 };

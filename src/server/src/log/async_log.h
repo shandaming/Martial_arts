@@ -6,7 +6,12 @@
 #define LOG_ASYNC_LOG_H
 
 #include <string>
+#include <atomic>
+#include <vector>
+#include <thread>
 #include <condition_variable>
+
+#include "log/log_stream.h"
 
 namespace lg
 {
@@ -45,15 +50,15 @@ public:
 	void start()
 	{
 		running_ = true;
-		thread_.start();
+		//thread_.start();
 		latch_.wait();
 	}
 
 	void stop()
 	{
 		running_ = false;
-		cond_.notify();
-		thread_.join();
+		cond_.notify_one();
+		thread_->join();
 	}
 private:
 	Async_log(const Async_log&) = delete;  
@@ -61,13 +66,13 @@ private:
 
 	void thread_func();
 
-	typedef lg::Log_buffer<lg::detail::large_buffer> Buffer;
-	typedef Ptr_vector<Buffer> Buffer_vector;
-	typedef Buffer_vector::auto_type BufferPtr;
+	typedef detail::Log_buffer<detail::large_buffer> Buffer;
+	typedef std::vector<std::unique_ptr<Buffer>> Buffer_vector;
+	typedef Buffer_vector::value_type Buffer_ptr;
 
 	const int flush_interval_;
 	bool running_;
-	string basename_;
+	std::string basename_;
 	off_t roll_size_;
   
 	Count_down_latch latch_;
@@ -76,8 +81,8 @@ private:
 	std::mutex mutex_;
 	std::condition_variable cond_;
 
-	BufferPtr current_buffer_;
-	BufferPtr next_buffer_;
+	Buffer_ptr current_buffer_;
+	Buffer_ptr next_buffer_;
 	Buffer_vector buffers_;
 };
 

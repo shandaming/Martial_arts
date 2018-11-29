@@ -57,8 +57,8 @@ void read_timerfd(int timerfd, Timestamp now)
 void reset_timerfd(int timerfd, Timestamp expiration)
 {
 	// wake up loop by timerfd_settime()
-	struct itimerspec new_value = {0};
-	struct itimerspec old_value = {0};
+	itimerspec new_value = {0};
+	itimerspec old_value = {0};
 
 	new_value.it_value = how_much_time_from_now(expiration);
 	int ret = timerfd_settime(timerfd, 0, &new_value, &old_value);
@@ -113,7 +113,7 @@ Timer_id Timer_queue::add_timer(Timer_callback&& cb, Timestamp when,
 void Timer_queue::cancel(const Timer_id& timerId)
 {
 	loop_->run_in_loop(std::bind(&Timer_queue::cancel_in_loop, this, 
-				timerId));
+				std::ref(timerId)));
 }
 
 void Timer_queue::add_timer_in_loop(Timer* timer)
@@ -123,11 +123,11 @@ void Timer_queue::add_timer_in_loop(Timer* timer)
 
 	if (earliest_changed)
 	{
-		reset_timerfd(timerfd_, timer->expiration());
+		detail::reset_timerfd(timerfd_, timer->expiration());
 	}
 }
 
-void Timer_queue::cancel_in_loop(const Timer_id timerId)
+void Timer_queue::cancel_in_loop(const Timer_id& timerId)
 {
 	loop_->assert_in_loop_thread();
 
@@ -156,7 +156,7 @@ void Timer_queue::handleRead()
 {
 	loop_->assert_in_loop_thread();
 	Timestamp now(Timestamp::now());
-	read_timerfd(timerfd_, now);
+	detail::read_timerfd(timerfd_, now);
 
 	std::vector<Entry> expired = get_expired(now);
 
@@ -224,7 +224,7 @@ void Timer_queue::reset(const std::vector<Entry>& expired, Timestamp now)
 
 	if (next_expire.valid())
 	{
-		reset_timerfd(timerfd_, next_expire);
+		detail::reset_timerfd(timerfd_, next_expire);
 	}
 }
 
@@ -256,4 +256,5 @@ bool Timer_queue::insert(Timer* timer)
 
 	assert(timers_.size() == active_timers_.size());
 	return earliest_changed;
+}
 }

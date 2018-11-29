@@ -45,6 +45,8 @@ private:
 class Timer_id
 {
 public:
+	friend class Timer_queue;
+
 	Timer_id() : timer_(nullptr), sequence_(0) {}
 
 	explicit Timer_id(Timer* timer, int64_t sequence) : 

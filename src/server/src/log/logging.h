@@ -8,6 +8,7 @@
 #include <experimental/filesystem>
 
 #include "log_stream.h"
+#include "common/timestamp.h"
 
 namespace lg
 {
@@ -46,7 +47,7 @@ private:
   //typedef Logger::Log_level Log_level;
   void init(Log_level level, int old_errno, const fs::path& file, int line);
   void format_time();
-  void finish();
+  void finish(const fs::path& file, int line);
 
 
   Timestamp time_;

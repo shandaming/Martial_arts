@@ -42,7 +42,7 @@ public:
 	void add(size_t len) { current_ += len; }
 
 	void reset() { current_ = data_; }
-	void bzero() { bzero(data_, sizeof data_); }
+	void bzero() { memset(data_, 0, sizeof data_); }
 
 	// for used by GDB
 	const char* debug_string()
