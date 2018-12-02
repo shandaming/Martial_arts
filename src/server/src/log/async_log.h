@@ -10,6 +10,7 @@
 #include <vector>
 #include <thread>
 #include <condition_variable>
+#include <mutex>
 
 #include "log/log_stream.h"
 
@@ -18,13 +19,24 @@ namespace lg
 class Count_down_latch
 {
 public:
-	explicit Count_down_latch(int count);
+	explicit Count_down_latch(int count) : count_(count) {}
 
-	void wait();
+	void wait()
+{
+	std::unique_lock<std::mutex> lock(mutex_);
+	condition_.wait(lock, [this]{ return count_ > 0; });
+}
 
-	void count_down();
+	void count_down()
+{
+	--count_;
+	if (count_ == 0)
+	{
+		condition_.notify_all();
+	}
+}
 
-	int get_count() const;
+	int get_count() const { return count_; }
 private:
 	mutable std::mutex mutex_;
 	std::condition_variable condition_;

@@ -6,6 +6,8 @@
 #define LOG_LOG_STREAM_H
 
 #include <cstring>
+#include <string>
+#include <cstdint>
 
 namespace lg
 {

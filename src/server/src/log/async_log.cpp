@@ -12,6 +12,7 @@
 
 namespace lg
 {
+/*
 Count_down_latch::Count_down_latch(int count) : count_(count) {}
 
 void Count_down_latch::wait()
@@ -33,7 +34,7 @@ int Count_down_latch::get_count() const
 {
 	return count_;
 }
-
+*/
 
 
 Async_log::Async_log(const std::string& basename, off_t roll_size, 

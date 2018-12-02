@@ -3,6 +3,7 @@
  */
 
 #include <cassert>
+#include <iomanip>
 
 #include "logging.h"
 #include "common/thread.h"
@@ -11,6 +12,8 @@ namespace
 {
 constexpr int MAX_ERROR_BUF = 64;
  __thread char error_buf[MAX_ERROR_BUF];
+
+__thread time_t t_lastSecond;
 /*
   extern __thread int t_cachedTid;
   extern __thread char t_tidString[32];
@@ -68,13 +71,13 @@ const char* Log_level_name[Logger::NUM_LOG_LEVELS] =
   "FATAL ",
 };
 
-/*
-inline Log_stream& operator<<(Log_stream& s, T v)
+
+inline Log_stream& operator<<(Log_stream& s, std::string& v)
 {
-  s.append(v.str_, v.len_);
+  s.append(v.data(), v.size());
   return s;
 }
-
+/*
 inline Log_stream& operator<<(Log_stream& s, const Logger::Source_file& v)
 {
   s.append(v.data_, v.size_);
@@ -113,18 +116,22 @@ std::ostringstream os;
   {
     t_lastSecond = seconds;
     struct tm tm_time;
-
-	os << std::put_time(std::localtime(&tm), "&F &T");
-    assert(os.str().size() == 19); (void)len;
+	time_t t = time(nullptr);
+os << std::put_time(std::localtime(&t), "&F &T");
+    assert(os.str().size() == 19);
   }
 
-	os << format_string(".%06d", microseconds);
-	stream << os;
+	char buf[16];
+	sprintf(buf, ".%06d", microseconds);
+
+	//os << format_string(".%06d", microseconds);
+	os << buf;
+	stream_ << os.str();
 }
 
 void Logger::finish(const fs::path& file, int line)
 {
-  stream_ << " - " << file.c_string() << ':' << line << '\n';
+  stream_ << " - " << file.string() << ':' << line << '\n';
 }
 
 
@@ -133,18 +140,18 @@ Logger::Logger(const fs::path& file, int line)
 init(INFO, 0, file, line);
 }
 
-Logger::Logger(const fs::path& file, int line, Logger::LogLevel level)
+Logger::Logger(const fs::path& file, int line, Logger::Log_level level)
 {
 init(level, 0, file, line);
 }
 
-Logger::Logger(const fs::path& file, int line, Logger::LogLevel level, const char* func)
+Logger::Logger(const fs::path& file, int line, Logger::Log_level level, const char* func)
 {
-  init(leve, 0, file, line);
+  init(level, 0, file, line);
 	stream_ << func << ' ';
 }
 
-Logger::Logger(const fs::path& file, int line, bool toAbort)
+Logger::Logger(const fs::path& file, int line, bool to_abort)
 {
 init(to_abort?FATAL:ERROR, errno, file, line);
 }
