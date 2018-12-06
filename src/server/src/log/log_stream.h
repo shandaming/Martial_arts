@@ -106,41 +106,13 @@ public:
 	Log_stream& operator<<(const unsigned char* str);
 
 	Log_stream& operator<<(const std::string& v);
-
-	void append(const char* data, int len); 
 private:
-	void static_check();
-
-	template<typename T>
-	void format_integer(T);
-
-	//Buffer buffer_; // 将要替换成异步日志类
 	static Async_log* log_;
 
 	static const int max_numeric_size = 32;
 };
 
 void init_log(const std::string& file, int rolle_size);
-
-class Fmt 
-{
- public:
-	template<typename T>
-	Fmt(const char* fmt, T val);
-
-	const char* data() const { return buf_; }
-	int length() const { return length_; }
-
- private:
-	char buf_[32];
-	int length_;
-};
-
-inline Log_stream& operator<<(Log_stream& s, const Fmt& fmt)
-{
-	s.append(fmt.data(), fmt.length());
-	return s;
-}
 
 } // end namespace lg
 

@@ -74,7 +74,7 @@ const char* Log_level_name[Logger::NUM_LOG_LEVELS] =
 
 inline Log_stream& operator<<(Log_stream& s, std::string& v)
 {
-  s.append(v.data(), v.size());
+  s << v;
   return s;
 }
 /*

@@ -97,8 +97,6 @@ private:
 	Buffer_ptr next_buffer_;
 	Buffer_vector buffers_;
 };
-
-#define LOG_INIT(filename, roll_size) static Async_log async_log(filename, roll_size);
 }
 
 #endif
