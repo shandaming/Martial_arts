@@ -2,7 +2,6 @@
  * Copyright (C) 2018
  */
 
-#include <mutex>
 #include <functional>
 #include <cassert>
 
@@ -12,41 +11,14 @@
 
 namespace lg
 {
-/*
-Count_down_latch::Count_down_latch(int count) : count_(count) {}
-
-void Count_down_latch::wait()
-{
-	std::unique_lock<std::mutex> lock(mutex_);
-	condition_.wait(lock, [this]{ return count_ > 0; });
-}
-
-void Count_down_latch::count_down()
-{
-	--count_;
-	if (count_ == 0)
-	{
-		condition_.notify_all();
-	}
-}
-
-int Count_down_latch::get_count() const
-{
-	return count_;
-}
-*/
-
-
-Async_log::Async_log(const std::string& basename, off_t roll_size, 
-		int flush_interval) 
-	: flush_interval_(flush_interval), 
+Async_log::Async_log(const std::string& filename, off_t roll_size, 
+		int flush_interval) :
+	flush_interval_(flush_interval), 
 	running_(false),
-    basename_(basename),
+    filename_(basename),
     roll_size_(roll_size),
-    //thread_(std::bind(&Async_log::thread_func, this), "Logging"),
     latch_(1),
     mutex_(),
-    //cond_(mutex_),
     current_buffer_(new Buffer),
     next_buffer_(new Buffer),
     buffers_()
@@ -87,7 +59,7 @@ void Async_log::thread_func()
 {
 	assert(running_ == true);
 	latch_.count_down();
-	Log_file output(basename_, roll_size_, false);
+	Log_file output(filename_, roll_size_, false);
 
 	// 2个缓存
 	Buffer_ptr new_buffer1(new Buffer);
@@ -106,13 +78,12 @@ void Async_log::thread_func()
 		assert(buffers_to_write.empty());
 
 		{
-			//std::scoped_lock<std::mutex> lock(mutex_);
-			//cond_.wait_for(lock, flush_interval_, !buffers_.empty());
 
-      			if (buffers_.empty())  // unusual usage!
-      			{
-        			//cond_.waitForSeconds(flush_interval_);
-      			}
+      		if (buffers_.empty())  // unusual usage!
+      		{
+				std::unique_lock(std::mutex) lock(mutex_);
+				cond_.wait_for(lock, std::chrono::seconds(flush_interval_), buffers_.empty())
+      		}
 
 			// 无论current_buffer_满还是不满，都天骄到buffers里
 			buffers_.emplace_back(current_buffer_.release());

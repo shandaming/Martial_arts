@@ -46,7 +46,7 @@ private:
 class Async_log
 {
 public:
-	Async_log(const std::string& basename, off_t roll_size, 
+	Async_log(const std::string& filename, off_t roll_size, 
 			int flush_interval = 3);
 
 	~Async_log()
@@ -62,7 +62,7 @@ public:
 	void start()
 	{
 		running_ = true;
-		//thread_.start();
+		thread_ = std::make_unique<std::thread>(thread_func);
 		latch_.wait();
 	}
 
@@ -84,12 +84,12 @@ private:
 
 	const int flush_interval_;
 	bool running_;
-	std::string basename_;
+	std::string filename_;
 	off_t roll_size_;
   
 	Count_down_latch latch_;
 
-	std::thread* thread_;
+	std::unique_ptr<std::thread> thread_;
 	std::mutex mutex_;
 	std::condition_variable cond_;
 
