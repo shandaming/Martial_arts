@@ -161,9 +161,9 @@ log/logging.o: log/logging.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/8/bits/refwrap.h \
  /usr/include/c++/8/ext/aligned_buffer.h \
  /usr/include/c++/8/experimental/bits/fs_ops.h log/log_stream.h \
- /usr/include/c++/8/cstring /usr/include/string.h /usr/include/strings.h \
- common/timestamp.h common/thread.h /usr/include/unistd.h \
- /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ log/log_buffer.h /usr/include/c++/8/cstring /usr/include/string.h \
+ /usr/include/strings.h common/timestamp.h common/thread.h \
+ /usr/include/unistd.h /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
  /usr/include/x86_64-linux-gnu/bits/environments.h \
  /usr/include/x86_64-linux-gnu/bits/confname.h \
  /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
@@ -600,6 +600,8 @@ log/logging.h:
 /usr/include/c++/8/experimental/bits/fs_ops.h:
 
 log/log_stream.h:
+
+log/log_buffer.h:
 
 /usr/include/c++/8/cstring:
 

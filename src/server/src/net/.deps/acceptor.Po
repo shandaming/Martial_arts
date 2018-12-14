@@ -207,7 +207,8 @@ net/acceptor.o: net/acceptor.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/8/bits/sstream.tcc \
  /usr/include/c++/8/experimental/bits/fs_dir.h \
  /usr/include/c++/8/experimental/bits/fs_ops.h log/log_stream.h \
- /usr/include/c++/8/cstring /usr/include/string.h /usr/include/strings.h
+ log/log_buffer.h /usr/include/c++/8/cstring /usr/include/string.h \
+ /usr/include/strings.h
 
 /usr/include/stdc-predef.h:
 
@@ -774,6 +775,8 @@ log/logging.h:
 /usr/include/c++/8/experimental/bits/fs_ops.h:
 
 log/log_stream.h:
+
+log/log_buffer.h:
 
 /usr/include/c++/8/cstring:
 

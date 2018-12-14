@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <cassert>
+//#include <chrono>
 
 #include "async_log.h"
 #include "log_file.h"
@@ -11,21 +12,20 @@
 
 namespace lg
 {
-Async_log::Async_log(const std::string& filename, off_t roll_size, 
-		int flush_interval) :
-	flush_interval_(flush_interval), 
-	running_(false),
-    filename_(basename),
-    roll_size_(roll_size),
-    latch_(1),
-    mutex_(),
-    current_buffer_(new Buffer),
+Async_log::Async_log() : running_(false), //latch_(1),
+	current_buffer_(new Buffer),
     next_buffer_(new Buffer),
     buffers_()
 {
-	current_buffer_->bzero();
-	next_buffer_->bzero();
 	buffers_.reserve(16);
+}
+
+void Async_log::init(const std::string& filename, off_t roll_size,
+		int flush_interval)
+{
+	filename_ = filename;
+	roll_size_ = roll_size;
+	//flush_interval_ = flush_interval;
 }
 
 void Async_log::append(const char* logline, int len)
@@ -58,14 +58,12 @@ void Async_log::append(const char* logline, int len)
 void Async_log::thread_func()
 {
 	assert(running_ == true);
-	latch_.count_down();
+	//latch_.count_down();
 	Log_file output(filename_, roll_size_, false);
 
 	// 2个缓存
 	Buffer_ptr new_buffer1(new Buffer);
 	Buffer_ptr new_buffer2(new Buffer);
-	new_buffer1->bzero();
-	new_buffer2->bzero();
 
 	// 将要写的缓存
 	Buffer_vector buffers_to_write;
@@ -81,8 +79,9 @@ void Async_log::thread_func()
 
       		if (buffers_.empty())  // unusual usage!
       		{
-				std::unique_lock(std::mutex) lock(mutex_);
-				cond_.wait_for(lock, std::chrono::seconds(flush_interval_), buffers_.empty())
+				std::unique_lock<std::mutex> lock(mutex_);
+				cond_.wait_for(lock, std::chrono::seconds(flush_interval_),
+						[&]{ return !buffers_.empty(); });
       		}
 
 			// 无论current_buffer_满还是不满，都天骄到buffers里
@@ -111,13 +110,15 @@ void Async_log::thread_func()
 					buffers_to_write.size()-2);
 			fputs(buf, stderr);
 			output.append(buf, static_cast<int>(strlen(buf)));
-			buffers_to_write.erase(buffers_to_write.begin()+2, buffers_to_write.end());
+			buffers_to_write.erase(buffers_to_write.begin() + 2, 
+					buffers_to_write.end());
 		}
 
 		for (size_t i = 0; i < buffers_to_write.size(); ++i)
 		{
 			// FIXME: use unbuffered stdio FILE ? or use ::writev ?
-			output.append(buffers_to_write[i]->data(), buffers_to_write[i]->length());
+			output.append(buffers_to_write[i]->data(), 
+					buffers_to_write[i]->length());
 		}
 
 		if (buffers_to_write.size() > 2)
@@ -146,5 +147,11 @@ void Async_log::thread_func()
 		output.flush();
 	}
 	output.flush();
+}
+
+Async_log* Async_log::instance()
+{
+	static Async_log instance;
+	return &instance;
 }
 }

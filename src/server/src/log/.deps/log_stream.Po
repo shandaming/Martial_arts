@@ -66,8 +66,7 @@ log/log_stream.o: log/log_stream.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/8/bits/alloc_traits.h \
  /usr/include/c++/8/bits/memoryfwd.h \
  /usr/include/c++/8/bits/uniform_int_dist.h /usr/include/c++/8/limits \
- log/log_stream.h /usr/include/c++/8/cstring /usr/include/string.h \
- /usr/include/strings.h /usr/include/c++/8/string \
+ log/log_stream.h /usr/include/c++/8/string \
  /usr/include/c++/8/bits/stringfwd.h \
  /usr/include/c++/8/bits/char_traits.h /usr/include/c++/8/bits/postypes.h \
  /usr/include/c++/8/cwchar /usr/include/wchar.h \
@@ -122,8 +121,10 @@ log/log_stream.o: log/log_stream.cpp /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/asm/errno.h \
  /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
- /usr/include/c++/8/bits/basic_string.tcc log/async_log.h \
- /usr/include/c++/8/atomic /usr/include/c++/8/bits/atomic_base.h \
+ /usr/include/c++/8/bits/basic_string.tcc log/log_buffer.h \
+ /usr/include/c++/8/cstring /usr/include/string.h /usr/include/strings.h \
+ log/async_log.h /usr/include/c++/8/atomic \
+ /usr/include/c++/8/bits/atomic_base.h \
  /usr/include/c++/8/bits/atomic_lockfree_defines.h \
  /usr/include/c++/8/vector /usr/include/c++/8/bits/stl_uninitialized.h \
  /usr/include/c++/8/bits/stl_vector.h \
@@ -146,7 +147,7 @@ log/log_stream.o: log/log_stream.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/8/condition_variable \
  /usr/include/c++/8/bits/std_mutex.h /usr/include/c++/8/system_error \
  /usr/include/x86_64-linux-gnu/c++/8/bits/error_constants.h \
- /usr/include/c++/8/mutex log/log_stream.h
+ /usr/include/c++/8/mutex log/log_buffer.h
 
 /usr/include/stdc-predef.h:
 
@@ -316,12 +317,6 @@ log/log_stream.o: log/log_stream.cpp /usr/include/stdc-predef.h \
 
 log/log_stream.h:
 
-/usr/include/c++/8/cstring:
-
-/usr/include/string.h:
-
-/usr/include/strings.h:
-
 /usr/include/c++/8/string:
 
 /usr/include/c++/8/bits/stringfwd.h:
@@ -462,6 +457,14 @@ log/log_stream.h:
 
 /usr/include/c++/8/bits/basic_string.tcc:
 
+log/log_buffer.h:
+
+/usr/include/c++/8/cstring:
+
+/usr/include/string.h:
+
+/usr/include/strings.h:
+
 log/async_log.h:
 
 /usr/include/c++/8/atomic:
@@ -532,4 +535,4 @@ log/async_log.h:
 
 /usr/include/c++/8/mutex:
 
-log/log_stream.h:
+log/log_buffer.h:

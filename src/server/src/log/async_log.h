@@ -12,10 +12,11 @@
 #include <condition_variable>
 #include <mutex>
 
-#include "log/log_stream.h"
+#include "log/log_buffer.h"
 
 namespace lg
 {
+#if 0
 class Count_down_latch
 {
 public:
@@ -43,27 +44,23 @@ private:
 	std::atomic<int> count_;
 };
 
+#endif
+
 class Async_log
 {
 public:
-	Async_log(const std::string& filename, off_t roll_size, 
-			int flush_interval = 3);
+	static Async_log* instance();
 
-	~Async_log()
-	{
-		if (running_)
-		{
-			stop();
-		}
-	}
+	void init(const std::string& filename, off_t roll_size, 
+			int flush_interval = 3);
 
 	void append(const char* logline, int len);
 
 	void start()
 	{
 		running_ = true;
-		thread_ = std::make_unique<std::thread>(thread_func);
-		latch_.wait();
+		thread_ = std::make_unique<std::thread>([this]{ this->thread_func(); });
+		//latch_.wait();
 	}
 
 	void stop()
@@ -73,21 +70,31 @@ public:
 		thread_->join();
 	}
 private:
+	Async_log();
+
+	~Async_log()
+	{
+		if (running_)
+		{
+			stop();
+		}
+	}
+
 	Async_log(const Async_log&) = delete;  
 	Async_log& operator=(const Async_log&) = delete;
 
 	void thread_func();
 
-	typedef detail::Log_buffer<detail::large_buffer> Buffer;
+	typedef Log_buffer<large_buffer> Buffer;
 	typedef std::vector<std::unique_ptr<Buffer>> Buffer_vector;
 	typedef Buffer_vector::value_type Buffer_ptr;
 
-	const int flush_interval_;
+	const int flush_interval_ = 3;
 	bool running_;
 	std::string filename_;
-	off_t roll_size_;
+	off_t roll_size_ = 0;
   
-	Count_down_latch latch_;
+	//Count_down_latch latch_;
 
 	std::unique_ptr<std::thread> thread_;
 	std::mutex mutex_;
@@ -98,5 +105,7 @@ private:
 	Buffer_vector buffers_;
 };
 }
+
+#define ASYNC_LOG lg::Async_log::instance()
 
 #endif
