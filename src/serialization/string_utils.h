@@ -32,11 +32,18 @@ namespace utils
 	bool wildcard_string_match(const std::string& str, 
 								const std::string& match);
 
-template<typename T, typename... Args>
-inline std::string string_format(T&& fmt, Args&&... args)
+#if 0
+template<typename T, typename... Args, 
+	typename std::enable_if_t<
+		std::is_same_v<std::remove_cv_t<T>, std::string> or
+		std::is_same_v<std::remove_cv_t<T>, char*>, 
+	int> = 0>
+std::string string_format(T&& fmt, Args&&... args)
 {
-	return sprintf(std::forward<T>(fmt), std::forward<Args>(args)...);
 }
+#endif
+
+const char* string_format(const char* fmt, ...);
 }
 
 #endif

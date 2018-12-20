@@ -44,17 +44,17 @@ public:
 private:
 	void append_unlocked(const char* logline, int len);
 
-	static std::string get_log_filename(const std::string& basename, time_t* now);
+	static std::string get_log_filename(const std::string& basename);
 
 	const std::string basename_;
 	const off_t roll_size_;
 	const int flush_interval_;
-	const int check_every_n_;
+	const uint64_t check_every_n_;
 
 	uint64_t count_;
 
 	bool thread_safe_;
-	std::mutex mutex_;
+	//std::mutex mutex_;
 
 	time_t start_of_period_;
 	time_t last_roll_;

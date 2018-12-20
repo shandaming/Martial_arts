@@ -135,12 +135,12 @@ log/async_log.o: log/async_log.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/8/bits/algorithmfwd.h \
  /usr/include/c++/8/bits/stl_heap.h /usr/include/c++/8/bits/stl_tempbuf.h \
  /usr/include/c++/8/bits/uniform_int_dist.h /usr/include/c++/8/cassert \
- /usr/include/assert.h /usr/include/c++/8/chrono /usr/include/c++/8/ratio \
- /usr/include/c++/8/ctime /usr/include/c++/8/bits/parse_numbers.h \
- log/async_log.h /usr/include/c++/8/atomic \
+ /usr/include/assert.h log/async_log.h /usr/include/c++/8/atomic \
  /usr/include/c++/8/bits/atomic_base.h \
  /usr/include/c++/8/bits/atomic_lockfree_defines.h \
- /usr/include/c++/8/thread /usr/include/c++/8/memory \
+ /usr/include/c++/8/thread /usr/include/c++/8/chrono \
+ /usr/include/c++/8/ratio /usr/include/c++/8/ctime \
+ /usr/include/c++/8/bits/parse_numbers.h /usr/include/c++/8/memory \
  /usr/include/c++/8/bits/stl_raw_storage_iter.h \
  /usr/include/c++/8/ext/concurrence.h \
  /usr/include/c++/8/bits/unique_ptr.h \
@@ -506,14 +506,6 @@ log/async_log.o: log/async_log.cpp /usr/include/stdc-predef.h \
 
 /usr/include/assert.h:
 
-/usr/include/c++/8/chrono:
-
-/usr/include/c++/8/ratio:
-
-/usr/include/c++/8/ctime:
-
-/usr/include/c++/8/bits/parse_numbers.h:
-
 log/async_log.h:
 
 /usr/include/c++/8/atomic:
@@ -523,6 +515,14 @@ log/async_log.h:
 /usr/include/c++/8/bits/atomic_lockfree_defines.h:
 
 /usr/include/c++/8/thread:
+
+/usr/include/c++/8/chrono:
+
+/usr/include/c++/8/ratio:
+
+/usr/include/c++/8/ctime:
+
+/usr/include/c++/8/bits/parse_numbers.h:
 
 /usr/include/c++/8/memory:
 

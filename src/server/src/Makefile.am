@@ -18,10 +18,11 @@ world_server_SOURCES = main.cpp \
 				 net/timer_queue.cpp \
 				 log/async_log.cpp \
 				 log/logging.cpp \
-				 log/async_log.cpp \
+				 log/log_file.cpp \
 				 log/log_stream.cpp \
 				 common/thread.cpp \
-				 common/timestamp.cpp
+				 common/timestamp.cpp \
+				 system_info.cpp
 
                          
 AM_CXXFLAGS = -std=c++17 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines

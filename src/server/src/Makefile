@@ -108,8 +108,9 @@ am_world_server_OBJECTS = main.$(OBJEXT) net/acceptor.$(OBJEXT) \
 	net/tcp_server.$(OBJEXT) net/tcp_connection.$(OBJEXT) \
 	net/timer.$(OBJEXT) net/timer_queue.$(OBJEXT) \
 	log/async_log.$(OBJEXT) log/logging.$(OBJEXT) \
-	log/async_log.$(OBJEXT) log/log_stream.$(OBJEXT) \
-	common/thread.$(OBJEXT) common/timestamp.$(OBJEXT)
+	log/log_file.$(OBJEXT) log/log_stream.$(OBJEXT) \
+	common/thread.$(OBJEXT) common/timestamp.$(OBJEXT) \
+	system_info.$(OBJEXT)
 world_server_OBJECTS = $(am_world_server_OBJECTS)
 world_server_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -127,8 +128,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/main.Po common/$(DEPDIR)/thread.Po \
-	common/$(DEPDIR)/timestamp.Po log/$(DEPDIR)/async_log.Po \
+am__depfiles_remade = ./$(DEPDIR)/main.Po ./$(DEPDIR)/system_info.Po \
+	common/$(DEPDIR)/thread.Po common/$(DEPDIR)/timestamp.Po \
+	log/$(DEPDIR)/async_log.Po log/$(DEPDIR)/log_file.Po \
 	log/$(DEPDIR)/log_stream.Po log/$(DEPDIR)/logging.Po \
 	net/$(DEPDIR)/acceptor.Po net/$(DEPDIR)/buffer.Po \
 	net/$(DEPDIR)/channel.Po net/$(DEPDIR)/event_loop.Po \
@@ -288,10 +290,11 @@ world_server_SOURCES = main.cpp \
 				 net/timer_queue.cpp \
 				 log/async_log.cpp \
 				 log/logging.cpp \
-				 log/async_log.cpp \
+				 log/log_file.cpp \
 				 log/log_stream.cpp \
 				 common/thread.cpp \
-				 common/timestamp.cpp
+				 common/timestamp.cpp \
+				 system_info.cpp
 
 AM_CXXFLAGS = -std=c++17 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines
 all: all-am
@@ -410,6 +413,8 @@ log/async_log.$(OBJEXT): log/$(am__dirstamp) \
 	log/$(DEPDIR)/$(am__dirstamp)
 log/logging.$(OBJEXT): log/$(am__dirstamp) \
 	log/$(DEPDIR)/$(am__dirstamp)
+log/log_file.$(OBJEXT): log/$(am__dirstamp) \
+	log/$(DEPDIR)/$(am__dirstamp)
 log/log_stream.$(OBJEXT): log/$(am__dirstamp) \
 	log/$(DEPDIR)/$(am__dirstamp)
 common/$(am__dirstamp):
@@ -437,9 +442,11 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/main.Po # am--include-marker
+include ./$(DEPDIR)/system_info.Po # am--include-marker
 include common/$(DEPDIR)/thread.Po # am--include-marker
 include common/$(DEPDIR)/timestamp.Po # am--include-marker
 include log/$(DEPDIR)/async_log.Po # am--include-marker
+include log/$(DEPDIR)/log_file.Po # am--include-marker
 include log/$(DEPDIR)/log_stream.Po # am--include-marker
 include log/$(DEPDIR)/logging.Po # am--include-marker
 include net/$(DEPDIR)/acceptor.Po # am--include-marker
@@ -612,9 +619,11 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/system_info.Po
 	-rm -f common/$(DEPDIR)/thread.Po
 	-rm -f common/$(DEPDIR)/timestamp.Po
 	-rm -f log/$(DEPDIR)/async_log.Po
+	-rm -f log/$(DEPDIR)/log_file.Po
 	-rm -f log/$(DEPDIR)/log_stream.Po
 	-rm -f log/$(DEPDIR)/logging.Po
 	-rm -f net/$(DEPDIR)/acceptor.Po
@@ -676,9 +685,11 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/main.Po
+	-rm -f ./$(DEPDIR)/system_info.Po
 	-rm -f common/$(DEPDIR)/thread.Po
 	-rm -f common/$(DEPDIR)/timestamp.Po
 	-rm -f log/$(DEPDIR)/async_log.Po
+	-rm -f log/$(DEPDIR)/log_file.Po
 	-rm -f log/$(DEPDIR)/log_stream.Po
 	-rm -f log/$(DEPDIR)/logging.Po
 	-rm -f net/$(DEPDIR)/acceptor.Po

@@ -2,7 +2,15 @@
  * Copyright (C) 2018
  */
 
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <cassert>
+#include <cstring>
+
 #include "log_file.h"
+#include "common/string_utils.h"
+#include "common/system_info.h"
 
 namespace lg
 {
@@ -31,7 +39,7 @@ void Append_file::append(const char* logline, const size_t len)
 			if (err)
 			{
 				fprintf(stderr, "Append_file::append() failed %s\n", 
-						strerror_tl(err));
+						strerror(err));
 			}
 			break;
 		}
@@ -53,7 +61,7 @@ size_t Append_file::write(const char* logline, size_t len)
 }
 
 
-Log_file::Log_file(const string& basename, off_t roll_size, 
+Log_file::Log_file(const std::string& basename, off_t roll_size, 
 		bool thread_safe, int flush_interval, int check_every_n) : 
 	basename_(basename),
 	roll_size_(roll_size),
@@ -65,7 +73,7 @@ Log_file::Log_file(const string& basename, off_t roll_size,
     last_roll_(0),
     last_flush_(0)
 {
-	assert(basename.find('/') == string::npos);
+	assert(basename.find('/') == std::string::npos);
 	roll_file();
 }
 
@@ -73,8 +81,8 @@ void Log_file::append(const char* logline, int len)
 {
 	if (thread_safe_)
 	{
-		std::scoped lock(mutex_);
-		append_unlocked(logline, len);
+		//std::scoped lock(mutex_);
+		//append_unlocked(logline, len);
 	}
 	else
 	{
@@ -86,8 +94,8 @@ void Log_file::flush()
 {
 	if (thread_safe_)
 	{
-		std::scoped lock(mutex_);
-		file_->flush();
+		//std::scoped lock(mutex_);
+		//file_->flush();
 	}
 	else
 	{
@@ -128,7 +136,7 @@ void Log_file::append_unlocked(const char* logline, int len)
 bool Log_file::roll_file()
 {
 	time_t now = 0;
-	string filename = get_log_filename(basename_, &now);
+	std::string filename = get_log_filename(basename_, &now);
 	time_t start = now / k_roll_per_seconds_ * k_roll_per_seconds_;
 
 	if (now > last_roll_)
@@ -142,27 +150,17 @@ bool Log_file::roll_file()
 	return false;
 }
 
-string Log_file::get_log_filename(const string& basename, time_t* now)
+std::string Log_file::get_log_filename(const std::string& basename)
 {
-	string filename;
+	std::string filename;
 	filename.reserve(basename.size() + 64);
 	filename = basename;
 
-	char timebuf[32];
-	struct tm tm;
-	*now = time(NULL);
-	gmtime_r(now, &tm); // FIXME: localtime_r ?
-	//strftime(timebuf, sizeof timebuf, ".%Y%m%d-%H%M%S.", &tm);
-	filename += put_time(&tm, ".%Y%m%d-%H%M%S.");
+	filename += std::string(sys::get_sys_datetime());
 
-	//filename += timebuf;
+	filename += std::string(sys::gethostname());
 
-	filename += get_hostname();
-
-	//char pidbuf[32];
-	//snprintf(pidbuf, sizeof pidbuf, ".%d", getpid());
-	//filename += pidbuf;
-	filename += string_format(".%d", getpid());
+	filename += std::string(utils::string_format(".%d", getpid()));
 
 	filename += ".log";
 

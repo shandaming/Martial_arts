@@ -80,4 +80,16 @@ namespace utils
 		}while(wild_matching && !matches && ++current < str.length());
 		return matches;
 	}
+
+const char* string_format(const char* fmt, ...)
+{
+    char buf[8192] = {0};
+    va_list ap;
+
+    va_start(ap, fmt);
+    vsprintf_s(buf, fmt, ap);
+    va_end(ap);
+
+    return buf;
+}
 }
