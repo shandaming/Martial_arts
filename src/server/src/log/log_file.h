@@ -34,9 +34,8 @@ class Log_file
 {
 public:
 	Log_file(const std::string& basename, off_t roll_size,
-			bool thread_safe = true,
 			int flush_interval = 3,
-			int check_every_n = 1024);
+			int check_every_n = 1024); //默认分割行数1024
 
 	void append(const char* logline, int len);
 	void flush();
@@ -44,7 +43,7 @@ public:
 private:
 	void append_unlocked(const char* logline, int len);
 
-	static std::string get_log_filename(const std::string& basename);
+	static std::string get_log_filename(const std::string& basename, time_t* now);
 
 	const std::string basename_;
 	const off_t roll_size_;
@@ -53,15 +52,13 @@ private:
 
 	uint64_t count_;
 
-	bool thread_safe_;
-	//std::mutex mutex_;
-
+	//开始记录日志时间（调整至零点时间，如12.04:11.24和 11.12.04:12.50，调整零点都是12.04:00.00，是同一天，只用来比较同一天，和日志名无关
 	time_t start_of_period_;
 	time_t last_roll_;
 	time_t last_flush_;
 	std::unique_ptr<Append_file> file_;
 
-	const static int k_roll_per_seconds_ = 60*60*24;
+	const static int k_roll_per_seconds_ = 60*60*24; // 一天
 };
 } // namespace lg
 

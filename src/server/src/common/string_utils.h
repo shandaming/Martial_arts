@@ -40,7 +40,7 @@ std::string string_format(T&& fmt, Args&&... args)
 }
 #endif
 
-const char* string_format(const char* fmt, ...);
+std::string string_format(const char* fmt, ...);
 }
 
 #endif

@@ -22,7 +22,8 @@ world_server_SOURCES = main.cpp \
 				 log/log_stream.cpp \
 				 common/thread.cpp \
 				 common/timestamp.cpp \
-				 system_info.cpp
+				 common/system_info.cpp \
+				 common/string_utils.cpp
 
                          
 AM_CXXFLAGS = -std=c++17 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines

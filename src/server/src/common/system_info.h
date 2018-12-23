@@ -5,11 +5,13 @@
 #ifndef COMMON_SYSTEM_INFO_H
 #define COMMON_SYSTEM_INFO_H
 
+#include <string>
+
 namespace sys
 {
-const char* gethostname();
+std::string gethostname();
 
-const char* get_sys_datetime();
+std::string get_sys_datetime();
 }
 
 #endif

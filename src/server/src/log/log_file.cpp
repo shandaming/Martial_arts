@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <ctime>
 
 #include "log_file.h"
 #include "common/string_utils.h"
@@ -62,13 +63,12 @@ size_t Append_file::write(const char* logline, size_t len)
 
 
 Log_file::Log_file(const std::string& basename, off_t roll_size, 
-		bool thread_safe, int flush_interval, int check_every_n) : 
+		int flush_interval, int check_every_n) : 
 	basename_(basename),
 	roll_size_(roll_size),
     flush_interval_(flush_interval),
     check_every_n_(check_every_n),
     count_(0),
-    thread_safe_(thread_safe),
     start_of_period_(0),
     last_roll_(0),
     last_flush_(0)
@@ -79,28 +79,12 @@ Log_file::Log_file(const std::string& basename, off_t roll_size,
 
 void Log_file::append(const char* logline, int len)
 {
-	if (thread_safe_)
-	{
-		//std::scoped lock(mutex_);
-		//append_unlocked(logline, len);
-	}
-	else
-	{
-		append_unlocked(logline, len);
-	}
+	append_unlocked(logline, len);
 }
 
 void Log_file::flush()
 {
-	if (thread_safe_)
-	{
-		//std::scoped lock(mutex_);
-		//file_->flush();
-	}
-	else
-	{
-		file_->flush();
-	}
+	file_->flush();
 }
 
 void Log_file::append_unlocked(const char* logline, int len)
@@ -120,7 +104,7 @@ void Log_file::append_unlocked(const char* logline, int len)
 			time_t now = time(nullptr);
 			time_t thisPeriod_ = now / k_roll_per_seconds_ * 
 				k_roll_per_seconds_;
-			if (thisPeriod_ != start_of_period_)
+			if (thisPeriod_ != start_of_period_)  //是今天？，不等就是第二天0点，那么滚动
 			{
 				roll_file();
 			}
@@ -137,6 +121,7 @@ bool Log_file::roll_file()
 {
 	time_t now = 0;
 	std::string filename = get_log_filename(basename_, &now);
+	// 当前时间/一天 * 一天 = 今天
 	time_t start = now / k_roll_per_seconds_ * k_roll_per_seconds_;
 
 	if (now > last_roll_)
@@ -150,17 +135,20 @@ bool Log_file::roll_file()
 	return false;
 }
 
-std::string Log_file::get_log_filename(const std::string& basename)
+std::string Log_file::get_log_filename(const std::string& basename, time_t* now)
 {
 	std::string filename;
 	filename.reserve(basename.size() + 64);
 	filename = basename;
 
-	filename += std::string(sys::get_sys_datetime());
+	*now = time(nullptr);
+	char mbstr[32];
+	std::strftime(mbstr, sizeof(mbstr), "%F_%T", std::localtime(now));
+	filename += std::string(mbstr);
 
-	filename += std::string(sys::gethostname());
+	filename += sys::gethostname();
 
-	filename += std::string(utils::string_format(".%d", getpid()));
+	filename += utils::string_format(".%d", getpid());
 
 	filename += ".log";
 

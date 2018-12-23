@@ -93,13 +93,13 @@ bool wildcard_string_match(const std::string& str, const std::string& match)
 	return matches;
 }
 
-const char* string_format(const char* fmt, ...)
+std::string string_format(const char* fmt, ...)
 {
     char buf[8192] = {0};
     va_list ap;
 
     va_start(ap, fmt);
-    vsprintf_s(buf, fmt, ap);
+    vsprintf(buf, fmt, ap);
     va_end(ap);
 
     return buf;

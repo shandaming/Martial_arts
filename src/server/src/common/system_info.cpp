@@ -5,22 +5,24 @@
 #include <unistd.h>
 
 #include <cerrno>
+#include <cstring>
+#include <ctime>
 
 #include "system_info.h"
 
 namespace sys
 {
-const char* gethostname()
+std::string gethostname()
 {
 	char hostname[128] = {0};
-	if(gethostname(hostname, sizeof(hostname)) < 0)
+	if(::gethostname(hostname, sizeof(hostname)) < 0)
 	{
 		return strerror(errno);
 	}
 	return hostname;
 }
 
-const char* get_sys_datetime()
+std::string get_sys_datetime()
 {
 	std::time_t t = std::time(NULL);
     	char mbstr[100];
