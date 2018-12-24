@@ -14,7 +14,7 @@ namespace net
 		public:
 			typedef std::function<void(Event_loop*)> Thread_init_callback;
 
-			Event_loop_threadpool(Event_loop* baseLoop, const std::string& name_arg);
+			Event_loop_threadpool(Event_loop* baseLoop);
 			~Event_loop_threadpool();
 			void set_thread_num(size_t num_threads) { num_threads_ = num_threads; }
 			void start(const Thread_init_callback& cb = Thread_init_callback());
@@ -29,12 +29,8 @@ namespace net
 			std::vector<Event_loop*> get_all_loops();
 
 			bool started() const { return started_; }
-
-			const std::string& name() const { return name_; }
-
 		private:
 			Event_loop* base_loop_;
-			std::string name_;
 			bool started_;
 			size_t num_threads_;
 			int next_;

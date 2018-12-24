@@ -6,11 +6,9 @@
 
 namespace net
 {
-Event_loop_thread::Event_loop_thread(const Thread_init_callback& cb,
-                                 const std::string& name)
-  : loop_(NULL),
+Event_loop_thread::Event_loop_thread(const Thread_init_callback& cb) :
+	loop_(NULL),
     exiting_(false),
-    //thread_(cb),
     callback_(cb) {}
 
 Event_loop_thread::~Event_loop_thread()
@@ -32,13 +30,13 @@ EventLoop* Event_loop_thread::start_loop()
 
 std::thread thread(cb);
 
-  {
-    std::lock_guard lock(mutex_);
+{
+	std::lock_guard lock(mutex_);
     while (loop_ == NULL)
     {
       cond_.wait();
     }
-  }
+}
 
   return loop_;
 }

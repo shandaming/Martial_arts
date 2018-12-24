@@ -9,9 +9,8 @@
 
 namespace net
 {
-Event_loop_threadpool::Event_loop_threadpool(Event_loop* base_loop, const std::string& nameArg)
+Event_loop_threadpool::Event_loop_threadpool(Event_loop* base_loop)
   : base_loop_(base_loop),
-    name_(nameArg),
     started_(false),
     num_threads_(0),
     next_(0)
@@ -32,9 +31,7 @@ void Event_loop_threadpool::start(const Thread_init_callback& cb)
 
   for (size_t i = 0; i < num_threads_; ++i)
   {
-    char buf[name_.size() + 32];
-    snprintf(buf, sizeof buf, "%s%lu", name_.c_str(), i);
-    Event_loop_thread* t = new Event_loop_thread(cb, buf);
+    Event_loop_thread* t = new Event_loop_thread(cb);
     threads_.emplace_back(std::unique_ptr<Event_loop_thread>(t));
     loops_.push_back(t->start_loop());
   }

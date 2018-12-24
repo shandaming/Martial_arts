@@ -12,50 +12,51 @@
 namespace net
 {
 class Event_loop;
-	class Poller
-	{
-		public:
-		  typedef std::vector<Channel*> Channel_list;
 
-		  Poller(Event_loop* loop);
-		  virtual ~Poller();
+class Poller
+{
+public:
+	typedef std::vector<Channel*> Channel_list;
 
-		  /// Polls the I/O events.
-		  /// Must be called in the loop thread.
-		  virtual Timestamp poll(int timeoutMs, Channel_list* activeChannels);
+	Poller(Event_loop* loop);
+	~Poller();
 
-		  /// Changes the interested I/O events.
-		  /// Must be called in the loop thread.
-		  virtual void update_channel(Channel* channel);
+	/// Polls the I/O events.
+	/// Must be called in the loop thread.
+	Timestamp poll(int timeoutMs, Channel_list* activeChannels);
 
-		  /// Remove the channel, when it destructs.
-		  /// Must be called in the loop thread.
-		  virtual void remove_channel(Channel* channel);
+	/// Changes the interested I/O events.
+	/// Must be called in the loop thread.
+	void update_channel(Channel* channel);
 
-		  virtual bool has_channel(Channel* channel) const;
+	/// Remove the channel, when it destructs.
+	/// Must be called in the loop thread.
+	void remove_channel(Channel* channel);
 
-		  static Poller* new_default_poller(Event_loop* loop);
+	bool has_channel(Channel* channel) const;
 
-		  void assert_in_loop_thread() const;
-		private:
-		  typedef std::map<int, Channel*> Channel_map;
-		Channel_map channels_;
+	static Poller* new_default_poller(Event_loop* loop);
 
-		 Event_loop* owner_loop_;
+	void assert_in_loop_thread() const;
+private:
+	typedef std::map<int, Channel*> Channel_map;
+	Channel_map channels_;
 
-  static const int kInit_event_list_size = 16;
+	Event_loop* owner_loop_;
 
-  static const char* operation_to_string(int op);
+	static const int kInit_event_list_size = 16;
 
-  void fill_active_channels(int num_events,
-                          Channel_list* active_channels) const;
-  void update(int operation, Channel* channel);
+	static const char* operation_to_string(int op);
 
-  typedef std::vector<struct epoll_event> Event_list;
+	void fill_active_channels(int num_events,
+			Channel_list* active_channels) const;
+	void update(int operation, Channel* channel);
 
-  int epollfd_;
-Event_list events_;
-	};
+	typedef std::vector<struct epoll_event> Event_list;
+
+	int epollfd_;
+	Event_list events_;
+};
 }
 
 #endif
