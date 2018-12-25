@@ -8,6 +8,7 @@ world_server_SOURCES = main.cpp \
 				 net/channel.cpp \
 				 net/event_loop_threadpool.cpp \
 				 net/event_loop.cpp \
+				 net/event_loop_thread.cpp \
 				 net/inet_address.cpp \
 				 net/net_utils.cpp \
 				 net/poller.cpp \
@@ -25,5 +26,6 @@ world_server_SOURCES = main.cpp \
 				 common/system_info.cpp \
 				 common/string_utils.cpp
 
+world_server_LDADD = -lstdc++fs 
                          
 AM_CXXFLAGS = -std=c++17 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines

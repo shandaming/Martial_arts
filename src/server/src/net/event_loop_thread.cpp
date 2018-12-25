@@ -26,19 +26,21 @@ Event_loop_thread::~Event_loop_thread()
 EventLoop* Event_loop_thread::start_loop()
 {
   //assert(!thread_.started());
-  thread_.start();
+  //thread_.start();
+	thread_ = new std::thread([this]{ thread_func(); })
 
-std::thread thread(cb);
-
+//std::thread thread(cb);
+Event_loop* loop = nullptr;
 {
 	std::lock_guard lock(mutex_);
     while (loop_ == NULL)
     {
       cond_.wait();
     }
+loop = loop_;
 }
 
-  return loop_;
+  return loop;
 }
 
 void Event_loop_thread::thread_func()

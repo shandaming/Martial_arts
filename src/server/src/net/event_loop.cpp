@@ -26,21 +26,6 @@ int create_event_fd()
 	}
 	return event_fd;
 }
-/*
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-class IgnoreSigPipe
-{
-public:
-	IgnoreSigPipe()
-	{
-		::signal(SIGPIPE, SIG_IGN);
-		// LOG_TRACE << "Ignore SIGPIPE";
-	}
-};
-#pragma GCC diagnostic error "-Wold-style-cast"
-
-IgnoreSigPipe initObj;
-*/
 }
 
 namespace net

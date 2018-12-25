@@ -103,16 +103,17 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_world_server_OBJECTS = main.$(OBJEXT) net/acceptor.$(OBJEXT) \
 	net/buffer.$(OBJEXT) net/channel.$(OBJEXT) \
 	net/event_loop_threadpool.$(OBJEXT) net/event_loop.$(OBJEXT) \
-	net/inet_address.$(OBJEXT) net/net_utils.$(OBJEXT) \
-	net/poller.$(OBJEXT) net/socket.$(OBJEXT) \
-	net/tcp_server.$(OBJEXT) net/tcp_connection.$(OBJEXT) \
-	net/timer.$(OBJEXT) net/timer_queue.$(OBJEXT) \
-	log/async_log.$(OBJEXT) log/logging.$(OBJEXT) \
-	log/log_file.$(OBJEXT) log/log_stream.$(OBJEXT) \
-	common/thread.$(OBJEXT) common/timestamp.$(OBJEXT) \
-	common/system_info.$(OBJEXT) common/string_utils.$(OBJEXT)
+	net/event_loop_thread.$(OBJEXT) net/inet_address.$(OBJEXT) \
+	net/net_utils.$(OBJEXT) net/poller.$(OBJEXT) \
+	net/socket.$(OBJEXT) net/tcp_server.$(OBJEXT) \
+	net/tcp_connection.$(OBJEXT) net/timer.$(OBJEXT) \
+	net/timer_queue.$(OBJEXT) log/async_log.$(OBJEXT) \
+	log/logging.$(OBJEXT) log/log_file.$(OBJEXT) \
+	log/log_stream.$(OBJEXT) common/thread.$(OBJEXT) \
+	common/timestamp.$(OBJEXT) common/system_info.$(OBJEXT) \
+	common/string_utils.$(OBJEXT)
 world_server_OBJECTS = $(am_world_server_OBJECTS)
-world_server_LDADD = $(LDADD)
+world_server_DEPENDENCIES =
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -135,7 +136,7 @@ am__depfiles_remade = ./$(DEPDIR)/main.Po \
 	log/$(DEPDIR)/log_file.Po log/$(DEPDIR)/log_stream.Po \
 	log/$(DEPDIR)/logging.Po net/$(DEPDIR)/acceptor.Po \
 	net/$(DEPDIR)/buffer.Po net/$(DEPDIR)/channel.Po \
-	net/$(DEPDIR)/event_loop.Po \
+	net/$(DEPDIR)/event_loop.Po net/$(DEPDIR)/event_loop_thread.Po \
 	net/$(DEPDIR)/event_loop_threadpool.Po \
 	net/$(DEPDIR)/inet_address.Po net/$(DEPDIR)/net_utils.Po \
 	net/$(DEPDIR)/poller.Po net/$(DEPDIR)/socket.Po \
@@ -282,6 +283,7 @@ world_server_SOURCES = main.cpp \
 				 net/channel.cpp \
 				 net/event_loop_threadpool.cpp \
 				 net/event_loop.cpp \
+				 net/event_loop_thread.cpp \
 				 net/inet_address.cpp \
 				 net/net_utils.cpp \
 				 net/poller.cpp \
@@ -299,6 +301,7 @@ world_server_SOURCES = main.cpp \
 				 common/system_info.cpp \
 				 common/string_utils.cpp
 
+world_server_LDADD = -lstdc++fs 
 AM_CXXFLAGS = -std=c++17 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines
 all: all-am
 
@@ -391,6 +394,8 @@ net/event_loop_threadpool.$(OBJEXT): net/$(am__dirstamp) \
 	net/$(DEPDIR)/$(am__dirstamp)
 net/event_loop.$(OBJEXT): net/$(am__dirstamp) \
 	net/$(DEPDIR)/$(am__dirstamp)
+net/event_loop_thread.$(OBJEXT): net/$(am__dirstamp) \
+	net/$(DEPDIR)/$(am__dirstamp)
 net/inet_address.$(OBJEXT): net/$(am__dirstamp) \
 	net/$(DEPDIR)/$(am__dirstamp)
 net/net_utils.$(OBJEXT): net/$(am__dirstamp) \
@@ -461,6 +466,7 @@ include net/$(DEPDIR)/acceptor.Po # am--include-marker
 include net/$(DEPDIR)/buffer.Po # am--include-marker
 include net/$(DEPDIR)/channel.Po # am--include-marker
 include net/$(DEPDIR)/event_loop.Po # am--include-marker
+include net/$(DEPDIR)/event_loop_thread.Po # am--include-marker
 include net/$(DEPDIR)/event_loop_threadpool.Po # am--include-marker
 include net/$(DEPDIR)/inet_address.Po # am--include-marker
 include net/$(DEPDIR)/net_utils.Po # am--include-marker
@@ -639,6 +645,7 @@ distclean: distclean-am
 	-rm -f net/$(DEPDIR)/buffer.Po
 	-rm -f net/$(DEPDIR)/channel.Po
 	-rm -f net/$(DEPDIR)/event_loop.Po
+	-rm -f net/$(DEPDIR)/event_loop_thread.Po
 	-rm -f net/$(DEPDIR)/event_loop_threadpool.Po
 	-rm -f net/$(DEPDIR)/inet_address.Po
 	-rm -f net/$(DEPDIR)/net_utils.Po
@@ -706,6 +713,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f net/$(DEPDIR)/buffer.Po
 	-rm -f net/$(DEPDIR)/channel.Po
 	-rm -f net/$(DEPDIR)/event_loop.Po
+	-rm -f net/$(DEPDIR)/event_loop_thread.Po
 	-rm -f net/$(DEPDIR)/event_loop_threadpool.Po
 	-rm -f net/$(DEPDIR)/inet_address.Po
 	-rm -f net/$(DEPDIR)/net_utils.Po

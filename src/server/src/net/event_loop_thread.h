@@ -26,6 +26,7 @@ private:
 
 	Event_loop* loop_;
 	bool exiting_;
+	std::thread* thread_;
 	std::mutex mutex_;
 	std::condition_variable cond_;
 	Thread_init_callback callback_;
