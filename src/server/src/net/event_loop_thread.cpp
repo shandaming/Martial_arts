@@ -19,24 +19,21 @@ Event_loop_thread::~Event_loop_thread()
     // still a tiny chance to call destructed object, if thread_func exits just now.
     // but when Event_loop_thread destructs, usually programming is exiting anyway.
     loop_->quit();
-    thread_.join();
+    thread_->join();
   }
 }
 
-EventLoop* Event_loop_thread::start_loop()
+Event_loop* Event_loop_thread::start_loop()
 {
   //assert(!thread_.started());
   //thread_.start();
-	thread_ = new std::thread([this]{ thread_func(); })
+	thread_ = new std::thread([this]{ thread_func(); });
 
 //std::thread thread(cb);
 Event_loop* loop = nullptr;
 {
-	std::lock_guard lock(mutex_);
-    while (loop_ == NULL)
-    {
-      cond_.wait();
-    }
+	 std::unique_lock<std::mutex> lk(mutex_);
+      cond_.wait(lk, [this] { return loop_ != nullptr; });
 loop = loop_;
 }
 
@@ -45,7 +42,7 @@ loop = loop_;
 
 void Event_loop_thread::thread_func()
 {
-  EventLoop loop;
+  Event_loop loop;
 
   if (callback_)
   {

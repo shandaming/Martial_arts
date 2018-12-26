@@ -7,6 +7,7 @@
 
 #include <mutex>
 #include <condition_variable>
+#include <thread>
 
 #include "event_loop.h"
 

@@ -48,6 +48,6 @@ void init_log(const std::string& file, int rolle_size);
 
 } // end namespace
 
-#define LOG_INIT(filename, rolle_size) lg::init_log(filename, rolle_size)
+#define LOG_INIT(filename, rolle_size) lg::init_log(filename, rolle_size);
 
 #endif

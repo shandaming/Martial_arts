@@ -215,7 +215,7 @@ main.o: main.cpp /usr/include/stdc-predef.h /usr/include/signal.h \
  net/socket.h net/inet_address.h exceptions.h net/tcp_connection.h \
  net/buffer.h /usr/include/c++/8/algorithm /usr/include/c++/8/cstring \
  /usr/include/string.h /usr/include/strings.h net/inet_address.h \
- net/net_utils.h net/socket.h
+ net/net_utils.h net/socket.h log/log_stream.h log/log_buffer.h
 
 /usr/include/stdc-predef.h:
 
@@ -810,3 +810,7 @@ net/inet_address.h:
 net/net_utils.h:
 
 net/socket.h:
+
+log/log_stream.h:
+
+log/log_buffer.h:
