@@ -23,6 +23,8 @@ public:
 	bool listen();
 	int accept(Inet_address& addr);
 
+	bool connect(const Inet_address& addr);
+
 	void shutdown_write();
 
 	void set_reuse_addr();

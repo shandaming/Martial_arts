@@ -118,7 +118,7 @@ std::ostringstream os;
     struct tm tm_time;
 	time_t t = time(nullptr);
 os << std::put_time(std::localtime(&t), "&F &T");
-    assert(os.str().size() == 19);
+    //assert(os.str().size() == 19);
   }
 
 	char buf[16];

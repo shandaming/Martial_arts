@@ -46,7 +46,7 @@ Event_loop::Event_loop() : looping_(false), quit_(false),
     wakeup_channel_(new Channel(this, wakeup_fd_)),
     current_active_channel_(NULL)
 {
-	LOG_DEBUG << "Event_loop created " << this << " in thread " << 
+	LOG_DEBUG << "Event_loop created. " << " thread id = " << 
 		get_current_thread_id();
 
 	if (loop_in_this_thread)

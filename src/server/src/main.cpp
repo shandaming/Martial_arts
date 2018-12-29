@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 
 	init_locale();
 
-	LOG_INIT("./logs/lg", 409600)
+	LOG_INIT("lg", 409600)
 
 	net::Inet_address addr(argv[1], static_cast<uint16_t>(atoi(argv[2])));
 	net::Event_loop event_loop;

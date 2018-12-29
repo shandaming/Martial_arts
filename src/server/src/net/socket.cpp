@@ -30,6 +30,11 @@ int Socket::accept(Inet_address& addr)
 	return accept_net_connection(fd_, addr);
 }
 
+bool Socket::connect(Inet_address& addr)
+{
+	return connect_server(fd_, addr);
+}
+
 void Socket::shutdown_write()
 {
 	net::shutdown_write(fd_);
