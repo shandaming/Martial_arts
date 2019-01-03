@@ -18,7 +18,8 @@ enum class Type : uint8_t
 {
 	null,
 	boolean,
-	number,
+	number_integer,
+	number_float,
 	string,
 	Array,
 	Object
@@ -97,12 +98,118 @@ class Value
 public:
 	typedef std::vector<Value> Array;
 	typedef std::map<std::string, Value> Object;
+
+	template<typename T, typename... Args>
+	{
+		std::allocator<T> alloc;
+		using Allocator_traits = std::allocator_traits<std::allocator<T>>;
+
+		auto deleter = [&](T* object) 
+		{
+			Allocator_traits::deallocate(alloc, object, 1);
+		};
+		std::unique_ptr<T, decltype(deleter)> 
+			obj(Allocator_traits::allocate(alloc, 1), deleter);
+		Allocator_traits::construct(alloc, obj.get(), 
+				std::forward<Args>(args)...);
+		assert(obj != nullptr);
+		return obj.release();
+	}
+
 	union Storage 
 	{
-		bool boolean;
-		double number;
+		Value() = default;
+		Value(bool v) : boolean(v) {}
+		Value(int64_t v) : number_integer(v) {}
+		Value(double v) : number_float(v) {}
 
-		int64_t int64;
+		Value(Type t)
+		{
+			switch(t)
+			{
+				case Type::null:
+					object = nullptr;
+					break;
+				case Type::boolean:
+					boolean = bool(false);
+					break;
+				case Type::number_integer:
+					number_integer = int64_t(0);
+					break;
+				case Type::number_float:
+					number_float = double(0.0);
+					break;
+				case Type::string:
+					string = create<std::string>("");
+					break;
+				case Type::array:
+					array = create<Array>();
+					break;
+				case Type::object:
+					object = create<Object>();
+					break;
+				default:
+					object = nullptr;
+					if(t == Type::null)
+					{
+						throw "create expation."
+					}
+					break;
+			}
+		}
+
+		Value(const std::string& v) { string = create<std::string>(v); }
+		Value(std::string&& v) 
+		{
+			string = create<std::string>(std::move(v)) 
+		}
+
+		Value(const Array& v) { array = create<Array>(v); }
+		Value(Array&& v) { array = create<Array>(std::move(v)); }
+
+		Value(const Object& v) { object = create<Object>(v); }
+		Value(Object&& v) { object = create<Object>(std::move(v)); }
+
+		void destroy(Type t)
+		{
+			switch(t)
+			{
+				case Type::string:
+					{
+						std::allocator<std::string> alloc;
+						std::allocator_traits<decltype(alloc)>::
+							destroy(alloc, string);
+						std::allocator_traits<>decltype(alloc)::
+							deallocate(alloc, string, 1);
+						break;
+					}
+				case Type::array:
+					{
+						std::allocator<Array> alloc;
+						std::allocator_traits<decltype(alloc)>::
+							destroy(alloc, array);
+						std::allocator_traits<>decltype(alloc)::
+							deallocate(alloc, array, 1);
+						break;
+					}
+				case Type::object:
+					{
+						std::allocator<Object> alloc;
+						std::allocator_traits<decltype(alloc)>::
+							destroy(alloc, object);
+						std::allocator_traits<>decltype(alloc)::
+							deallocate(alloc, object, 1);
+						break;
+					}
+				default:
+					break;
+			}
+		}
+
+		bool boolean;
+		double number_float;
+
+		int64_t number_integer; //int64;
 
 		std::string *string;
 		Array *array;
@@ -121,10 +228,10 @@ public
 			case Type::boolean:
 				u_.boolean_ = false;
 				break;
-			case Type::number:
+			case Type::number_integer:
 				u_.number = 0.0;
 				break;
-			case Type::int64:
+			case Type::number_float:
 				u_.int64 = 0;
 				break;
 			case Type::string:
@@ -142,7 +249,7 @@ public
 
 	explicit Value(bool b) : type_(Type::boolean), u_() { u_.boolean = b; }
 
-	explicit Value(int64_t v) : type_(Type::int64), u_() { u_.int64 = v; }
+	explicit Value(int64_t v) : type_(Type::number_float), u_() { u_.int64 = v; }
 
 	explicit Value(double n) : type_(number), u_()
 	{
@@ -280,13 +387,13 @@ public
 
 	void set_number(const double v) 
 	{
-		type_ = Type::number;
+		type_ = Type::number_integer;
 		u_.number = v; 
 	}
 
 	void set_int64(const int64_t v) 
 	{
-		type_ = Type::int64;
+		type_ = Type::number_float;
 		u_.int64 = v; 
 	}
 
@@ -349,9 +456,9 @@ public
 				return "nmull";
 			case Type::boolean:
 				return u_.boolean ? "true" : "false";
-			case Type::int64:
+			case Type::number_float:
 				;
-			case Type::number:
+			case Type::number_integer:
 				;
 			case Type::string:
 				return *u_.string;
@@ -472,8 +579,8 @@ private:
 
 	bool is_null() const { return type_ == Type::null; }
 	bool is_boolean() const { return type_ == Type::boolean; }
-	bool is_number() const { return type_ == Type::number; }
-	bool is_int64() const { return type_ == Type::int64; }
+	bool is_number() const { return type_ == Type::number_integer; }
+	bool is_int64() const { return type_ == Type::number_float; }
 	bool is_string() const { return type_ == Type::string; }
 	bool is_array() const { return type_ == Type::array; }
 	bool is_object() const { return type_ == Type::object; }
@@ -497,8 +604,8 @@ private:
 	}
 };
 
-typedef value::array array;
-typedef value::object object;
+typedef Value::array array;
+typedef Value::object object;
 
 template <typename Iter> 
 class Input 
@@ -509,7 +616,8 @@ protected:
 	int line_;
 
 public:
-	Input(const Iter& first, const Iter& last) : cur_(first), end_(last), consumed_(false), line_(1) {}
+	Input(const Iter& first, const Iter& last) : 
+		cur_(first), end_(last), consumed_(false), line_(1) {}
 
 	int getc() 
 	{
@@ -583,7 +691,9 @@ public:
 	}
 };
 
-template <typename Iter> inline int _parse_quadhex(Input<Iter> &in) 
+// parse quadhex
+template <typename Iter> 
+inline int _parse_quadhex(Input<Iter> &in) 
 {
 	int uni_ch = 0, hex;
 	for (int i = 0; i < 4; i++) 
@@ -614,7 +724,9 @@ template <typename Iter> inline int _parse_quadhex(Input<Iter> &in)
 	return uni_ch;
 }
 
-template <typename String, typename Iter> inline bool _parse_codepoint(String &out, Input<Iter> &in) 
+// parse codepoint
+template <typename String, typename Iter> 
+inline bool _parse_codepoint(String &out, Input<Iter> &in) 
 {
 	int uni_ch;
 	if ((uni_ch = _parse_quadhex(in)) == -1) 
@@ -670,7 +782,9 @@ template <typename String, typename Iter> inline bool _parse_codepoint(String &o
 	return true;
 }
 
-template <typename String, typename Iter> inline bool _parse_string(String &out, Input<Iter> &in) 
+// parse string
+template <typename String, typename Iter> 
+inline bool _parse_string(String &out, Input<Iter> &in)
 {
 	while (1) 
 	{
@@ -692,34 +806,49 @@ template <typename String, typename Iter> inline bool _parse_string(String &out,
 			}
 			switch (ch) 
 			{
-#define MAP(sym, val)                                                                                                              \
-  case sym:                                                                                                                        \
-    out.push_back(val);                                                                                                            \
-    break
-        MAP('"', '\"');
-        MAP('\\', '\\');
-        MAP('/', '/');
-        MAP('b', '\b');
-        MAP('f', '\f');
-        MAP('n', '\n');
-        MAP('r', '\r');
-        MAP('t', '\t');
-#undef MAP
-      case 'u':
-        if (!_parse_codepoint(out, in)) {
-          return false;
-        }
-        break;
-      default:
-        return false;
-      }
-    } else {
-      out.push_back(static_cast<char>(ch));
-    }
-  }
-  return false;
+				case '"':
+					out.push_back('\"');
+					break;
+				case '\\':
+					out.push_back('\\');
+					break;
+				case '/':
+					out.push_back('/');
+					break;
+				case 'b':
+					out.push_back('\b');
+					break;
+				case 'f':
+					out.push_back('\f');
+					break;
+				case 'n':
+					out.push_back('\n');
+					break;
+				case 'r':
+					out.push_back('\r');
+					break;
+				case 't':
+					out.push_back('\t');
+					break;
+				case 'u':
+					if (!_parse_codepoint(out, in)) 
+					{
+						return false;
+					}
+					break;
+				default:
+					return false;
+			}
+		} 
+		else 
+		{
+			out.push_back(static_cast<char>(ch));
+		}
+	}
+	return false;
 }
 
+// parse array
 template <typename Context, typename Iter> 
 inline bool _parse_array(Context &ctx, Input<Iter> &in) 
 {
@@ -743,7 +872,9 @@ inline bool _parse_array(Context &ctx, Input<Iter> &in)
 	return in.expect(']') && ctx.parse_array_stop(idx);
 }
 
-template <typename Context, typename Iter> inline bool _parse_object(Context &ctx, Input<Iter> &in) 
+// parse object
+template <typename Context, typename Iter> 
+inline bool _parse_object(Context &ctx, Input<Iter> &in) 
 {
 	if (!ctx.parse_object_start()) 
 	{
@@ -768,7 +899,9 @@ template <typename Context, typename Iter> inline bool _parse_object(Context &ct
 	return in.expect('}');
 }
 
-template <typename Iter> inline std::string _parse_number(Input<Iter> &in) 
+// parse number
+template <typename Iter> 
+inline std::string _parse_number(Input<Iter> &in) 
 {
 	std::string num_str;
 	while (1) 
@@ -798,140 +931,119 @@ template <typename Iter> inline std::string _parse_number(Input<Iter> &in)
 template <typename Context, typename Iter> 
 inline bool _parse(Context &ctx, Input<Iter> &in) 
 {
-  in.skip_ws();
-  int ch = in.getc();
-  switch (ch) {
-#define IS(ch, text, op)                                                                                                           \
-  case ch:                                                                                                                         \
-    if (in.match(text) && op) {                                                                                                    \
-      return true;                                                                                                                 \
-    } else {                                                                                                                       \
-      return false;                                                                                                                \
-    }
-    IS('n', "ull", ctx.set_null());
-    IS('f', "alse", ctx.set_bool(false));
-    IS('t', "rue", ctx.set_bool(true));
-#undef IS
-  case '"':
-    return ctx.parse_string(in);
-  case '[':
-    return _parse_array(ctx, in);
-  case '{':
-    return _parse_object(ctx, in);
-  default:
-    if (('0' <= ch && ch <= '9') || ch == '-') {
-      double f;
-      char *endp;
-      in.ungetc();
-      std::string num_str(_parse_number(in));
-      if (num_str.empty()) {
-        return false;
-      }
+	in.skip_ws();
+	int ch = in.getc();
+	switch (ch) 
+	{
+		case 'n':
+			if(in.match("ull") && ctx.set_null())
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		case 'f':
+			if(in.match("alse") && ctx.set_bool(false))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		case 't':
+			if(in.match("rue") && ctx.set_bool(true))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		case '"':
+			return ctx.parse_string(in);
+		case '[':
+			return _parse_array(ctx, in);
+		case '{':
+			return _parse_object(ctx, in);
+		default:
+			if (('0' <= ch && ch <= '9') || ch == '-') 
+			{
+				double f;
+				char *endp;
+				in.ungetc();
+				std::string num_str(_parse_number(in));
+				if (num_str.empty()) 
+				{
+					return false;
+				}
 #ifdef PICOJSON_USE_INT64
-      {
-        errno = 0;
-        intmax_t ival = strtoimax(num_str.c_str(), &endp, 10);
-        if (errno == 0 && std::numeric_limits<int64_t>::min() <= ival && ival <= std::numeric_limits<int64_t>::max() &&
-            endp == num_str.c_str() + num_str.size()) {
-          ctx.set_int64(ival);
-          return true;
-        }
-      }
+				{
+				errno = 0;
+				intmax_t ival = strtoimax(num_str.c_str(), &endp, 10);
+				if (errno == 0 && std::numeric_limits<int64_t>::min() <= ival && ival <= std::numeric_limits<int64_t>::max() &&
+				endp == num_str.c_str() + num_str.size()) 
+				{
+					ctx.set_int64(ival);
+					return true;
+				}
+				}
 #endif
-      f = strtod(num_str.c_str(), &endp);
-      if (endp == num_str.c_str() + num_str.size()) {
-        ctx.set_number(f);
-        return true;
-      }
-      return false;
-    }
-    break;
-  }
-  in.ungetc();
-  return false;
+				f = strtod(num_str.c_str(), &endp);
+				if (endp == num_str.c_str() + num_str.size()) 
+				{
+					ctx.set_number(f);
+					return true;
+				}
+				return false;
+			}
+			break;
+	}
+	in.ungetc();
+	return false;
 }
-
-class deny_parse_context 
-{
-public:
-  bool set_null() {
-    return false;
-  }
-  bool set_bool(bool) {
-    return false;
-  }
-#ifdef PICOJSON_USE_INT64
-  bool set_int64(int64_t) {
-    return false;
-  }
-#endif
-  bool set_number(double) {
-    return false;
-  }
-  template <typename Iter> bool parse_string(Input<Iter> &) {
-    return false;
-  }
-  bool parse_array_start() {
-    return false;
-  }
-  template <typename Iter> bool parse_array_item(Input<Iter> &, size_t) {
-    return false;
-  }
-  bool parse_array_stop(size_t) {
-    return false;
-  }
-  bool parse_object_start() {
-    return false;
-  }
-  template <typename Iter> bool parse_object_item(Input<Iter> &, const std::string &) {
-    return false;
-  }
-};
-
-
 
 class Default_parse_context 
 {
-protected:
-	value *out_;
-
 public:
-	Default_parse_context(value *out) : out_(out) {}
+	Default_parse_context(Value *out) : out_(out) {}
 
 	bool set_null() 
 	{
-		*out_ = value();
+		*out_ = Value();
 		return true;
 	}
 
 	bool set_bool(bool b) 
 	{
-		*out_ = value(b);
+		*out_ = Value(b);
 		return true;
 	}
 
 	bool set_int64(int64_t i) 
 	{
-		*out_ = value(i);
+		*out_ = Value(i);
 		return true;
 	}
 
 	bool set_number(double f) 
 	{
-		*out_ = value(f);
+		*out_ = Value(f);
 		return true;
 	}
 
 	template <typename Iter> 
 	bool parse_string(input<Iter> &in) 
 	{
-		*out_ = value(string_type, false);
+		*out_ = Value(Type::string, false);
 		return _parse_string(out_->get<std::string>(), in);
 	}
 
 	bool parse_array_start() 
 	{
-		*out_ = value(array_type, false);
+		*out_ = Value(array_type, false);
 		return true;
 	}
 
@@ -939,7 +1051,7 @@ public:
 	bool parse_array_item(input<Iter> &in, size_t) 
 	{
 		array &a = out_->get<array>();
-		a.push_back(value());
+		a.push_back(Value());
 		Default_parse_context ctx(&a.back());
 		return _parse(ctx, in);
 	}
@@ -951,7 +1063,7 @@ public:
 
 	bool parse_object_start() 
 	{
-		*out_ = value(object_type, false);
+		*out_ = Value(object_type, false);
 		return true;
 	}
 
@@ -966,6 +1078,8 @@ public:
 private:
 	Default_parse_context(const Default_parse_context &);
 	Default_parse_context &operator=(const Default_parse_context &);
+
+	Value *out_;
 };
 
 
@@ -996,7 +1110,7 @@ inline Iter _parse(Context &ctx, const Iter &first, const Iter &last, std::strin
 }
 
 template <typename Iter> 
-inline Iter parse(value &out, const Iter &first, const Iter &last, std::string *err) 
+inline Iter parse(Value &out, const Iter &first, const Iter &last, std::string *err) 
 {
 	Default_parse_context ctx(&out);
 	return _parse(ctx, first, last, err);
