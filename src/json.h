@@ -99,23 +99,6 @@ public:
 	typedef std::vector<Value> Array;
 	typedef std::map<std::string, Value> Object;
 
-	template<typename T, typename... Args>
-	{
-		std::allocator<T> alloc;
-		using Allocator_traits = std::allocator_traits<std::allocator<T>>;
-
-		auto deleter = [&](T* object) 
-		{
-			Allocator_traits::deallocate(alloc, object, 1);
-		};
-		std::unique_ptr<T, decltype(deleter)> 
-			obj(Allocator_traits::allocate(alloc, 1), deleter);
-		Allocator_traits::construct(alloc, obj.get(), 
-				std::forward<Args>(args)...);
-		assert(obj != nullptr);
-		return obj.release();
-	}
-
 	union Storage 
 	{
 		Value() = default;
@@ -140,13 +123,13 @@ public:
 					number_float = double(0.0);
 					break;
 				case Type::string:
-					string = create<std::string>("");
+					string = new std::string("");
 					break;
 				case Type::array:
-					array = create<Array>();
+					array = new Array();
 					break;
 				case Type::object:
-					object = create<Object>();
+					object = new Object();
 					break;
 				default:
 					object = nullptr;
@@ -158,17 +141,17 @@ public:
 			}
 		}
 
-		Value(const std::string& v) { string = create<std::string>(v); }
+		Value(const std::string& v) { string = new std::string(v); }
 		Value(std::string&& v) 
 		{
-			string = create<std::string>(std::move(v)) 
+			string = new std::string(std::move(v)) 
 		}
 
-		Value(const Array& v) { array = create<Array>(v); }
-		Value(Array&& v) { array = create<Array>(std::move(v)); }
+		Value(const Array& v) { array = new Array(v); }
+		Value(Array&& v) { array = new Array(std::move(v)); }
 
-		Value(const Object& v) { object = create<Object>(v); }
-		Value(Object&& v) { object = create<Object>(std::move(v)); }
+		Value(const Object& v) { object = Object(v); }
+		Value(Object&& v) { object = Object(std::move(v)); }
 
 		void destroy(Type t)
 		{
@@ -176,29 +159,17 @@ public:
 			{
 				case Type::string:
 					{
-						std::allocator<std::string> alloc;
-						std::allocator_traits<decltype(alloc)>::
-							destroy(alloc, string);
-						std::allocator_traits<>decltype(alloc)::
-							deallocate(alloc, string, 1);
+						delete string;
 						break;
 					}
 				case Type::array:
 					{
-						std::allocator<Array> alloc;
-						std::allocator_traits<decltype(alloc)>::
-							destroy(alloc, array);
-						std::allocator_traits<>decltype(alloc)::
-							deallocate(alloc, array, 1);
+						delete array;
 						break;
 					}
 				case Type::object:
 					{
-						std::allocator<Object> alloc;
-						std::allocator_traits<decltype(alloc)>::
-							destroy(alloc, object);
-						std::allocator_traits<>decltype(alloc)::
-							deallocate(alloc, object, 1);
+						delete object;
 						break;
 					}
 				default:
