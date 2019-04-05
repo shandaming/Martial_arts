@@ -1,5 +1,5 @@
-#ifndef BOOST_CMDLINE_VP_2003_05_19
-#define BOOST_CMDLINE_VP_2003_05_19
+#ifndef UTIL_CMDLINE_H
+#define UTIL_CMDLINE_H
 
 #include "options_description.h"
 #include "positional_options.h"
@@ -67,33 +67,6 @@ enum class style_t : uint8_t
 	default_style = unix_style
 };
 
-
-
-    /** 命令行解析器类。主要要求是：
-         - 足以支持所有常见用途。
-         - 简单易学易用。
-         - 最小的代码大小和外部依赖性。
-         - 可扩展自定义语法。
-
-        首先注册所有选项。之后，命令行的元素
-        使用operator ++提取。
-
-        对于每个元素，用户都可以找到
-         - 如果它是一个选项或参数
-         - 选项的名称
-         - 期权的指数
-         - 期权价值（如果有）
-        
-        有时注册的选项名称不等于遇到的
-        例如，因为支持名称缩写。因此
-        可以获得两个选项名称：
-         - 注册的
-         - 在命令行找到的那个
-
-        有很多样式选项，可用于调整命令
-        行解析。此外，还可以安装额外的解析器
-        这将处理自定义选项样式。
-    */
 class cmdline 
 {
 public:
