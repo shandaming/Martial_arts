@@ -1,6 +1,9 @@
+/*
+ * Copyright (C) 2019
+ */
 
-#ifndef BOOST_VALUE_SEMANTIC_HPP_VP_2004_02_24
-#define BOOST_VALUE_SEMANTIC_HPP_VP_2004_02_24
+#ifndef CMD_VALUE_SEMANTIC_H
+#define CMD_VALUE_SEMANTIC_H
 
 #include <string>
 #include <vector>
@@ -82,7 +85,7 @@ class typed_value : public value_semantic_codecvt_helper,
 	public typed_value_base
 {
 public:
-	typed_value(T* store_to) :\
+	typed_value(T* store_to) :
 		m_store_to(store_to), composing_(false), implicit_(false), 
 		multitoken_(false), zero_tokens_(false), required_(false) {} 
 
@@ -206,7 +209,7 @@ public: // value semantic overrides
         /** Creates an instance of the 'validator' class and calls
             its operator() to perform the actual conversion. */
     void xparse(std::any& value_store, 
-                const std::vector< std::basic_string<charT> >& new_tokens) 
+                const std::vector<std::string>& new_tokens) 
             const;
 
         /** If default value was specified via previous call to 

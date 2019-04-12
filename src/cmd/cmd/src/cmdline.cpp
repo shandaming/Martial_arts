@@ -1,6 +1,6 @@
-
-
-#define BOOST_PROGRAM_OPTIONS_SOURCE
+/*
+ * Copyright (C) 2019
+ */
 
 #include <string>
 #include <utility>

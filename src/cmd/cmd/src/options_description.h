@@ -72,13 +72,16 @@ private:
     options_description* owner_;
 };
 
-class  options_description 
+class options_description 
 {
 public:
 	static constexpr uint32_t default_line_length;
-        
+      
+#if 0
+	// 似乎用的少
     options_description(uint32_t line_length = default_line_length,
 			uint32_t min_description_length = default_line_length / 2);
+#endif
 
     options_description(const std::string& caption,
 			uint32_t line_length = default_line_length,
@@ -120,8 +123,6 @@ private:
     std::vector<std::shared_ptr<option_description>> options_;
 
     std::vector<bool> belong_to_group_;
-
-    std::vector< std::shared_ptr<options_description>> groups_;
 };
 
     /** 找到重复选项描述时抛出的类。 */

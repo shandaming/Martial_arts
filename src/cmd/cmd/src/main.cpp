@@ -1,6 +1,7 @@
 #include "options_description.h"
 
-// https://github.com/wesnoth/wesnoth/blob/master/src/commandline_options.cpp
+:q
+:quit
 
 int main(int argc, char* argv[])
 {
