@@ -22,7 +22,7 @@ enum class database_field_type : uint8_t
 class field
 {
 public:
-	field() : data_.length(0), data_.value(nullptr), data_.type(database_field_type::NULLPTR), data_.raw(false) {}
+	field() : data_.length(0), data_.value(nullptr), data_.type(database_field_type::null), data_.raw(false) {}
 
 	~field();
 
