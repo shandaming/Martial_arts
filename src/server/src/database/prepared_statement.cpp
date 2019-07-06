@@ -134,3 +134,59 @@ void prepared_statement::set_null(const uint8_t index)
 	statement_data_[index].type = TYPE_NULL;
 }
 
+void prepared_statement::bind_parameters()
+{
+	assert(stmt_);
+
+	uint8_t i = 0;
+	for(; i < statement_data_.size(); ++i)
+	{
+		swtich(statement_data_[i].type)
+		{
+			case TYPE_BOOL:
+				stmt_->set_bool(i, statement_data_[i].data.boolen);
+				break;
+			case TYPE_UINT8:
+				stmt_->set_uint8(i, statement_data_[i].data.uint8);
+				break;
+			case TYPE_UINT16:
+				stmt_->set_uint16(i, statement_data_[i].data.uint16);
+				break;
+			case TYPE_UINT32:
+				stmt_->set_uint32(i, statement_data_[i].data.uint32);
+				break;
+			case TYPE_UINT64:
+				stmt_->set_uint64(i, statement_data_[i].data.uint64);
+				break;
+			case TYPE_INT8:
+				stmt_->set_int8(i, statement_data_[i].data.int8);
+				break;
+			case TYPE_INT16:
+				stmt_->set_int16(i, statement_data_[i].data.int16);
+				break;
+			case TYPE_INT32:
+				stmt_->set_int32(i, statement_data_[i].data.int32);
+				break;
+			case TYPE_INT64:
+				stmt_->set_int64(i, statement_data_[i].data.int64);
+				break;
+			case TYPE_FLOAT:
+				stmt_->set_float(i, statement_data_[i].data.float_t);
+				break;
+			case TYPE_DBOULE:
+				stmt_->set_double(i, statement_data_[i].data.double_t);
+				break;
+			case TYPE_STRING:
+				stmt_->set_binary(i, statement_data_[i].binary, true);
+				break;
+			case TYPE_BINARY:
+				stmt_->set_binary(i, statement_data_[i].binary, false);
+				break;
+			case TYPE_NULL:
+				stmt_->set_null(i);
+				break;
+			default:
+				break;
+		}
+	}
+}
