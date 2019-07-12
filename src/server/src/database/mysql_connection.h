@@ -43,13 +43,13 @@ public:
 	bool prepare_statements();
 
 	bool execute(const char* sql);
-	bool execute(prepare_statement* stmt);
+	bool execute(prepared_statement* stmt);
 
 	result_set* query(const char* sql);
-	prepare_result_set* query(prepare_statement* stmt);
+	prepare_result_set* query(prepared_statement* stmt);
 
 	bool query(const char* sql, MYSQL_RES** preult, MYSQL_FIELD** fields, uint64_t* row_count, uint32_t* field_count);
-	bool query(prepare_statement* stmt, MYSQL_RES** result, uint64_t* row_count, uint32_t* field_count);
+	bool query(prepared_statement* stmt, MYSQL_RES** result, uint64_t* row_count, uint32_t* field_count);
 
 	void begin_transaction();
 	void rollback_transaction();
@@ -67,12 +67,12 @@ private:
 	void unlock();
 
 	MYSQL* get_handle() { return mysql_; }
-	mysql_prepare_statement* get_prepare_statement(uint32_t index);
+	mysql_prepared_statement* get_prepare_statement(uint32_t index);
 	void prepare_statement(uint32_t index, const char* sql, connection_flags flag);
 
 	virtual void do_prepare_statements() = 0;
 
-	std::vector<std::unique_ptr<mysql_prepare_statement>> stmts_; // 准备好的声明存储
+	std::vector<std::unique_ptr<mysql_prepared_statement>> stmts_; // 准备好的声明存储
 	prepared_statement_map queries_; // 查询存储
 	bool reconnection_; // 我们重新连接了吗？
 	bool prepare_error_; // 在准备陈述时是否有任何错误？
