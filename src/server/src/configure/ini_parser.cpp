@@ -2,153 +2,166 @@
  * Copyright (C) 2019
  */
 
+#include <sstream>
+#include <iostream>
+
 #include "ini_parser.h"
+#include "string_utils.h"
 
-ini_parser::ini_parser(const std::string& filename) : filename_(filename), it_(line_.begin()), ch_(' ')
+bool ini_parser::has_section(const std::string& section)
 {
-	open_file(filename_);
-}
-
-ini_parser::~ini_parser()
-{
-	close_file();
-}
-
-bool ini_parser::open_file(const std::string& filename)
-{
-	close_file();
-
-	fs_.open(filename, std::ios::in | std::ios::out);
-	if(!fs_.is_open())
+	for(auto& i : sections_)
 	{
-		std::stderr << "Failed to open " << filename;
-		return false;
+		if(i->section == section)
+			return true;
 	}
-	return true;
+	return false;
 }
 
-void ini_parser::close_file()
-{
-	if(fs_.is_open())
-	{
-		fs_.close();
-	}
-}
-
-bool ini_parser::reload_file(const std::string& filename)
-{
-	filename_ = filename;
-	return open_file(filename_);
-}
-
-char ini_parser::getchar()
-{
-	if(it_ != line_.end())
-	{
-		*it_++;
-	}
-	else
-	{
-		if(std::getline(fs_, line_, '#'))
-		{
-			it_ = line_.begin();
-			return *it_++;
-		}
-	}
-	return EOF;
-}
-
-bool ini_parser::scan(const char need)
-{
-	ch_ = getchar();
-	if(need)
-	{
-		if(ch_ != need)
-			return false;
-
-		ch_ = getchar();
-		return true;
-	}
-	return true;
-}
-
-void ini_parser::tokenize()
-{
-	std::string section;
-	std::string name;
-	std::string value;
-	std::pair<token, std::string> res;
-
-	while(ch_ != EOF)
-	{
-		while(ch_ == ' ' || ch_ == '\t')
-			scan();
-
-		{
-			switch(ch_)
-			{
-					// 跳过注释
-				case '#':
-				case ';':
-					while(ch_ != EOF)
-						scan();
-					break;
-					// section
-				case '[': 
-					whle(!scan(']'))
-					{
-						if(ch_ == '\0')
-							std::stderr << "section: error!";
-						section.push(ch);
-					}
-					res = std::make_pair(SECTION, section);
-					section.clear();
-				default:
-
-					break;
-			}
-		}
-		if(res.empty())
-			return res;
-	}
-}
-
-void ini_parser::analyse()
-{
-	auto value = tokenize();
-	switch(value.first)
-	{
-
-	}
-}
-
-void ini_parser::parse()
+bool ini_parser::read_ini(const std::string& file, std::string& error)
 {
 	std::string line;
-	std::string section;
 	std::string key;
 	std::string value;
-	int line = 1;
+	size_t line_no = 0;
+	section* section = 0;
 
-	while(std::getline(fs_, line, '#'))
+	std::fstream fs;
+	fs.open(file, std::ios::in);
+	if(!fs.is_open())
 	{
-		for(int i = 0, i < line.size(); ++i)
+		error = "open file '" + file + "' failed.";
+		return false;
+	}
+
+	while(fs.good())
+	{
+		++line_no;
+		std::getline(fs, line);
+		if(!fs_.good() && !fs.eof())
 		{
-			char ch = line[i];
-			switch(ch)
+			error = ("Read error. Line: " + line_no);
+			return false;
+		}
+		utils::trim(line);
+		if(!line.empty())
+		{
+			if(line[0] == ';' || line[0] == '#')
+			{}
+			else if(line[0] == '[')
 			{
-				case '#':
-				case ';':
+				if(section && section->properties.empty())
+				{
+					// section如果没有ke-value,则忽略这section.
+					sections_.pop_back();
+				}
 
-					break;
-				case '[':
-					break;
-				case ' ':
-				case '\t':
+				auto pos = line.find(']');
+				if(pos == std::string::npos)
+				{
+					error = ("Unmatched '['. Line:" + line_no);
+					return false;
+				}
+				key = line.substr(1, pos - 1);
+				utils::trim(key);
+				
+				if(has_section(key))
+				{
+					error = ("Has the same section. Line:" + line_no);
+					return false;
+				}
+
+				std::shared_ptr<ini_parser::section> s(new ini_parser::section);
+				assert(s);
+				section = s.get();
+				s->section = key;
+				sections_.push_back(s);
+			}
+			else
+			{
+				if(!section)
+				{
+					// 没有section则跳过
 					continue;
+				}
+				auto pos = line.find('=');
+				if(pos == std::string::npos)
+				{
+					error = ("'=' character not found. Line:" + line_no);
+					return false;
+				}
+				if(pos == 0)
+				{
+					error = ("Key expected. Line:" + line_no);
+					return false;
+				}
+				key = line.substr(0, pos);
+				value = line.substr(pos + 1);
+				utils::trim(key);
+				utils::trim(value);
 
+				if(section->has_key(key))
+				{
+					error = ("Has the same key in a section. Line:" + line_no);
+					return false;
+				}
+
+				section->properties.push_back(std::make_pair(key, value));
 			}
 		}
-		++line;
 	}
+	return true;
+}
+
+bool ini_parser::write_ini(const std::string& file, std::string& error)
+{
+	std::fstream fs;
+	fs.open(file, std::ios::out);
+	if(!fs.is_open())
+	{
+		error = "open file '" + file + "' failed.";
+		return false;
+	}
+
+	for(auto& i : sections_)
+	{
+		fs_ << "[" << i->section << "]" << std::endl;
+		for(auto& j : i->properties)
+		{
+			fs_ << j.first << " = " << j.second << std::endl;
+		}
+	}
+	return true;
+}
+
+void ini_parser::print()
+{
+	std::stringstream os;
+	for(auto& i : sections_)
+	{
+		os << "[" << i->section << "]" << std::endl;
+		for(auto& j : i->properties)
+		{
+			os << j.first << " = " << j.second << std::endl;
+		}
+	}
+	std::cout << os.str();
+}
+
+std::string ini_parser::get_value(const std::string& section, const std::string& key) const
+{
+	for(auto& i : sections_)
+	{
+		if(i->section == section)
+		{
+			for(auto& j : i->properties)
+			{
+				if(j.first == key)
+				{
+					return j.second;
+				}
+			}
+		}
+	}
+	return "";
 }

@@ -17,12 +17,12 @@
 /*
  * Base class for all the errors encountered.
  */
-struct Error : std::exception
+struct error : std::exception
 {
-	Error() : message() {}
-	Error(const std::string& msg) : message(msg) {}
+	error() : message() {}
+	error(const std::string& msg) : message(msg) {}
 
-	~Error() noexcept {}
+	~error() noexcept {}
 
 	const char* what() noexcept
 	{

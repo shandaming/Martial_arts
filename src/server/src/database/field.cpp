@@ -4,9 +4,28 @@
 
 #include "field.h"
 
+template<typename T>
+struct conversion
+{
+	template<typename D, typename Func>
+	static T get_value(D& d, Func func)
+	{
+		if(!data_.value)
+		{
+			return 0;
+		}
+		if(data_.raw)
+		{
+			return *reinterpret_cast<T*>(data_.value);
+		}
+		
+		return static_cast<T>(func((char*)data_.value, nullptr, 10));	
+	}
+}
+
 uint8_t field::get_uint8() const
 {
-	return get_int<uint8_t, Data, strtoul>(data_);
+	return conversion<uint8_t>::get_value(data_, strtoul);
 
 	if(!data_.value)
 	{

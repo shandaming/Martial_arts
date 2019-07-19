@@ -6,51 +6,45 @@
 #define CFG_INI_PARSER_H
 
 #include <fstream>
+#include <memory>
+#include <vector>
 
 class ini_parser
 {
 public:
-	ini_parser(const std::string& filename);
-	~ini_parser();
+	ini_parser() = default;
+	~ini_parser() = default;
 
-	ini_parser(const ini_parser&);
-	ini_parser& operator=(const ini_parser&);
+	ini_parser(const ini_parser&) = delete;
+	ini_parser& operator=(const ini_parser&) = delete;
 
-	ini_parser(ini_parser&&);
-	ini_parser& operator=(ini_parser&&);
+	bool read_ini(const std::string& file, std::string& error);
+	bool write_ini(const std::string& file, std::string& error);
+	void print();
 
-	bool open_file(const std::string& filename);
-	void close_file();
-
-	bool reload_file(const std::string& filename);
-
+	std::string get_value(const std::string& section, const std::string& key) const;
 private:
-	enum token
-	{
-		SECTION,
-		KEY,
-		VALUE
-	};
+	bool has_section(const std::string& section);
 
 	using section_property = std::pair<std::string, std::string>;
 	struct section
 	{
-		std::string name;
+		bool has_key(const std::string& key)
+		{
+			for(auto& i : properties)
+			{
+				if(i.first == key)
+					return true;
+			}
+			return false;
+		}
+
+		std::string section;
 		std::vector<section_property> properties;
 	};
 
-	char getchar();
-	bool scan(const char need = 0);
-	void tokenize();
-
-	void analyse();
-
-	std::string line_;
-	char ch_;
-	std::string::iterator it_;
-
 	std::string filename_;
-	std::vector<section> sections_;
+	std::vector<std::shared_ptr<section>> sections_;
 	std::fstream fs_;
 };
 
