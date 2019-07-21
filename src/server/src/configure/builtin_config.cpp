@@ -11,7 +11,7 @@ static std::string get_string_with_default_value(const std::string& section,
 		const std::string& key, Func func)
 {
 	const std::string& val = CONFIG_MGR->get_string_default(section, key, "");
-	return val.empty() ? func(), val;
+	return val.empty() ? func() : val;
 }
 
 std::string get_source_directory()

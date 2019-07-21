@@ -9,6 +9,7 @@ int main()
 		std::cout << error << std::endl;
 
 	std::cout << "String = " << CONFIG_MGR->get_value_default("string", "abc", std::string("123")) <<std::endl;
+	std::cout << "String = " << CONFIG_MGR->get_value_default("string", "abc", "123") <<std::endl;
 
 	uint8_t z = 0;
 	std::cout << "uint8 = " << CONFIG_MGR->get_value_default("int8", "int8", z) <<std::endl;

@@ -9,5 +9,7 @@
 
 #define MYSQL_EXECUTABLE	R"(/usr/bin/mysql)"
 #define SOURCE_DIRECTORY	R"(/home/mylw/service)"
+#define FULL_DATABASE		"db_full_world.sql"
+#define HOTFIXES_DATABASE	"db_hotfixes.sql"
 
 #endif

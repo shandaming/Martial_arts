@@ -6,86 +6,87 @@
 #define INI_CONFIG_H
 
 #include <algorithm>
+#include <type_traits>
 
 #include "ini_parser.h"
 
 namespace tlp
 {
+// 将字符串转换为对应的类型的直
 template<typename T>
-struct conversion
+struct convert_string
 {
-	T operator()(const std::string& str) { return str; }
+	constexpr typename std::enable_if_t<std::is_same_v<std::remove_const_t<T>, std::string>, std::string> operator()(const std::string& str) { return str; }
 };
-/*
-template<>
-struct conversion<const char*>
-{
-	const char* operator()(const std::string& str) { return str; }
-};
-*/
 
 template<>
-struct conversion<int8_t>
+struct convert_string<const char*>
+{
+	std::string operator()(const std::string& str) { return str; }
+};
+
+template<>
+struct convert_string<int8_t>
 {
 	int8_t operator()(const std::string& str) { return atoi(str.c_str()); }
 };
 
 template<>
-struct conversion<int16_t>
+struct convert_string<int16_t>
 {
 	int16_t operator()(const std::string& str) { return atoi(str.c_str()); }
 };
 
 template<>
-struct conversion<int32_t>
+struct convert_string<int32_t>
 {
 	int32_t operator()(const std::string& str) { return atol(str.c_str()); }
 };
 
 template<>
-struct conversion<int64_t>
+struct convert_string<int64_t>
 {
 	int64_t operator()(const std::string& str) { return atoll(str.c_str()); }
 };
 
 template<>
-struct conversion<uint8_t>
+struct convert_string<uint8_t>
 {
 	uint8_t operator()(const std::string& str) { return strtoul(str.c_str(), 0, 10); }
 };
 
 template<>
-struct conversion<uint16_t>
+struct convert_string<uint16_t>
 {
 	uint16_t operator()(const std::string& str) { return strtoul(str.c_str(), 0, 10); }
 };
 
 template<>
-struct conversion<uint32_t>
+struct convert_string<uint32_t>
 {
 	uint32_t operator()(const std::string& str) { return strtoul(str.c_str(), 0, 10); }
 };
 
 template<>
-struct conversion<uint64_t>
+struct convert_string<uint64_t>
 {
 	uint64_t operator()(const std::string& str) { return strtoull(str.c_str(), 0, 10); }
 };
 
 template<>
-struct conversion<float>
+struct convert_string<float>
 {
 	float operator()(const std::string& str) { return strtof(str.c_str(), 0); }
 };
 
 template<>
-struct conversion<double>
+struct convert_string<double>
 {
 	double operator()(const std::string& str) { return atof(str.c_str()); }
 };
 
 template<>
-struct conversion<bool>
+struct convert_string<bool>
 {
 	bool operator()(const std::string& str) 
 	{
@@ -111,7 +112,17 @@ public:
 		if(res.empty())
 			return def;
 		res.erase(std::remove(res.begin(), res.end(), '"'), res.end());
-		tlp::conversion<T> c;
+		tlp::convert_string<T> c;
+		return c(res);
+	}
+
+	std::string get_value_default(const std::string& section, const std::string& key, const char* def) const
+	{
+		std::string res = ini_.get_value(section, key);
+		if(res.empty())
+			return def;
+		res.erase(std::remove(res.begin(), res.end(), '"'), res.end());
+		tlp::convert_string<const char*> c;
 		return c(res);
 	}
 
