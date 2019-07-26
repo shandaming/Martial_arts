@@ -5,6 +5,9 @@
 #ifndef DATABASE_DB_UPDATE_H
 #define DATABASE_DB_UPDATE_H
 
+#include <string>
+#include <filesystem>
+
 class update_exception : public std::exception
 {
 public:
@@ -51,7 +54,7 @@ public:
 private:
 	static query_result retrieve(database_worker_pool<T>& pool, const std::string& query);
 	static void apply(database_worker_pool<T>& pool, const std::string& query);
-	static void apply_fiel(database_worker_pool<T>& pool, const path& path);
+	static void apply_file(database_worker_pool<T>& pool, const path& path);
 	static void apply_file(database_worker_pool<T>& pool, const std::string& host, const std::string& user, const std::string& password, const std::string& port_or_socket, const std::string& database, const path& path);
 };
 

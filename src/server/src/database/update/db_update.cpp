@@ -4,6 +4,8 @@
 
 #include <unistd.h>
 
+#include <cstdio>
+
 #include "db_update.h"
 #include "builtin_config.h"
 
@@ -210,10 +212,10 @@ bool db_updater<T>::create(database_worker_ool<T>& pool)
 
 	LOG_INFO << "sql.updates. Creating database \"" << pool.get_connection_info()->database << "\"...";
 
-	//
-	static const fs::path temp("create_table.sql");
+	// 临时文件的路径
+	static const path temp("create_table.sql");
 
-	//
+	// 创建临时查询以使用外部MySQL CLi
 	std::ofstream file(temp.generic_string());
 	if(!file.is_open())
 	{
@@ -231,12 +233,12 @@ bool db_updater<T>::create(database_worker_ool<T>& pool)
 	catch(update_exception&)
 	{
 		LOG_FATAL << "sql.updates. Failed to create database " << pool.get_connection_info()->database << "! Does the user (named in *.cfg) have 'create', 'alter', 'drop', 'insert' and 'delete' privileges on the MySQL server?";
-		fs::remove(temp);
+		remove(temp);
 		return false;
 	}
 
 	LOG_INFO << "sql.updates. Done.";
-	fs::remove(temp);
+	remove(temp);
 	return true;
 }
 
@@ -250,7 +252,7 @@ bool db_updater<T>::update(database_worker_pool<T>& pool)
 
 	LOG_INFO << "sql.updates. Updating " << db_updater<T>::get_table_name() << " database...";
 
-	const fs::path source_directory(get_source_directory());
+	const path source_directory(get_source_directory());
 	if(!is_directory(source_directory))
 	{
 		LOG_ERROR << "sql.updates. db_updater: The given source directory " << source_directory.generic_string() << " does not exist, change the path to the directory where your sql directory exists (for example c:\\source\\server). Shutting down.";
