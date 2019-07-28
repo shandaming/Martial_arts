@@ -5,6 +5,15 @@
 #ifndef UPDATE_FETCHER_H
 #define UPDATE_FETCHER_H
 
+#include <string>
+#include <functional>
+#include <set>
+#include <unordered_map>
+#include <vector>
+#include <cstdint>
+#include <memory>
+#include <filesystem>
+
 struct update_result
 {
 	update_result() : updated(0), recent(0), archived(0) {}
@@ -75,13 +84,18 @@ private:
 	typedef std::vector<update_fetcher::directory_entry> directory_storage;
 
 	locale_file_storage get_file_list() const;
+	// 第归查找更新sql文件存储到storage中
 	void fill_file_list_recursively(const path& path, locale_file_storage& storage, const state state, const uint32_t depth) const;
 
+	// 从数据库里查询所有要更新的包含目录
 	directory_storage receive_include_directories() const;
+	// 从数据库里查询文件的详细信息
 	applied_file_storage receive_applied_files() const;
 
+	// 读取文件里的sql语句
 	std::string read_sql_update(const path& file) const;
 
+	// 更新数据库
 	uint32_t apply(const path& path) const;
 
 	void update_entry(const applied_file_entry& entry, const uint32_t speed = 0) const;

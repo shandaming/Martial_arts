@@ -2,7 +2,10 @@
  * Copyright (C) 2019
  */
 
+#include <chrono>
+
 #include "update_fetcher.h"
+#include "logging.h"
 
 struct update_fetcher::directory_entry
 {
@@ -16,8 +19,8 @@ update_fetcher::update_fetcher(const path& source_directory,
 		const std::function<void(const std::string&)>& apply,
 		const std::function<void(const path&)> apply_file,
 		const std::function<query_result(const std::string&)>& retrieve) :
-	source_directory(std::make_unique<path>(source_directoru_)), 
-	apply_(apply_), apply_file(apply_file), retrieve_(retrieve) {}
+	source_directory_(std::make_unique<path>(source_directoru_)), 
+	apply_(apply), apply_file_(apply_file), retrieve_(retrieve) {}
 
 update_fetcher::locale_file_storage update_fetcher::get_file_list() const
 {
@@ -65,7 +68,7 @@ void update_fetcher::fill_file_list_recursively(const path& path, locale_file_st
 update_fetcher::directory_storage update_fetcher::receive_include_directories() const
 {
 	directory_storage directories;
-	const query_result result = retrieve("SELECT 'path', 'state' from updates_include");
+	const query_result result = retrieve_("SELECT 'path', 'state' from updates_include");
 	if(!result)
 	{
 		return directories;
@@ -77,7 +80,7 @@ update_fetcher::directory_storage update_fetcher::receive_include_directories() 
 		std::string path = fields[0].get_string();
 		if(path.substr(0, 1) == "S")
 		{
-			path = source_directory->generic_string() + path().substr(1);
+			path = source_directory_->generic_string() + path().substr(1);
 		}
 
 		const path p(path);
@@ -99,7 +102,7 @@ update_fetcher::directory_storage update_fetcher::receive_include_directories() 
 update_fetcher::applied_file_storage update_fetcher::receive_applied_files() const
 {
 	applied_file_storage map;
-	query_result result = retrieve("select 'name', 'hash', 'state', unix_timestamp('timestamp') from updates order by 'name' asc");
+	query_result result = retrieve_("select 'name', 'hash', 'state', unix_timestamp('timestamp') from updates order by 'name' asc");
 	if(!result)
 	{
 		return map;
@@ -322,7 +325,7 @@ uint32_t update_fetcher::apply(const path& path) const
 	// 基准查询速度
 	auto begin = time::now();
 	// 更新数据库
-	apply_file(path);
+	apply_file_(path);
 
 	// 返回查询应用的时间
 	return uint32_t(std::chrono::duration_cast<std::chrono::milliseconds>(time::now() - begin).count());
@@ -332,5 +335,54 @@ void update_fetcher::update_entry(const applied_file_entry& entry, const uint32_
 {
 	const std::string update = "replace into updates (name, hash, state, speed) values('" + entry.name + "', '" + entry.hash + "', '" + entry.get_state_as_string() + "', '" + std::to_string(speed) + "')";
 	// 更新数据库
-	apply(update);
+	apply_(update);
+}
+
+void update_fetcher::rename_entry(const std::string& from, const std::string& to) const
+{
+	// 删除目标（如果存在）
+	const std::string update = "delete from updates where name = '" + to + "'";
+	apply_(update);
+
+	// 改名
+	update = "update updates set name = '" + to + "' where name = '" + from + "'";
+	apply_(update);
+}
+
+void update_fetcher::clean_up(const applied_file_storage& storage) const
+{
+	if(storage.empty())
+	{
+		return;
+	}
+
+	std::stringstream update;
+	size_t remaining = storage.size();
+
+	update << "delete from updates where name in(";
+	for(auto& i : storage)
+	{
+		update << "'" << i.first << "'";
+		if((--remaining) > 0)
+		{
+			update << ",";
+		}
+	}
+	update << ")";
+
+	// 更新数据库
+	apply_(update.str());
+}
+
+void update_fetcher::update_state(const std::string& name, const state state) const
+{
+	const std::string update = "update updates set state = '" + applied_file_entry::state_conver(state) + "' + where name = '" + name + "'";
+
+	// 更新数据库
+	apply_(update);
+}
+
+bool update_fetcher::path_compare::operator()(const locale_file_entry& l, const locale_file_entry& r) const
+{
+	return l.first.filename().string() < r.first.filename().string();
 }
