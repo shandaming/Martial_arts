@@ -5,7 +5,7 @@
 #include <chrono>
 
 #include "update_fetcher.h"
-#include "logging.h"
+#include "log/logging.h"
 
 struct update_fetcher::directory_entry
 {

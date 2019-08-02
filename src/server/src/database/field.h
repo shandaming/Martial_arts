@@ -5,6 +5,11 @@
 #ifndef DATABASE_FIELD_H
 #define DATABASE_FIELD_H
 
+#include <string>
+#include <vector>
+#include <cstdint>
+
+// 字段类型
 enum class database_field_type : uint8_t
 {
 	null,
@@ -67,7 +72,7 @@ private:
 	bool is_numeric() const;
 
 	void set_byte_value(void* new_value, database_field_type new_type, uint32_t length);
-	void set_structure_value(char* new_value, data_base_field_type new_type, uint32_t length);
+	void set_structure_value(char* new_value, database_field_type new_type, uint32_t length);
 
 	void clean_up();
 
@@ -76,7 +81,7 @@ private:
 	{
 		uint32_t length;
 		void* value;
-		database_filed_type type;
+		database_field_type type;
 		bool raw;
 	} data_;
 #pragma pop(pop)

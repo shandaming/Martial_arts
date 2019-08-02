@@ -4,11 +4,13 @@
 
 #include "field.h"
 
+namespace
+{
 template<typename T>
 struct conversion
 {
 	template<typename D, typename Func>
-	static T get_value(D& d, Func func)
+	static T get_value(D& data, Func func)
 	{
 		if(!data_.value)
 		{
@@ -21,12 +23,13 @@ struct conversion
 		
 		return static_cast<T>(func((char*)data_.value, nullptr, 10));	
 	}
+};
 }
 
 uint8_t field::get_uint8() const
 {
 	return conversion<uint8_t>::get_value(data_, strtoul);
-
+/*
 	if(!data_.value)
 	{
 		return 0;
@@ -37,10 +40,13 @@ uint8_t field::get_uint8() const
 	}
 	
 	return static_cast<uint8_t>(strtoul((char*)data_.value, nullptr, 10));
+	*/
 }
 
 int8_t field::get_int8() const
 {
+	return conversion<int8_t>::get_value(data_, strtol);
+	/*
 	if(!data_.value)
 	{
 		return 0;
@@ -51,10 +57,13 @@ int8_t field::get_int8() const
 	}
 
 	return static_cast<int8_t>(strtol((char*)data_.value, nullptr, 10));
+	*/
 }
 
 uint16_t field::get_uint16() const
 {
+	return conversion<uint16_t>::get_value(data_, strtoul);
+	/*
 	if(!data_.value)
 	{
 		return 0;
@@ -65,10 +74,13 @@ uint16_t field::get_uint16() const
 	}
 
 	return static_cast<uint16_t>(strtoul((char*)data_.value, nullptr, 10));
+	*/
 }
 
 int16_t field::get_int16() const
 {
+	return conversion<int16_t>::get_value(data_, strtol);
+	/*
 	if(!data_.value)
 	{
 		return 0;
@@ -79,10 +91,13 @@ int16_t field::get_int16() const
 	}
 
 	return static_cast<int16_t>(strtol((char*)data_.value, nullptr, 10));
+	*/
 }
 
 uint32_t field::get_uint32() const
 {
+	return conversion<uint32_t>::get_value(data_, strtoul);
+	/*
 	if(!data_.value)
 	{
 		return 0;
@@ -93,10 +108,13 @@ uint32_t field::get_uint32() const
 	}
 
 	return static_cast<uint32_t>(strtoul((char*)data_.value, nullptr, 10));
+	*/
 }
 
 int32_t field::get_int32() const
 {
+	return conversion<int32_t>::get_value(data_, strtol);
+	/*
 	if(!data_.value)
 	{
 		return 0;
@@ -107,10 +125,13 @@ int32_t field::get_int32() const
 	}
 
 	return static_cast<int32_t>(strtol((char*)data_.value, nullptr, 10));
+	*/
 }
 
 uint64_t field::get_uint64() const
 {
+	return conversion<uint64_t>::get_value(data_, strtoull);
+	/*
 	if(!data_.value)
 	{
 		return 0;
@@ -121,10 +142,13 @@ uint64_t field::get_uint64() const
 	}
 
 	return static_cast<uint64_t>(strtoull((char*)data_.value, nullptr, 10));
+	*/
 }
 
 int64_t field::get_int64() const
 {
+	return conversion<int64_t>::get_value(data_, strtoll);
+	/*
 	if(!data_.value)
 	{
 		return 0;
@@ -135,6 +159,7 @@ int64_t field::get_int64() const
 	}
 
 	return static_cast<int64_t>(strtoll((char*)data_.value, nullptr, 10));
+	*/
 }
 
 float field::get_float() const

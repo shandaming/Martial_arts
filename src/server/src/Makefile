@@ -111,7 +111,15 @@ am_world_server_OBJECTS = main.$(OBJEXT) net/acceptor.$(OBJEXT) \
 	log/logging.$(OBJEXT) log/log_file.$(OBJEXT) \
 	log/log_stream.$(OBJEXT) common/thread.$(OBJEXT) \
 	common/timestamp.$(OBJEXT) common/system_info.$(OBJEXT) \
-	common/string_utils.$(OBJEXT)
+	common/string_utils.$(OBJEXT) \
+	database/update/update_fetcher.$(OBJEXT) \
+	database/update/db_update.$(OBJEXT) database/field.$(OBJEXT) \
+	database/database_loader.$(OBJEXT) \
+	database/mysql_connection.$(OBJEXT) \
+	database/mysql_pool.$(OBJEXT) database/query_result.$(OBJEXT) \
+	configure/builtin_config.$(OBJEXT) configure/config.$(OBJEXT) \
+	configure/ini_parser.$(OBJEXT) configure/revision.$(OBJEXT) \
+	configure/string_utils.$(OBJEXT)
 world_server_OBJECTS = $(am_world_server_OBJECTS)
 world_server_DEPENDENCIES =
 AM_V_P = $(am__v_P_$(V))
@@ -132,11 +140,24 @@ am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/main.Po \
 	common/$(DEPDIR)/string_utils.Po \
 	common/$(DEPDIR)/system_info.Po common/$(DEPDIR)/thread.Po \
-	common/$(DEPDIR)/timestamp.Po log/$(DEPDIR)/async_log.Po \
-	log/$(DEPDIR)/log_file.Po log/$(DEPDIR)/log_stream.Po \
-	log/$(DEPDIR)/logging.Po net/$(DEPDIR)/acceptor.Po \
-	net/$(DEPDIR)/buffer.Po net/$(DEPDIR)/channel.Po \
-	net/$(DEPDIR)/event_loop.Po net/$(DEPDIR)/event_loop_thread.Po \
+	common/$(DEPDIR)/timestamp.Po \
+	configure/$(DEPDIR)/builtin_config.Po \
+	configure/$(DEPDIR)/config.Po \
+	configure/$(DEPDIR)/ini_parser.Po \
+	configure/$(DEPDIR)/revision.Po \
+	configure/$(DEPDIR)/string_utils.Po \
+	database/$(DEPDIR)/database_loader.Po \
+	database/$(DEPDIR)/field.Po \
+	database/$(DEPDIR)/mysql_connection.Po \
+	database/$(DEPDIR)/mysql_pool.Po \
+	database/$(DEPDIR)/query_result.Po \
+	database/update/$(DEPDIR)/db_update.Po \
+	database/update/$(DEPDIR)/update_fetcher.Po \
+	log/$(DEPDIR)/async_log.Po log/$(DEPDIR)/log_file.Po \
+	log/$(DEPDIR)/log_stream.Po log/$(DEPDIR)/logging.Po \
+	net/$(DEPDIR)/acceptor.Po net/$(DEPDIR)/buffer.Po \
+	net/$(DEPDIR)/channel.Po net/$(DEPDIR)/event_loop.Po \
+	net/$(DEPDIR)/event_loop_thread.Po \
 	net/$(DEPDIR)/event_loop_threadpool.Po \
 	net/$(DEPDIR)/inet_address.Po net/$(DEPDIR)/net_utils.Po \
 	net/$(DEPDIR)/poller.Po net/$(DEPDIR)/socket.Po \
@@ -198,16 +219,16 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O0
+CXXFLAGS = -O3
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
-EGREP = /bin/grep -E
+EGREP = /usr/bin/grep -E
 EXEEXT = 
-GREP = /bin/grep
+GREP = /usr/bin/grep
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
@@ -218,7 +239,7 @@ LIBOBJS =
 LIBS = 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/mylw/Martial_arts/src/server/missing makeinfo
-MKDIR_P = /bin/mkdir -p
+MKDIR_P = /usr/bin/mkdir -p
 OBJEXT = o
 PACKAGE = full-package-name
 PACKAGE_BUGREPORT = BUG-REPORT-ADDRESS
@@ -299,10 +320,23 @@ world_server_SOURCES = main.cpp \
 				 common/thread.cpp \
 				 common/timestamp.cpp \
 				 common/system_info.cpp \
-				 common/string_utils.cpp
+				 common/string_utils.cpp \
+				 database/update/update_fetcher.cpp \
+				 database/update/db_update.cpp \
+				 database/field.cpp \
+				 database/database_loader.cpp \
+				 database/mysql_connection.cpp \
+				 database/mysql_pool.cpp \
+				 database/prepared_statement_cpp \
+				 database/query_result.cpp \
+				 configure/builtin_config.cpp \
+				 configure/config.cpp \
+				 configure/ini_parser.cpp \
+				 configure/revision.cpp \
+				 configure/string_utils.cpp
 
 world_server_LDADD = -lstdc++fs 
-AM_CXXFLAGS = -std=c++17 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines
+AM_CXXFLAGS = -std=c++1z -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines
 all: all-am
 
 .SUFFIXES:
@@ -439,6 +473,49 @@ common/system_info.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
 common/string_utils.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
+database/update/$(am__dirstamp):
+	@$(MKDIR_P) database/update
+	@: > database/update/$(am__dirstamp)
+database/update/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) database/update/$(DEPDIR)
+	@: > database/update/$(DEPDIR)/$(am__dirstamp)
+database/update/update_fetcher.$(OBJEXT):  \
+	database/update/$(am__dirstamp) \
+	database/update/$(DEPDIR)/$(am__dirstamp)
+database/update/db_update.$(OBJEXT): database/update/$(am__dirstamp) \
+	database/update/$(DEPDIR)/$(am__dirstamp)
+database/$(am__dirstamp):
+	@$(MKDIR_P) database
+	@: > database/$(am__dirstamp)
+database/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) database/$(DEPDIR)
+	@: > database/$(DEPDIR)/$(am__dirstamp)
+database/field.$(OBJEXT): database/$(am__dirstamp) \
+	database/$(DEPDIR)/$(am__dirstamp)
+database/database_loader.$(OBJEXT): database/$(am__dirstamp) \
+	database/$(DEPDIR)/$(am__dirstamp)
+database/mysql_connection.$(OBJEXT): database/$(am__dirstamp) \
+	database/$(DEPDIR)/$(am__dirstamp)
+database/mysql_pool.$(OBJEXT): database/$(am__dirstamp) \
+	database/$(DEPDIR)/$(am__dirstamp)
+database/query_result.$(OBJEXT): database/$(am__dirstamp) \
+	database/$(DEPDIR)/$(am__dirstamp)
+configure/$(am__dirstamp):
+	@$(MKDIR_P) configure
+	@: > configure/$(am__dirstamp)
+configure/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) configure/$(DEPDIR)
+	@: > configure/$(DEPDIR)/$(am__dirstamp)
+configure/builtin_config.$(OBJEXT): configure/$(am__dirstamp) \
+	configure/$(DEPDIR)/$(am__dirstamp)
+configure/config.$(OBJEXT): configure/$(am__dirstamp) \
+	configure/$(DEPDIR)/$(am__dirstamp)
+configure/ini_parser.$(OBJEXT): configure/$(am__dirstamp) \
+	configure/$(DEPDIR)/$(am__dirstamp)
+configure/revision.$(OBJEXT): configure/$(am__dirstamp) \
+	configure/$(DEPDIR)/$(am__dirstamp)
+configure/string_utils.$(OBJEXT): configure/$(am__dirstamp) \
+	configure/$(DEPDIR)/$(am__dirstamp)
 
 world_server$(EXEEXT): $(world_server_OBJECTS) $(world_server_DEPENDENCIES) $(EXTRA_world_server_DEPENDENCIES) 
 	@rm -f world_server$(EXEEXT)
@@ -447,6 +524,9 @@ world_server$(EXEEXT): $(world_server_OBJECTS) $(world_server_DEPENDENCIES) $(EX
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f common/*.$(OBJEXT)
+	-rm -f configure/*.$(OBJEXT)
+	-rm -f database/*.$(OBJEXT)
+	-rm -f database/update/*.$(OBJEXT)
 	-rm -f log/*.$(OBJEXT)
 	-rm -f net/*.$(OBJEXT)
 
@@ -458,6 +538,18 @@ include common/$(DEPDIR)/string_utils.Po # am--include-marker
 include common/$(DEPDIR)/system_info.Po # am--include-marker
 include common/$(DEPDIR)/thread.Po # am--include-marker
 include common/$(DEPDIR)/timestamp.Po # am--include-marker
+include configure/$(DEPDIR)/builtin_config.Po # am--include-marker
+include configure/$(DEPDIR)/config.Po # am--include-marker
+include configure/$(DEPDIR)/ini_parser.Po # am--include-marker
+include configure/$(DEPDIR)/revision.Po # am--include-marker
+include configure/$(DEPDIR)/string_utils.Po # am--include-marker
+include database/$(DEPDIR)/database_loader.Po # am--include-marker
+include database/$(DEPDIR)/field.Po # am--include-marker
+include database/$(DEPDIR)/mysql_connection.Po # am--include-marker
+include database/$(DEPDIR)/mysql_pool.Po # am--include-marker
+include database/$(DEPDIR)/query_result.Po # am--include-marker
+include database/update/$(DEPDIR)/db_update.Po # am--include-marker
+include database/update/$(DEPDIR)/update_fetcher.Po # am--include-marker
 include log/$(DEPDIR)/async_log.Po # am--include-marker
 include log/$(DEPDIR)/log_file.Po # am--include-marker
 include log/$(DEPDIR)/log_stream.Po # am--include-marker
@@ -619,6 +711,12 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f common/$(DEPDIR)/$(am__dirstamp)
 	-rm -f common/$(am__dirstamp)
+	-rm -f configure/$(DEPDIR)/$(am__dirstamp)
+	-rm -f configure/$(am__dirstamp)
+	-rm -f database/$(DEPDIR)/$(am__dirstamp)
+	-rm -f database/$(am__dirstamp)
+	-rm -f database/update/$(DEPDIR)/$(am__dirstamp)
+	-rm -f database/update/$(am__dirstamp)
 	-rm -f log/$(DEPDIR)/$(am__dirstamp)
 	-rm -f log/$(am__dirstamp)
 	-rm -f net/$(DEPDIR)/$(am__dirstamp)
@@ -637,6 +735,18 @@ distclean: distclean-am
 	-rm -f common/$(DEPDIR)/system_info.Po
 	-rm -f common/$(DEPDIR)/thread.Po
 	-rm -f common/$(DEPDIR)/timestamp.Po
+	-rm -f configure/$(DEPDIR)/builtin_config.Po
+	-rm -f configure/$(DEPDIR)/config.Po
+	-rm -f configure/$(DEPDIR)/ini_parser.Po
+	-rm -f configure/$(DEPDIR)/revision.Po
+	-rm -f configure/$(DEPDIR)/string_utils.Po
+	-rm -f database/$(DEPDIR)/database_loader.Po
+	-rm -f database/$(DEPDIR)/field.Po
+	-rm -f database/$(DEPDIR)/mysql_connection.Po
+	-rm -f database/$(DEPDIR)/mysql_pool.Po
+	-rm -f database/$(DEPDIR)/query_result.Po
+	-rm -f database/update/$(DEPDIR)/db_update.Po
+	-rm -f database/update/$(DEPDIR)/update_fetcher.Po
 	-rm -f log/$(DEPDIR)/async_log.Po
 	-rm -f log/$(DEPDIR)/log_file.Po
 	-rm -f log/$(DEPDIR)/log_stream.Po
@@ -705,6 +815,18 @@ maintainer-clean: maintainer-clean-am
 	-rm -f common/$(DEPDIR)/system_info.Po
 	-rm -f common/$(DEPDIR)/thread.Po
 	-rm -f common/$(DEPDIR)/timestamp.Po
+	-rm -f configure/$(DEPDIR)/builtin_config.Po
+	-rm -f configure/$(DEPDIR)/config.Po
+	-rm -f configure/$(DEPDIR)/ini_parser.Po
+	-rm -f configure/$(DEPDIR)/revision.Po
+	-rm -f configure/$(DEPDIR)/string_utils.Po
+	-rm -f database/$(DEPDIR)/database_loader.Po
+	-rm -f database/$(DEPDIR)/field.Po
+	-rm -f database/$(DEPDIR)/mysql_connection.Po
+	-rm -f database/$(DEPDIR)/mysql_pool.Po
+	-rm -f database/$(DEPDIR)/query_result.Po
+	-rm -f database/update/$(DEPDIR)/db_update.Po
+	-rm -f database/update/$(DEPDIR)/update_fetcher.Po
 	-rm -f log/$(DEPDIR)/async_log.Po
 	-rm -f log/$(DEPDIR)/log_file.Po
 	-rm -f log/$(DEPDIR)/log_stream.Po

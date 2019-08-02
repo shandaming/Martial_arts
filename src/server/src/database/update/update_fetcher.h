@@ -14,6 +14,8 @@
 #include <memory>
 #include <filesystem>
 
+#include "database/query_result.h"
+
 struct update_result
 {
 	update_result() : updated(0), recent(0), archived(0) {}

@@ -16,7 +16,7 @@ AC_ARG_ENABLE(debug,
 	[],
 	[enable_debug=no])
 AS_IF([test "$enable_debug" = "yes"],[CXXFLAGS="-g -O0"],
-	[test "$enable_debug" = "no"],[CXXFLAGS="-O2"],
+	[test "$enable_debug" = "no"],[CXXFLAGS="-O3"],
 	[])
 
 # Checks for libraries.

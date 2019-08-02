@@ -23,7 +23,7 @@ public:
 	bool listen();
 	int accept(Inet_address& addr);
 
-	bool connect(const Inet_address& addr);
+	bool connect(Inet_address& addr);
 
 	void shutdown_write();
 

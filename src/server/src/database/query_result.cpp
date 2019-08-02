@@ -123,6 +123,7 @@ bool result_set::next_row()
 		return false;
 	}
 
+	// 获取字段数
 	unsigned long* lengths = mysql_fetch_lengths(result_);
 	if(!lengths)
 	{
