@@ -201,8 +201,10 @@ base_location::DB_updater<T>::get_base_location_type()
 template<typename T>
 bool db_updater<T>::create(database_worker_ool<T>& pool)
 {
-	LOG_INFO << "sql.update. Dtabase\"" << pool.get_connection_info()->database << "\" does not exist, do you want to create it? [yes (default) / no]:";
+	LOG_INFO << "sql.update. Dtabase\"" << pool.get_connection_info()->database 
+		<< "\" does not exist, do you want to create it? [yes (default) / no]:";
 
+	// 从控制台获取是否更新
 	std::string answer;
 	std::getline(std::cin, answer);
 	if(!answer.empty() && !(answer.substr(0, 1) == 'y'))
@@ -223,7 +225,9 @@ bool db_updater<T>::create(database_worker_ool<T>& pool)
 		return false;
 	}
 
-	file << "create database '" << pool.get_connection_info()->database << "' default character set utf8 collate utf8_general_ci\n\n";
+	// 文件里写入创建数据库sql
+	file << "create database '" << pool.get_connection_info()->database 
+		<< "' default character set utf8 collate utf8_general_ci\n\n";
 	file.close();
 
 	try
@@ -232,13 +236,15 @@ bool db_updater<T>::create(database_worker_ool<T>& pool)
 	}
 	catch(update_exception&)
 	{
-		LOG_FATAL << "sql.updates. Failed to create database " << pool.get_connection_info()->database << "! Does the user (named in *.cfg) have 'create', 'alter', 'drop', 'insert' and 'delete' privileges on the MySQL server?";
+		LOG_FATAL << "sql.updates. Failed to create database " << pool.get_connection_info()->database 
+			<< "! Does the user (named in *.cfg) have 'create', 'alter', 'drop', \
+			'insert' and 'delete' privileges on the MySQL server?";
 		remove(temp);
 		return false;
 	}
 
 	LOG_INFO << "sql.updates. Done.";
-	remove(temp);
+	remove(temp); // 删除临时文集
 	return true;
 }
 
@@ -367,51 +373,60 @@ void db_updater<T>::apply_file(database_worker_pool<T>& pool, const path& path)
 }
 
 template<typename T>
-void db_updater<T>:: apply_file(database_worker_pool<T>& pool, const std::string& host, const std::string& user, const std::string& password, const std::string& port_or_socket, const std::string& database, const path& path)
+void db_updater<T>:: apply_file(database_worker_pool<T>& pool, const std::string& host,
+		const std::string& user, const std::string& password, const std::string& port_or_socket, 
+		const std::string& database, const path& path)
 {
 	std::vector<std::string> args;
 	args.reserve(8);
 
-	//
+	// args[0] 是程序名
 	args.push_back("mysql");
-	//
-	args.push_back("-h" + host);
-	args.push_back("-u" + user);
+	// 客户端连接信息
+	args.push_back("-h" + host); // 主机名
+	args.push_back("-u" + user); // mysql用户名
 
 	if(!password.empty())
 	{
-		args.push_back("-p" + password);
+		args.push_back("-p" + password); // mysql秘密
 	}
 	
-	//
+	// 检测是否通过IP或socket连接
 	if(!isdigit(port_or_socket))
 	{
-		//
+		// 如果host =='.' 我们不能检测，因为开启socket会被命名为localhost
 		args.push_back("-P0");
 		args.push_back("-protocol=SOCKET");
 		args.push_back("-S" + port_or_socket);
 	}
 	else
 	{
+		// 一般情况
 		args.push_back("-P" + port_or_socket);
 	}
 
-	//
+	// 设置字符集为utf8
 	args.push_back("--default-character-set=utf8");
-	//
+	// 设置允许的最大数据包为1GB
 	args.push_back("--max-allowed-packet=1GB");
 
-	//
+	// 数据库
 	if(!database.empty())
 	{
 		args.push_back(database);
 	}
-	//
-	const int ret = trinity::start_pocess(db_updater_util::get_corected_mysql_executable(), args, "sql.updates", path.generic_string(), true);
+	// 调用一个不会泄露证书到日志里的mysql进程
+	const int ret = trinity::start_pocess(db_updater_util::get_corrected_mysql_executable(), args, 
+			"sql.updates", path.generic_string(), true);
 
 	if(ret != EXIT_SUCCESS)
 	{
-		LOG_FATAL << "sql. updates. Applying of file '" << path.generic_string() << "' to database '" << pool.get_connection_info()->database << "' failed! If you are a user, please pull the latest revision from the repository. Also make sure you have not applied any of the database with your sql client. You cannot use auto-update system and import sql files from TrinityCore repository with your sql client. If you are a developer, please fix you sql Query.";
+		LOG_FATAL << "sql. updates. Applying of file '" << path.generic_string() 
+			<< "' to database '" << pool.get_connection_info()->database 
+			<< "' failed! If you are a user, please pull the latest revision from the repository.\
+			Also make sure you have not applied any of the database with your sql client. \
+			You cannot use auto-update system and import sql files from TrinityCore repository with your sql client.\
+			If you are a developer, please fix you sql Query.";
 		throw update_exception("update failed.");
 	}
 }

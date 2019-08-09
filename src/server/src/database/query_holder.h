@@ -26,6 +26,10 @@ private:
 	std::vector<std::pair<prepared_statement_base*, prepared_query_result>> queries_;
 };
 
+typedef std::future<sql_query_holder_base*> query_result_holder_future;
+typedef std::promise<sql_query_holder_base*> query_result_holder_promise;
+
+
 template<typename T>
 class sql_query_holder : public sql_query_holder_base
 {

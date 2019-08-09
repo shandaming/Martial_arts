@@ -21,16 +21,18 @@ private:
 
 enum base_location
 {
-	LOCATION_REPOSITORY,
-	LOCATION_DOWNLOAD
+	LOCATION_REPOSITORY, // 位置存储
+	LOCATION_DOWNLOAD // 位置下载
 };
 
 class DB_updater_util
 {
 public:
+	// 获取mysql可执行程序的路径
 	static std::string get_corrected_mysql_executable();
 	static bool check_executable();
 private:
+	// 正确的路径
 	static std::string& corrected_path();
 };
 
@@ -55,6 +57,7 @@ private:
 	static query_result retrieve(database_worker_pool<T>& pool, const std::string& query);
 	static void apply(database_worker_pool<T>& pool, const std::string& query);
 	static void apply_file(database_worker_pool<T>& pool, const path& path);
+	// 开启一个mysql进程并连接数据库执行文件里的sql
 	static void apply_file(database_worker_pool<T>& pool, const std::string& host, const std::string& user, const std::string& password, const std::string& port_or_socket, const std::string& database, const path& path);
 };
 
