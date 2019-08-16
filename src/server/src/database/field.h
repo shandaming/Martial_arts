@@ -27,7 +27,8 @@ enum class database_field_type : uint8_t
 class field
 {
 public:
-	field() : data_.length(0), data_.value(nullptr), data_.type(database_field_type::null), data_.raw(false) {}
+	field() : data_.length(0), data_.value(nullptr), data_.type(database_field_type::null), 
+		data_.raw(false) {}
 
 	~field();
 
@@ -43,7 +44,7 @@ public:
 	int32_t get_int32() const;
 
 	uint64_t get_uint64() const;
-	int64_t get_int64_t() const;
+	int64_t get_int64() const;
 
 	float get_float() const;
 	double get_double() const;

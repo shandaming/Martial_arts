@@ -2,26 +2,34 @@
  * Copyright (C) 2019
  */
 
+#include <cstdlib>
+#include <cstring>
+
 #include "field.h"
 
 namespace
 {
+double a2f(const char* str, char*, int)
+{
+	return std::stof(str);
+}
+
 template<typename T>
 struct conversion
 {
 	template<typename D, typename Func>
 	static T get_value(D& data, Func func)
 	{
-		if(!data_.value)
+		if(!data.value)
 		{
-			return 0;
+			return T(0);
 		}
-		if(data_.raw)
+		if(data.raw)
 		{
-			return *reinterpret_cast<T*>(data_.value);
+			return *reinterpret_cast<T*>(data.value);
 		}
 		
-		return static_cast<T>(func((char*)data_.value, nullptr, 10));	
+		return static_cast<T>(func((char*)data.value, nullptr, 10));
 	}
 };
 }
@@ -164,6 +172,8 @@ int64_t field::get_int64() const
 
 float field::get_float() const
 {
+	return conversion<float>::get_value(data_, a2f);
+	/*
 	if(!data_.value)
 	{
 		return 0.0f;
@@ -173,10 +183,13 @@ float field::get_float() const
 		return *reinterpret_cast<float*>(data_.value);
 	}
 	return static_cast<float>(atof(char*)data_.value);
+	*/
 }
 
 double field::get_double() const
 {
+	return conversion<double>::get_value(data_, a2f);
+	/*
 	if(!data_.value)
 	{
 		return 0.0f;
@@ -186,6 +199,7 @@ double field::get_double() const
 		return *reinterpret_cast<double*>(data_.value);
 	}
 	return static_cast<double>(atof((char*)data_.value));
+	*/
 }
 
 const char* field::get_cstring() const
@@ -203,7 +217,7 @@ std::string field::get_string() const
 	{
 		return "";
 	}
-	return std::string(data_.value, data_.length);
+	return std::string(static_cast<char*>(data_.value), data_.length);
 }
 
 std::vector<uint8_t> field::get_binary() const
@@ -233,11 +247,11 @@ void field::set_byte_value(void* new_value, database_field_type new_type, uint32
 	// 此值存储必须稍后显式转换的原始字节
 	data_.value = new_value;
 	data_.length = length;
-	data_type = new_type;
+	data_.type = new_type;
 	data_.raw = true;
 }
 
-void field::set_structure_value(char* new_value, data_base_field_type new_type, uint32_t length)
+void field::set_structure_value(char* new_value, database_field_type new_type, uint32_t length)
 {
 	if(data_.value)
 	{

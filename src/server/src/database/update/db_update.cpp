@@ -55,12 +55,12 @@ std::string DB_updater_util::get_corrected_mysql_executable()
 bool DB_updater_util::check_executable()
 {
 	std::filesystem::path exe(get_corrected_mysql_executable())
-	if(!std::filesystem::exists(exe))
+	if(!std::filesystem::exists(exe)) // 不存在
 	{
 		exe = Trinity::search_executable_in_path("mysql"); // ?????
 		if(!exe.empty() && std::filesystem::exists(exe))
 		{
-			// 纠正cli的路径
+			// 纠正mysql cli的路径
 			corrected_path() = std::filesystem::absolute(exe).generic_string();
 			return true;
 		}
