@@ -2,22 +2,22 @@
  * Copyright (C) 2019
  */
 
-#ifndef BIND_STDIN_H
-#define BIND_STDIN_H
+#ifndef BIND_STDERR_H
+#define BIND_STDERR_H
 
 #include <unistd.h>
 
 #include "initializer.h"
 
-class bind_stdin : public initializer_base
+class bind_stderr : public initializer_base
 {
 public:
-	explicit bind_stdin(const int fd) : fd_(fd) {}
+	explicit bind_stderr(const int fd) : fd_(fd) {}
 
 	template<typename T>
 	void on_exec_setup(T&) const
 	{
-		::dup2(fd_, STDIN_FILENO);
+		::dup2(fd_, STDERR_FILENO);
 	}
 private:
 	const int fd_;

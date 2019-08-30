@@ -5,6 +5,8 @@
 #ifndef EXECUTOR_H
 #define EXECUTOR_H
 
+#include <unistd.h>
+
 struct executor
 {
 	executor() : exe(0), cmd_line(0), env(0) {}
@@ -77,20 +79,20 @@ struct executor
 	template<typename T>
 	child operator()(const T& seq)
 	{
-		std::for_each(seq, call_on_fork_setup(*this));
+		std::for_each(seq, call_on_fork_setup(*this)); // inherit_env有
 		pid_t pid = ::fork();
 		if(pid == -1)
 		{
-			std::for_each(seq, call_on_fork_error(*this));
+			std::for_each(seq, call_on_fork_error(*this)); // 都没有
 		}
 		else if(pid == 0)
 		{
-			std::for_each(seq, call_on_exec_setup(*this));
+			std::for_each(seq, call_on_exec_setup(*this)); // 除inherit_env其他都有
 			::execve(exe, cmd_line, env);
-			std::for_each(seq, call_on_exec_error(*this));
+			std::for_each(seq, call_on_exec_error(*this)); // 都没有
 			_exit(EXIT_FAILURE);
 		}
-		std::for_each(seq, call_on_fork_success(*this));
+		std::for_each(seq, call_on_fork_success(*this)); // 都没有
 		return child(pid);
 	}
 
@@ -103,6 +105,50 @@ template<typename... Args>
 child execute(Args&&... args)
 {
 	return executor()(std::make_tuple(std::forword<Args>(args)...));
+}
+
+child execute(const std::string& run_exe, const std::vector<std::string>& args, const int in_fd, const int out_fd, const int err_fd)
+{
+	const char** env = environ;
+
+	pid_t pid = ::fork();
+	if(pid == -1)
+	{
+		PROCESS_THROW_LAST_SYSTEM_ERROR("fork() failed.")
+	}
+	else if(pid == 0) // 子进程
+	{
+		std::unique_ptr<char*[]> cmdline(new char*[args.size() + 1]);
+		std::transform(args.begin(), args.end(), cmdline.get(), 
+				[](const std::string& s)
+				{ return const_cast<char*>(s.c_str()); });
+		cmdline[args.size()] = 0;
+
+		if(!run_exe.empty() && args.size() > 1)
+		{
+			const char* exe = args[0].c_str();
+			if(in_fd >= 0)
+			{
+				::dup2(in_fd, STDIN_FILENO);
+				::close(in_fd);
+			}
+			if(out_fd >= 0)
+			{
+				::dup2(out_fd, STDOUT_FILENO);
+				::close(out_fd);
+			}
+			if(err_fd >= 0)
+			{
+				::dup2(err_fd, STDERR_FILENO);
+				::close(err_fd);
+			}
+
+			::execve(exe, cmdline, env);
+
+			_exit(EXIT_FAILURE);
+		}
+	}
+	return child(pid);
 }
 
 #endif
