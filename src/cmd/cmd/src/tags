@@ -1,0 +1,505 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ACLOCAL	Makefile	/^ACLOCAL = ${SHELL} \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/missing aclocal-1.16$/;"	m
+ACLOCAL_M4	Makefile	/^ACLOCAL_M4 = $(top_srcdir)\/aclocal.m4$/;"	m
+AMTAR	Makefile	/^AMTAR = $${TAR-tar}$/;"	m
+AM_CXXFLAGS	Makefile	/^AM_CXXFLAGS = -std=c++17 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines$/;"	m
+AM_DEFAULT_VERBOSITY	Makefile	/^AM_DEFAULT_VERBOSITY = 1$/;"	m
+AM_V_CXX	Makefile	/^AM_V_CXX = $(am__v_CXX_$(V))$/;"	m
+AM_V_CXXLD	Makefile	/^AM_V_CXXLD = $(am__v_CXXLD_$(V))$/;"	m
+AM_V_GEN	Makefile	/^AM_V_GEN = $(am__v_GEN_$(V))$/;"	m
+AM_V_P	Makefile	/^AM_V_P = $(am__v_P_$(V))$/;"	m
+AM_V_at	Makefile	/^AM_V_at = $(am__v_at_$(V))$/;"	m
+AUTOCONF	Makefile	/^AUTOCONF = ${SHELL} \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/missing autoconf$/;"	m
+AUTOHEADER	Makefile	/^AUTOHEADER = ${SHELL} \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/missing autoheader$/;"	m
+AUTOMAKE	Makefile	/^AUTOMAKE = ${SHELL} \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/missing automake-1.16$/;"	m
+AUTOMAKE_OPTIONS	Makefile	/^AUTOMAKE_OPTIONS = foreign subdir-objects$/;"	m
+AWK	Makefile	/^AWK = mawk$/;"	m
+BOOST_ERRORS_VP_2003_01_02	errors.h	3;"	d
+BOOST_PARSERS_VP_2003_05_19	parsers.h	5;"	d
+BOOST_PROGRAM_OPTIONS_POSITIONAL_OPTIONS_VP_2004_03_02	positional_options.h	4;"	d
+BOOST_PROGRAM_OPTIONS_SOURCE	positional_options.cpp	2;"	d	file:
+BOOST_PROGRAM_OPTIONS_SOURCE	value_semantic.cpp	2;"	d	file:
+BOOST_PROGRAM_OPTIONS_SOURCE	variables_map.cpp	1;"	d	file:
+BOOST_VARIABLES_MAP_VP_2003_05_19	variables_map.h	3;"	d
+CC	Makefile	/^CC = gcc$/;"	m
+CCDEPMODE	Makefile	/^CCDEPMODE = depmode=gcc3$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -g -O2$/;"	m
+CMD_VALUE_SEMANTIC_H	value_semantic.h	6;"	d
+CONFIG_CLEAN_FILES	Makefile	/^CONFIG_CLEAN_FILES =$/;"	m
+CONFIG_CLEAN_VPATH_FILES	Makefile	/^CONFIG_CLEAN_VPATH_FILES =$/;"	m
+CONFIG_HEADER	Makefile	/^CONFIG_HEADER = $(top_builddir)\/config.h$/;"	m
+CPP	Makefile	/^CPP = gcc -E$/;"	m
+CPPFLAGS	Makefile	/^CPPFLAGS = $/;"	m
+CTAGS	Makefile	/^CTAGS = ctags$/;"	m
+CXX	Makefile	/^CXX = g++$/;"	m
+CXXCOMPILE	Makefile	/^CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \\$/;"	m
+CXXDEPMODE	Makefile	/^CXXDEPMODE = depmode=gcc3$/;"	m
+CXXFLAGS	Makefile	/^CXXFLAGS = -O2$/;"	m
+CXXLD	Makefile	/^CXXLD = $(CXX)$/;"	m
+CXXLINK	Makefile	/^CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \\$/;"	m
+CYGPATH_W	Makefile	/^CYGPATH_W = echo$/;"	m
+DECL	parsers.h	117;"	d
+DEFAULT_INCLUDES	Makefile	/^DEFAULT_INCLUDES = -I. -I$(top_builddir)$/;"	m
+DEFS	Makefile	/^DEFS = -DHAVE_CONFIG_H$/;"	m
+DEPDIR	Makefile	/^DEPDIR = .deps$/;"	m
+DISTFILES	Makefile	/^DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)$/;"	m
+DIST_COMMON	Makefile	/^DIST_COMMON = $(srcdir)\/Makefile.am $(am__DIST_COMMON)$/;"	m
+DIST_SOURCES	Makefile	/^DIST_SOURCES = $(world_server_SOURCES)$/;"	m
+ECHO_C	Makefile	/^ECHO_C = $/;"	m
+ECHO_N	Makefile	/^ECHO_N = -n$/;"	m
+ECHO_T	Makefile	/^ECHO_T = $/;"	m
+EGREP	Makefile	/^EGREP = \/usr\/bin\/grep -E$/;"	m
+ETAGS	Makefile	/^ETAGS = etags$/;"	m
+EXEEXT	Makefile	/^EXEEXT = $/;"	m
+GREP	Makefile	/^GREP = \/usr\/bin\/grep$/;"	m
+INSTALL	Makefile	/^INSTALL = \/usr\/bin\/install -c$/;"	m
+INSTALL_DATA	Makefile	/^INSTALL_DATA = ${INSTALL} -m 644$/;"	m
+INSTALL_HEADER	Makefile	/^INSTALL_HEADER = $(INSTALL_DATA)$/;"	m
+INSTALL_PROGRAM	Makefile	/^INSTALL_PROGRAM = ${INSTALL}$/;"	m
+INSTALL_SCRIPT	Makefile	/^INSTALL_SCRIPT = ${INSTALL}$/;"	m
+INSTALL_STRIP_PROGRAM	Makefile	/^INSTALL_STRIP_PROGRAM = $(install_sh) -c -s$/;"	m
+LDFLAGS	Makefile	/^LDFLAGS = $/;"	m
+LIBOBJS	Makefile	/^LIBOBJS = $/;"	m
+LIBS	Makefile	/^LIBS = $/;"	m
+LTLIBOBJS	Makefile	/^LTLIBOBJS = $/;"	m
+MAKEINFO	Makefile	/^MAKEINFO = ${SHELL} \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/missing makeinfo$/;"	m
+MKDIR_P	Makefile	/^MKDIR_P = \/usr\/bin\/mkdir -p$/;"	m
+NORMAL_INSTALL	Makefile	/^NORMAL_INSTALL = :$/;"	m
+NORMAL_UNINSTALL	Makefile	/^NORMAL_UNINSTALL = :$/;"	m
+OBJEXT	Makefile	/^OBJEXT = o$/;"	m
+OPTIONS_DESCRIPTION_H	options_description.h	6;"	d
+PACKAGE	Makefile	/^PACKAGE = full-package-name$/;"	m
+PACKAGE_BUGREPORT	Makefile	/^PACKAGE_BUGREPORT = BUG-REPORT-ADDRESS$/;"	m
+PACKAGE_NAME	Makefile	/^PACKAGE_NAME = FULL-PACKAGE-NAME$/;"	m
+PACKAGE_STRING	Makefile	/^PACKAGE_STRING = FULL-PACKAGE-NAME VERSION$/;"	m
+PACKAGE_TARNAME	Makefile	/^PACKAGE_TARNAME = full-package-name$/;"	m
+PACKAGE_URL	Makefile	/^PACKAGE_URL = $/;"	m
+PACKAGE_VERSION	Makefile	/^PACKAGE_VERSION = VERSION$/;"	m
+PATH_SEPARATOR	Makefile	/^PATH_SEPARATOR = :$/;"	m
+POST_INSTALL	Makefile	/^POST_INSTALL = :$/;"	m
+POST_UNINSTALL	Makefile	/^POST_UNINSTALL = :$/;"	m
+PRE_INSTALL	Makefile	/^PRE_INSTALL = :$/;"	m
+PRE_UNINSTALL	Makefile	/^PRE_UNINSTALL = :$/;"	m
+PROGRAMS	Makefile	/^PROGRAMS = $(bin_PROGRAMS)$/;"	m
+SET_MAKE	Makefile	/^SET_MAKE = $/;"	m
+SHELL	Makefile	/^SHELL = \/bin\/bash$/;"	m
+SOURCES	Makefile	/^SOURCES = $(world_server_SOURCES)$/;"	m
+STRIP	Makefile	/^STRIP = $/;"	m
+UTIL_CMDLINE_H	cmdline.h	2;"	d
+UTIL_OPTION_H	option.h	6;"	d
+VERSION	Makefile	/^VERSION = VERSION$/;"	m
+abs_builddir	Makefile	/^abs_builddir = \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/src$/;"	m
+abs_srcdir	Makefile	/^abs_srcdir = \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/src$/;"	m
+abs_top_builddir	Makefile	/^abs_top_builddir = \/home\/mylw\/Martial_arts\/src\/cmd\/cmd$/;"	m
+abs_top_srcdir	Makefile	/^abs_top_srcdir = \/home\/mylw\/Martial_arts\/src\/cmd\/cmd$/;"	m
+abstract_variables_map	variables_map.h	/^		abstract_variables_map() : next_(0) {}$/;"	f	class:abstract_variables_map
+abstract_variables_map	variables_map.h	/^        abstract_variables_map(const abstract_variables_map* next) : next_(next) {}$/;"	f	class:abstract_variables_map
+abstract_variables_map	variables_map.h	/^    class  abstract_variables_map {$/;"	c
+ac_ct_CC	Makefile	/^ac_ct_CC = gcc$/;"	m
+ac_ct_CXX	Makefile	/^ac_ct_CXX = g++$/;"	m
+add	options_description.cpp	/^options_description& options_description::add(const options_description& desc)$/;"	f	class:options_description
+add	options_description.cpp	/^void options_description::add(std::shared_ptr<option_description> desc)$/;"	f	class:options_description
+add	positional_options.cpp	/^    positional_options_description& positional_options_description::add(const char* name, int max_count)$/;"	f	class:positional_options_description
+add_context	errors.h	/^        void add_context(const std::string& option_name,$/;"	f	class:error_with_option_name
+add_options	options_description.h	/^	options_description_easy_init add_options()$/;"	f	class:options_description
+additional_parser	cmdline.h	/^				const std::string&)> additional_parser;$/;"	t	class:style_t::cmdline
+additional_parser_	cmdline.h	/^    additional_parser additional_parser_;$/;"	m	class:style_t::cmdline
+allow_dash_for_short	cmdline.h	/^	allow_dash_for_short = allow_short << 1,$/;"	m	class:style_t
+allow_guessing	cmdline.h	/^	allow_guessing = allow_sticky << 1,$/;"	m	class:style_t
+allow_long	cmdline.h	/^	allow_long = 1,$/;"	m	class:style_t
+allow_short	cmdline.h	/^	allow_short = allow_long << 1,$/;"	m	class:style_t
+allow_slash_for_short	cmdline.h	/^	allow_slash_for_short = allow_dash_for_short << 1,$/;"	m	class:style_t
+allow_sticky	cmdline.h	/^	allow_sticky = short_allow_next << 1,$/;"	m	class:style_t
+allow_unregistered	cmdline.cpp	/^void cmdline::allow_unregistered()$/;"	f	class:cmdline
+allow_unregistered	parsers.h	/^		 basic_command_line_parser<charT>::allow_unregistered()$/;"	f	class:basic_command_line_parser
+allow_unregistered_	cmdline.h	/^    bool allow_unregistered_;$/;"	m	class:style_t::cmdline
+alternatives	errors.h	/^        const std::vector<std::string>& alternatives() const throw() {return m_alternatives;}$/;"	f	class:ambiguous_option
+am__DIST_COMMON	Makefile	/^am__DIST_COMMON = $(srcdir)\/Makefile.in $(top_srcdir)\/depcomp$/;"	m
+am__aclocal_m4_deps	Makefile	/^am__aclocal_m4_deps = $(top_srcdir)\/configure.ac$/;"	m
+am__can_run_installinfo	Makefile	/^am__can_run_installinfo = \\$/;"	m
+am__cd	Makefile	/^am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd$/;"	m
+am__configure_deps	Makefile	/^am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \\$/;"	m
+am__define_uniq_tagged_files	Makefile	/^am__define_uniq_tagged_files = \\$/;"	m
+am__depfiles_remade	Makefile	/^am__depfiles_remade = .\/$(DEPDIR)\/main.Po \\$/;"	m
+am__include	Makefile	/^am__include = include$/;"	m
+am__installdirs	Makefile	/^am__installdirs = "$(DESTDIR)$(bindir)"$/;"	m
+am__is_gnu_make	Makefile	/^am__is_gnu_make = { \\$/;"	m
+am__leading_dot	Makefile	/^am__leading_dot = .$/;"	m
+am__make_dryrun	Makefile	/^am__make_dryrun = (target_option=n; $(am__make_running_with_option))$/;"	m
+am__make_keepgoing	Makefile	/^am__make_keepgoing = (target_option=k; $(am__make_running_with_option))$/;"	m
+am__make_running_with_option	Makefile	/^am__make_running_with_option = \\$/;"	m
+am__maybe_remake_depfiles	Makefile	/^am__maybe_remake_depfiles = depfiles$/;"	m
+am__mv	Makefile	/^am__mv = mv -f$/;"	m
+am__quote	Makefile	/^am__quote = $/;"	m
+am__tagged_files	Makefile	/^am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)$/;"	m
+am__tar	Makefile	/^am__tar = $${TAR-tar} chof - "$$tardir"$/;"	m
+am__uniquify_input	Makefile	/^am__uniquify_input = $(AWK) '\\$/;"	m
+am__untar	Makefile	/^am__untar = $${TAR-tar} xf -$/;"	m
+am__v_CXXLD_	Makefile	/^am__v_CXXLD_ = $(am__v_CXXLD_$(AM_DEFAULT_VERBOSITY))$/;"	m
+am__v_CXXLD_0	Makefile	/^am__v_CXXLD_0 = @echo "  CXXLD   " $@;$/;"	m
+am__v_CXXLD_1	Makefile	/^am__v_CXXLD_1 = $/;"	m
+am__v_CXX_	Makefile	/^am__v_CXX_ = $(am__v_CXX_$(AM_DEFAULT_VERBOSITY))$/;"	m
+am__v_CXX_0	Makefile	/^am__v_CXX_0 = @echo "  CXX     " $@;$/;"	m
+am__v_CXX_1	Makefile	/^am__v_CXX_1 = $/;"	m
+am__v_GEN_	Makefile	/^am__v_GEN_ = $(am__v_GEN_$(AM_DEFAULT_VERBOSITY))$/;"	m
+am__v_GEN_0	Makefile	/^am__v_GEN_0 = @echo "  GEN     " $@;$/;"	m
+am__v_GEN_1	Makefile	/^am__v_GEN_1 = $/;"	m
+am__v_P_	Makefile	/^am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))$/;"	m
+am__v_P_0	Makefile	/^am__v_P_0 = false$/;"	m
+am__v_P_1	Makefile	/^am__v_P_1 = :$/;"	m
+am__v_at_	Makefile	/^am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))$/;"	m
+am__v_at_0	Makefile	/^am__v_at_0 = @$/;"	m
+am__v_at_1	Makefile	/^am__v_at_1 = $/;"	m
+am_world_server_OBJECTS	Makefile	/^am_world_server_OBJECTS = main.$(OBJEXT) options_description.$(OBJEXT) \\$/;"	m
+ambiguous_option	errors.h	/^        ambiguous_option(const std::vector<std::string>& xalternatives)$/;"	f	class:ambiguous_option
+ambiguous_option	errors.h	/^    class  ambiguous_option : public error_with_no_option_name {$/;"	c
+apply_default	value_semantic.h	/^    bool apply_default(std::any&) const { return false; }$/;"	f	class:untyped_value
+apply_default	value_semantic.h	/^    virtual bool apply_default(std::any& value_store) const$/;"	f	class:typed_value
+approximate_match	options_description.h	/^	enum match_result { no_match, full_match, approximate_match };$/;"	e	enum:option_description::match_result
+approximation_range	options_description.h	/^    typedef std::pair<name2index_iterator, name2index_iterator> approximation_range;$/;"	t	class:options_description
+args_	cmdline.h	/^    std::vector<std::string> args_;$/;"	m	class:style_t::cmdline
+as	variables_map.h	/^       T& as() { return std::any_cast<T&>(v); }$/;"	f	class:variable_value
+as	variables_map.h	/^       const T& as() const { return std::any_cast<const T&>(v); }$/;"	f	class:variable_value
+at_least_one_value_required	errors.h	/^            at_least_one_value_required, $/;"	e	enum:validation_error::kind_t
+basic_command_line_parser	parsers.h	/^		 basic_command_line_parser(const std::vector<$/;"	f	class:basic_command_line_parser
+basic_command_line_parser	parsers.h	/^		 basic_command_line_parser(int argc, const charT* const argv[])$/;"	f	class:basic_command_line_parser
+basic_command_line_parser	parsers.h	/^    class basic_command_line_parser : private cmdline {$/;"	c
+basic_parsed_options	parsers.h	/^        explicit basic_parsed_options(const options_description* xdescription, int options_prefix = 0)$/;"	f	class:basic_parsed_options
+basic_parsed_options	parsers.h	/^    class basic_parsed_options {$/;"	c
+belong_to_group_	options_description.h	/^    std::vector<bool> belong_to_group_;$/;"	m	class:options_description
+bin_PROGRAMS	Makefile	/^bin_PROGRAMS = world_server$(EXEEXT)$/;"	m
+bindir	Makefile	/^bindir = ${exec_prefix}\/bin$/;"	m
+bool_switch	value_semantic.cpp	/^    bool_switch()$/;"	f
+bool_switch	value_semantic.cpp	/^    bool_switch(bool* v)$/;"	f
+boost	value_semantic.h	/^namespace boost { template<class T> class optional; }$/;"	n
+build_alias	Makefile	/^build_alias = $/;"	m
+builddir	Makefile	/^builddir = .$/;"	m
+canonical_display_name	options_description.cpp	/^std::string option_description::canonical_display_name(int prefix_style) const$/;"	f	class:option_description
+caption_	options_description.h	/^    std::string caption_;$/;"	m	class:options_description
+case_insensitive	option.h	/^    bool case_insensitive;$/;"	m	class:option
+check_first_occurrence	value_semantic.cpp	/^        void check_first_occurrence(const std::any& value)$/;"	f	namespace:validators
+check_style	cmdline.cpp	/^void cmdline::check_style(int style) const$/;"	f	class:cmdline
+clear	variables_map.cpp	/^    void variables_map::clear()$/;"	f	class:variables_map
+cmdline	cmdline.cpp	/^cmdline::cmdline(int argc, const char*const * argv)$/;"	f	class:cmdline
+cmdline	cmdline.h	/^	cmdline(const std::vector<std::string>& args) { init(args); }$/;"	f	class:style_t::cmdline
+cmdline	cmdline.h	/^class cmdline $/;"	c	class:style_t
+command_line_parser	parsers.h	/^    typedef basic_command_line_parser<char> command_line_parser;$/;"	t
+composing	value_semantic.h	/^    typed_value* composing()$/;"	f	class:typed_value
+composing_	value_semantic.h	/^    bool composing_, implicit_, multitoken_, zero_tokens_, required_;$/;"	m	class:typed_value
+datadir	Makefile	/^datadir = ${datarootdir}$/;"	m
+datarootdir	Makefile	/^datarootdir = ${prefix}\/share$/;"	m
+default_line_length	options_description.cpp	/^constexpr uint32_t options_description::default_line_length = 80;$/;"	m	class:options_description	file:
+default_line_length	options_description.h	/^	static constexpr uint32_t default_line_length;$/;"	m	class:options_description
+default_style	cmdline.h	/^	default_style = unix_style$/;"	m	class:style_t
+default_value	value_semantic.h	/^    typed_value* default_value(const T& v)$/;"	f	class:typed_value
+default_value	value_semantic.h	/^    typed_value* default_value(const T& v, const std::string& textual)$/;"	f	class:typed_value
+defaulted	variables_map.h	/^	   bool defaulted() const { return defaulted_; }$/;"	f	class:variable_value
+defaulted_	variables_map.h	/^        bool defaulted_;$/;"	m	class:variable_value
+depcomp	Makefile	/^depcomp = $(SHELL) $(top_srcdir)\/depcomp$/;"	m
+desc_	cmdline.h	/^    const options_description* desc_;$/;"	m	class:style_t::cmdline
+desc_	parsers.h	/^        const options_description* desc_;$/;"	m	class:basic_command_line_parser
+description	options_description.h	/^	const std::string& description() const { return description_; }$/;"	f	class:option_description
+description	parsers.h	/^        const options_description* description;$/;"	m	class:basic_parsed_options
+description_	options_description.h	/^    std::string description_;$/;"	m	class:option_description
+docdir	Makefile	/^docdir = ${datarootdir}\/doc\/${PACKAGE_TARNAME}$/;"	m
+duplicate_option_error	options_description.h	/^        duplicate_option_error(const std::string& xwhat) : error(xwhat) {}$/;"	f	class:duplicate_option_error
+duplicate_option_error	options_description.h	/^    class  duplicate_option_error : public error {$/;"	c
+dvidir	Makefile	/^dvidir = ${docdir}$/;"	m
+empty	variables_map.h	/^	   bool empty() const { return v_.empty(); }$/;"	f	class:variable_value
+empty_adjacent_parameter	errors.h	/^            empty_adjacent_parameter,$/;"	e	enum:invalid_syntax::kind_t
+error	errors.h	/^        error(const std::string& xwhat) : std::logic_error(xwhat) {}$/;"	f	class:error
+error	errors.h	/^    class  error : public std::logic_error {$/;"	c
+error_with_no_option_name	errors.h	/^        error_with_no_option_name(const std::string& template_,$/;"	f	class:error_with_no_option_name
+error_with_no_option_name	errors.h	/^    class  error_with_no_option_name : public error_with_option_name {$/;"	c
+error_with_option_name	errors.h	/^    class  error_with_option_name : public error {$/;"	c
+error_with_option_name	value_semantic.cpp	/^    error_with_option_name::error_with_option_name( const std::string& template_,$/;"	f	class:error_with_option_name
+exec_prefix	Makefile	/^exec_prefix = ${prefix}$/;"	m
+ext_parser	parsers.h	/^    typedef function1<std::pair<std::string, std::string>, const std::string&> ext_parser;$/;"	t
+extra_parameter	errors.h	/^            extra_parameter,$/;"	e	enum:invalid_syntax::kind_t
+extra_parser	parsers.h	/^		 basic_command_line_parser<charT>::extra_parser(ext_parser ext)$/;"	f	class:basic_command_line_parser
+extra_style_parser	cmdline.cpp	/^void cmdline::extra_style_parser(style_parser s)$/;"	f	class:cmdline
+extra_style_parser	parsers.h	/^		 basic_command_line_parser<charT>::extra_style_parser(style_parser s)$/;"	f	class:basic_command_line_parser
+final_	variables_map.h	/^        std::set<std::string> final_;$/;"	m	class:variables_map
+find	options_description.cpp	/^const option_description& options_description::find(const std::string& name, $/;"	f	class:options_description
+find_nothrow	options_description.cpp	/^const option_description* options_description::find_nothrow(const std::string& name, $/;"	f	class:options_description
+finish_option	cmdline.cpp	/^    void cmdline::finish_option(option& opt,$/;"	f	class:cmdline
+format_description	options_description.cpp	/^void format_description(std::ostream& os, const std::string& desc, $/;"	f	namespace:__anon2
+format_name	options_description.cpp	/^std::string option_description::format_name() const$/;"	f	class:option_description
+format_one	options_description.cpp	/^void format_one(std::ostream& os, const option_description& opt, $/;"	f	namespace:__anon2
+format_paragraph	options_description.cpp	/^void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32_t line_length)$/;"	f	namespace:__anon2
+format_parameter	options_description.cpp	/^std::string option_description::format_parameter() const$/;"	f	class:option_description
+full_match	options_description.h	/^	enum match_result { no_match, full_match, approximate_match };$/;"	e	enum:option_description::match_result
+get	variables_map.cpp	/^    const variable_value& variables_map::get(const std::string& name) const$/;"	f	class:variables_map
+get_canonical_option_name	value_semantic.cpp	/^    string error_with_option_name::get_canonical_option_name() const$/;"	f	class:error_with_option_name
+get_canonical_option_prefix	cmdline.cpp	/^int cmdline::get_canonical_option_prefix()$/;"	f	class:cmdline
+get_canonical_option_prefix	value_semantic.cpp	/^    string error_with_option_name::get_canonical_option_prefix() const$/;"	f	class:error_with_option_name
+get_option_column_width	options_description.cpp	/^uint32_t options_description::get_option_column_width() const                                $/;"	f	class:options_description
+get_option_name	errors.h	/^        std::string get_option_name() const$/;"	f	class:error_with_option_name
+get_single_string	value_semantic.h	/^const std::basic_string<charT>& get_single_string($/;"	f	namespace:validators
+get_template	cmdline.cpp	/^std::string invalid_syntax::get_template(kind_t kind)$/;"	f	class:invalid_syntax
+get_template	value_semantic.cpp	/^    string validation_error::get_template(kind_t kind)$/;"	f	class:validation_error
+handle_additional_parser	cmdline.cpp	/^    cmdline::handle_additional_parser(vector<string>& args)$/;"	f	class:cmdline
+host_alias	Makefile	/^host_alias = $/;"	m
+htmldir	Makefile	/^htmldir = ${docdir}$/;"	m
+implicit_	value_semantic.h	/^    bool composing_, implicit_, multitoken_, zero_tokens_, required_;$/;"	m	class:typed_value
+implicit__value	value_semantic.h	/^    std::any implicit__value;$/;"	m	class:typed_value
+implicit__value_as_text	value_semantic.h	/^    std::string implicit__value_as_text;$/;"	m	class:typed_value
+implicit_value	value_semantic.h	/^    typed_value* implicit_value(const T &v)$/;"	f	class:typed_value
+implicit_value	value_semantic.h	/^    typed_value* implicit_value(const T &v, const std::string& textual)$/;"	f	class:typed_value
+includedir	Makefile	/^includedir = ${prefix}\/include$/;"	m
+infodir	Makefile	/^infodir = ${datarootdir}\/info$/;"	m
+init	cmdline.cpp	/^void cmdline::init(const vector<string>& args)$/;"	f	class:cmdline
+install_sh	Makefile	/^install_sh = ${SHELL} \/home\/mylw\/Martial_arts\/src\/cmd\/cmd\/install-sh$/;"	m
+install_sh_DATA	Makefile	/^install_sh_DATA = $(install_sh) -c -m 644$/;"	m
+install_sh_PROGRAM	Makefile	/^install_sh_PROGRAM = $(install_sh) -c$/;"	m
+install_sh_SCRIPT	Makefile	/^install_sh_SCRIPT = $(install_sh) -c$/;"	m
+invalid_bool_value	errors.h	/^            invalid_bool_value,$/;"	e	enum:validation_error::kind_t
+invalid_bool_value	errors.h	/^    class  invalid_bool_value $/;"	c
+invalid_bool_value	value_semantic.cpp	/^    invalid_bool_value(const std::string& bad_value)$/;"	f	class:invalid_bool_value
+invalid_command_line_style	errors.h	/^        invalid_command_line_style(const std::string& msg)$/;"	f	class:invalid_command_line_style
+invalid_command_line_style	errors.h	/^    class  invalid_command_line_style : public error {$/;"	c
+invalid_command_line_syntax	errors.h	/^        invalid_command_line_syntax(kind_t kind,$/;"	f	class:invalid_command_line_syntax
+invalid_command_line_syntax	errors.h	/^    class  invalid_command_line_syntax : public invalid_syntax {$/;"	c
+invalid_config_file_syntax	errors.h	/^        invalid_config_file_syntax(const std::string& invalid_line, kind_t kind):$/;"	f	class:invalid_config_file_syntax
+invalid_config_file_syntax	errors.h	/^    class  invalid_config_file_syntax : public invalid_syntax {$/;"	c
+invalid_option	errors.h	/^            invalid_option$/;"	e	enum:validation_error::kind_t
+invalid_option_value	errors.h	/^            invalid_option_value,$/;"	e	enum:validation_error::kind_t
+invalid_option_value	errors.h	/^    class  invalid_option_value $/;"	c
+invalid_option_value	value_semantic.cpp	/^    invalid_option_value(const std::string& bad_value)$/;"	f	class:invalid_option_value
+invalid_syntax	errors.h	/^        invalid_syntax(kind_t kind, $/;"	f	class:invalid_syntax
+invalid_syntax	errors.h	/^    class  invalid_syntax : public error_with_option_name {$/;"	c
+is_composing	value_semantic.h	/^    bool is_composing() const { return composing_; }$/;"	f	class:typed_value
+is_composing	value_semantic.h	/^    bool is_composing() const { return false; }$/;"	f	class:untyped_value
+is_required	value_semantic.h	/^    bool is_required() const { return false; }$/;"	f	class:untyped_value
+is_required	value_semantic.h	/^    bool is_required() const { return required_; }$/;"	f	class:typed_value
+is_style_active	cmdline.cpp	/^bool cmdline::is_style_active(style_t style) const$/;"	f	class:cmdline
+key	options_description.cpp	/^const std::string& option_description::key(const std::string& option) const$/;"	f	class:option_description
+kind	errors.h	/^        kind_t kind() const { return m_kind; }$/;"	f	class:validation_error
+kind	errors.h	/^        kind_t kind() const {return m_kind;}$/;"	f	class:invalid_syntax
+kind_t	errors.h	/^        enum kind_t {$/;"	g	class:invalid_syntax
+kind_t	errors.h	/^        enum kind_t {$/;"	g	class:validation_error
+libdir	Makefile	/^libdir = ${exec_prefix}\/lib$/;"	m
+libexecdir	Makefile	/^libexecdir = ${exec_prefix}\/libexec$/;"	m
+line_length_	options_description.h	/^    const uint32_t line_length_;$/;"	m	class:options_description
+localedir	Makefile	/^localedir = ${datarootdir}\/locale$/;"	m
+localstatedir	Makefile	/^localstatedir = ${prefix}\/var$/;"	m
+long_adjacent_not_allowed	errors.h	/^            long_adjacent_not_allowed,$/;"	e	enum:invalid_syntax::kind_t
+long_allow_adjacent	cmdline.h	/^	long_allow_adjacent = allow_slash_for_short << 1,$/;"	m	class:style_t
+long_allow_next	cmdline.h	/^	long_allow_next = long_allow_adjacent << 1,$/;"	m	class:style_t
+long_name	options_description.cpp	/^const std::string& option_description::long_name() const$/;"	f	class:option_description
+long_names	options_description.cpp	/^const std::pair<const std::string*, std::size_t> option_description::long_names() const$/;"	f	class:option_description
+long_names_	options_description.h	/^    std::vector<std::string> long_names_;$/;"	m	class:option_description
+long_not_allowed	errors.h	/^            long_not_allowed = 30,$/;"	e	enum:invalid_syntax::kind_t
+m_alternatives	errors.h	/^        std::vector<std::string> m_alternatives;$/;"	m	class:ambiguous_option
+m_default_value	value_semantic.h	/^    std::any m_default_value;$/;"	m	class:typed_value
+m_default_value_as_text	value_semantic.h	/^    std::string m_default_value_as_text;$/;"	m	class:typed_value
+m_error_template	errors.h	/^        std::string m_error_template;$/;"	m	class:error_with_option_name
+m_kind	errors.h	/^        kind_t m_kind;$/;"	m	class:invalid_syntax
+m_kind	errors.h	/^        kind_t m_kind;$/;"	m	class:validation_error
+m_message	errors.h	/^        mutable std::string m_message;  \/\/ For on-demand formatting in 'what'$/;"	m	class:error_with_option_name
+m_option_style	errors.h	/^        int m_option_style;$/;"	m	class:error_with_option_name
+m_options_prefix	parsers.h	/^        int m_options_prefix;$/;"	m	class:basic_parsed_options
+m_store_to	value_semantic.h	/^    T* m_store_to;$/;"	m	class:typed_value
+m_substitution_defaults	errors.h	/^        std::map<std::string, string_pair > m_substitution_defaults;$/;"	m	class:error_with_option_name
+m_substitutions	errors.h	/^        std::map<std::string, std::string> m_substitutions;$/;"	m	class:error_with_option_name
+m_value_name	value_semantic.h	/^    std::string m_value_name;$/;"	m	class:typed_value
+main	main.cpp	/^int main(int argc, char* argv[])$/;"	f
+mandir	Makefile	/^mandir = ${datarootdir}\/man$/;"	m
+match	options_description.cpp	/^match_result option_description::match(const std::string& option,  bool approx, $/;"	f	class:option_description
+match_result	options_description.h	/^	enum match_result { no_match, full_match, approximate_match };$/;"	g	class:option_description
+max_tokens	value_semantic.cpp	/^    untyped_value::max_tokens() const$/;"	f	class:untyped_value
+max_tokens	value_semantic.h	/^    uint32_t max_tokens() const {$/;"	f	class:typed_value
+max_total_count	positional_options.cpp	/^    uint32_t positional_options_description::max_total_count() const$/;"	f	class:positional_options_description
+min_description_length_	options_description.h	/^    const uint32_t min_description_length_;$/;"	m	class:options_description
+min_tokens	value_semantic.cpp	/^    untyped_value::min_tokens() const$/;"	f	class:untyped_value
+min_tokens	value_semantic.h	/^    uint32_t min_tokens() const$/;"	f	class:typed_value
+missing_parameter	errors.h	/^            missing_parameter,$/;"	e	enum:invalid_syntax::kind_t
+mkdir_p	Makefile	/^mkdir_p = $(MKDIR_P)$/;"	m
+mkinstalldirs	Makefile	/^mkinstalldirs = $(install_sh) -d$/;"	m
+multiple_occurrences	errors.h	/^        multiple_occurrences() $/;"	f	class:multiple_occurrences
+multiple_occurrences	errors.h	/^    class  multiple_occurrences : public error_with_option_name {$/;"	c
+multiple_values	errors.h	/^        multiple_values() $/;"	f	class:multiple_values
+multiple_values	errors.h	/^    class  multiple_values : public error_with_option_name {$/;"	c
+multiple_values_not_allowed	errors.h	/^            multiple_values_not_allowed = 30,$/;"	e	enum:validation_error::kind_t
+multitoken	value_semantic.h	/^    typed_value* multitoken()$/;"	f	class:typed_value
+multitoken_	value_semantic.h	/^    bool composing_, implicit_, multitoken_, zero_tokens_, required_;$/;"	m	class:typed_value
+name	value_semantic.cpp	/^    untyped_value::name() const$/;"	f	class:untyped_value
+name	value_semantic.h	/^std::string typed_value<T, charT>::name() const$/;"	f	class:typed_value
+name2index_iterator	options_description.h	/^    typedef std::map<std::string, int>::const_iterator name2index_iterator;$/;"	t	class:options_description
+name_for_position	positional_options.cpp	/^    const std::string&   positional_options_description::name_for_position(uint32_t position) const$/;"	f	class:positional_options_description
+names_	positional_options.h	/^        std::vector<std::string> names_;$/;"	m	class:positional_options_description
+next	variables_map.h	/^		void next(abstract_variables_map* next) { next_ = next; }$/;"	f	class:abstract_variables_map
+next_	variables_map.h	/^        const abstract_variables_map* next_;$/;"	m	class:abstract_variables_map
+no_match	options_description.h	/^	enum match_result { no_match, full_match, approximate_match };$/;"	e	enum:option_description::match_result
+notifier	value_semantic.h	/^    typed_value* notifier(std::function<void(const T&)> f)$/;"	f	class:typed_value
+notifier_	value_semantic.h	/^    std::function<void(const T&)> notifier_;$/;"	m	class:typed_value
+notify	value_semantic.h	/^    void notify(const std::any&) const {}        $/;"	f	class:untyped_value
+notify	value_semantic.h	/^void typed_value<T, charT>::notify(const std::any& value_store) const$/;"	f	class:typed_value
+notify	variables_map.cpp	/^    void variables_map::notify()$/;"	f	class:variables_map
+notify	variables_map.h	/^	void notify(variables_map& m) { m.notify(); }$/;"	f
+oldincludedir	Makefile	/^oldincludedir = \/usr\/include$/;"	m
+operator ()	options_description.cpp	/^options_description_easy_init& options_description_easy_init:: operator()(const char* name,$/;"	f	class:options_description_easy_init
+operator ()	options_description.cpp	/^options_description_easy_init& options_description_easy_init::operator()(const char* name,$/;"	f	class:options_description_easy_init
+operator <<	options_description.cpp	/^std::ostream& operator<<(std::ostream& os, const options_description& desc)$/;"	f
+operator []	variables_map.cpp	/^    abstract_variables_map::operator[](const std::string& name) const$/;"	f	class:abstract_variables_map
+operator []	variables_map.h	/^        const variable_value& operator[](const std::string& name) const$/;"	f	class:variables_map
+option	option.h	/^	option() : position_key(-1), unregistered(false), case_insensitive(false) {}$/;"	f	class:option
+option	option.h	/^	option(const std::string& xstring_key, const std::vector< std::string> &xvalue) : $/;"	f	class:option
+option	option.h	/^class option$/;"	c
+option_description	options_description.cpp	/^option_description::option_description(const char* names, const value_semantic* s) :$/;"	f	class:option_description
+option_description	options_description.cpp	/^option_description::option_description(const char* names, const value_semantic* s,$/;"	f	class:option_description
+option_description	options_description.h	/^	option_description() {}$/;"	f	class:option_description
+option_description	options_description.h	/^class option_description $/;"	c
+options	options_description.h	/^	const std::vector< std::shared_ptr<option_description> >& options() const $/;"	f	class:options_description
+options	parsers.h	/^		 basic_command_line_parser<charT>::options(const options_description& desc)$/;"	f	class:basic_command_line_parser
+options	parsers.h	/^        std::vector< basic_option<charT> > options;$/;"	m	class:basic_parsed_options
+options_	options_description.h	/^    std::vector<std::shared_ptr<option_description>> options_;$/;"	m	class:options_description
+options_description	options_description.cpp	/^options_description::options_description(const std::string& caption, $/;"	f	class:options_description
+options_description	options_description.h	/^class options_description $/;"	c
+options_description_easy_init	options_description.h	/^	options_description_easy_init(options_description* owner_) : owner_(owner_) {}$/;"	f	class:options_description_easy_init
+options_description_easy_init	options_description.h	/^class  options_description_easy_init $/;"	c
+original_tokens	option.h	/^    std::vector< std::basic_string<char> > original_tokens;$/;"	m	class:option
+override	value_semantic.h	/^			bool utf8) const override;$/;"	m	class:value_semantic_codecvt_helper
+owner_	options_description.h	/^    options_description* owner_;$/;"	m	class:options_description_easy_init
+parse	value_semantic.cpp	/^    parse(std::any& value_store, const std::vector<std::string>& new_tokens,$/;"	f	class:value_semantic_codecvt_helper
+parse_command_line	parsers.h	/^		 parse_command_line(int argc, const charT* const argv[],$/;"	f
+parse_disguised_long_option	cmdline.cpp	/^    cmdline::parse_disguised_long_option(vector<string>& args)$/;"	f	class:cmdline
+parse_dos_option	cmdline.cpp	/^    cmdline::parse_dos_option(vector<string>& args)$/;"	f	class:cmdline
+parse_long_option	cmdline.cpp	/^    vector<option> cmdline::parse_long_option(vector<string>& args)$/;"	f	class:cmdline
+parse_short_option	cmdline.cpp	/^    vector<option> cmdline::parse_short_option(vector<string>& args)$/;"	f	class:cmdline
+parse_terminator	cmdline.cpp	/^    cmdline::parse_terminator(vector<string>& args)$/;"	f	class:cmdline
+parsed_options	parsers.h	/^    typedef basic_parsed_options<char> parsed_options;$/;"	t
+pdfdir	Makefile	/^pdfdir = ${docdir}$/;"	m
+pkgdatadir	Makefile	/^pkgdatadir = $(datadir)\/full-package-name$/;"	m
+pkgincludedir	Makefile	/^pkgincludedir = $(includedir)\/full-package-name$/;"	m
+pkglibdir	Makefile	/^pkglibdir = $(libdir)\/full-package-name$/;"	m
+pkglibexecdir	Makefile	/^pkglibexecdir = $(libexecdir)\/full-package-name$/;"	m
+position_key	option.h	/^    int position_key;$/;"	m	class:option
+positional	parsers.h	/^		 basic_command_line_parser<charT>::positional($/;"	f	class:basic_command_line_parser
+positional_	cmdline.h	/^    const positional_options_description* positional_;$/;"	m	class:style_t::cmdline
+positional_options_description	positional_options.h	/^		positional_options_description() {}$/;"	f	class:positional_options_description
+positional_options_description	positional_options.h	/^    class  positional_options_description {$/;"	c
+prefix	Makefile	/^prefix = \/usr\/local$/;"	m
+print	options_description.cpp	/^void options_description::print(std::ostream& os, uint32_t width) const$/;"	f	class:options_description
+program_transform_name	Makefile	/^program_transform_name = s,x,x,$/;"	m
+psdir	Makefile	/^psdir = ${docdir}$/;"	m
+replace_token	value_semantic.cpp	/^    void error_with_option_name::replace_token(const string& from, const string& to) const$/;"	f	class:error_with_option_name
+required	value_semantic.h	/^    typed_value* required()$/;"	f	class:typed_value
+required_	value_semantic.h	/^    bool composing_, implicit_, multitoken_, zero_tokens_, required_;$/;"	m	class:typed_value
+required_	variables_map.h	/^        std::map<std::string, std::string> required_;$/;"	m	class:variables_map
+required_option	errors.h	/^       required_option(const std::string& option_name)$/;"	f	class:required_option
+required_option	errors.h	/^    class  required_option : public error_with_option_name {$/;"	c
+run	cmdline.cpp	/^ cmdline::run()$/;"	f	class:cmdline
+run	parsers.h	/^		 basic_command_line_parser<charT>::run()$/;"	f	class:basic_command_line_parser
+runstatedir	Makefile	/^runstatedir = ${localstatedir}\/run$/;"	m
+sbindir	Makefile	/^sbindir = ${exec_prefix}\/sbin$/;"	m
+semantic	options_description.h	/^	std::shared_ptr<const value_semantic> semantic() const { return value_semantic_; }$/;"	f	class:option_description
+set_additional_parser	cmdline.cpp	/^void cmdline::set_additional_parser(additional_parser p)$/;"	f	class:cmdline
+set_names	options_description.cpp	/^option_description& option_description::set_names(const char* _names)$/;"	f	class:option_description
+set_option_name	errors.h	/^        virtual void set_option_name(const std::string& option_name)$/;"	f	class:error_with_option_name
+set_option_name	errors.h	/^        virtual void set_option_name(const std::string&) {}$/;"	f	class:error_with_no_option_name
+set_options_description	cmdline.cpp	/^void cmdline::set_options_description(const options_description& desc)$/;"	f	class:cmdline
+set_original_token	errors.h	/^        void set_original_token(const std::string& original_token)$/;"	f	class:error_with_option_name
+set_positional_options	cmdline.cpp	/^void  cmdline::set_positional_options($/;"	f	class:cmdline
+set_prefix	errors.h	/^        void set_prefix(int option_style)$/;"	f	class:error_with_option_name
+set_substitute	errors.h	/^        void set_substitute(const std::string& parameter_name,  const std::string& value)$/;"	f	class:error_with_option_name
+set_substitute_default	errors.h	/^        void set_substitute_default(const std::string& parameter_name, $/;"	f	class:error_with_option_name
+sharedstatedir	Makefile	/^sharedstatedir = ${prefix}\/com$/;"	m
+short_adjacent_not_allowed	errors.h	/^            short_adjacent_not_allowed,$/;"	e	enum:invalid_syntax::kind_t
+short_allow_adjacent	cmdline.h	/^	short_allow_adjacent = long_allow_next << 1,$/;"	m	class:style_t
+short_allow_next	cmdline.h	/^	short_allow_next = short_allow_adjacent << 1,$/;"	m	class:style_t
+short_name_	options_description.h	/^    std::string short_name_;$/;"	m	class:option_description
+srcdir	Makefile	/^srcdir = .$/;"	m
+store	variables_map.cpp	/^    void store(const parsed_options& options, variables_map& xm,$/;"	f
+store	variables_map.cpp	/^    void store(const wparsed_options& options, variables_map& m)$/;"	f
+string_key	option.h	/^    std::string string_key;$/;"	m	class:option
+string_pair	errors.h	/^        typedef std::pair<std::string, std::string> string_pair;$/;"	t	class:error_with_option_name
+strip_prefixes	errors.h	/^    inline std::string strip_prefixes(const std::string& text)$/;"	f
+style	cmdline.cpp	/^void cmdline::style(int style)$/;"	f	class:cmdline
+style	parsers.h	/^		 basic_command_line_parser<charT>::style(int xstyle)$/;"	f	class:basic_command_line_parser
+style_	cmdline.h	/^    style_t style_;$/;"	m	class:style_t::cmdline
+style_parser	cmdline.h	/^				std::vector<std::string&>)> style_parser;$/;"	t	class:style_t::cmdline
+style_parser_	cmdline.h	/^    style_parser style_parser_;$/;"	m	class:style_t::cmdline
+style_t	cmdline.h	/^enum class style_t : uint8_t$/;"	c
+subdir	Makefile	/^subdir = src$/;"	m
+substitute_placeholders	value_semantic.cpp	/^    void ambiguous_option::substitute_placeholders(const string& original_error_template) const$/;"	f	class:ambiguous_option
+substitute_placeholders	value_semantic.cpp	/^    void error_with_option_name::substitute_placeholders(const string& error_template) const$/;"	f	class:error_with_option_name
+sysconfdir	Makefile	/^sysconfdir = ${prefix}\/etc$/;"	m
+target_alias	Makefile	/^target_alias = $/;"	m
+tokens	errors.h	/^        virtual std::string tokens() const {return get_option_name();   }$/;"	f	class:invalid_syntax
+tokens	errors.h	/^        virtual std::string tokens() const {return m_substitutions.find("invalid_line")->second;    }$/;"	f	class:invalid_config_file_syntax
+tolower	options_description.cpp	/^std::basic_string<T>  tolower(const std::basic_string<T>& str)$/;"	f	namespace:__anon1
+too_many_positional_options_error	errors.h	/^        too_many_positional_options_error() $/;"	f	class:too_many_positional_options_error
+too_many_positional_options_error	errors.h	/^    class  too_many_positional_options_error : public error {$/;"	c
+top_build_prefix	Makefile	/^top_build_prefix = ..\/$/;"	m
+top_builddir	Makefile	/^top_builddir = ..$/;"	m
+top_srcdir	Makefile	/^top_srcdir = ..$/;"	m
+trailing_	positional_options.h	/^        std::string trailing_;$/;"	m	class:positional_options_description
+transform	Makefile	/^transform = $(program_transform_name)$/;"	m
+typed_value	value_semantic.h	/^	typed_value(T* store_to) :$/;"	f	class:typed_value
+typed_value	value_semantic.h	/^class typed_value : public value_semantic_codecvt_helper,$/;"	c
+typed_value_base	value_semantic.h	/^class typed_value_base $/;"	c
+unix_style	cmdline.h	/^	unix_style = (allow_short | short_allow_adjacent | short_allow_next$/;"	m	class:style_t
+unknown_option	errors.h	/^        unknown_option(const std::string& original_token = "")$/;"	f	class:unknown_option
+unknown_option	errors.h	/^    class  unknown_option : public error_with_no_option_name {$/;"	c
+unrecognized_line	errors.h	/^            unrecognized_line$/;"	e	enum:invalid_syntax::kind_t
+unregistered	option.h	/^    bool unregistered;$/;"	m	class:option
+untyped_value	value_semantic.h	/^	untyped_value(bool zero_tokens = false)$/;"	f	class:untyped_value
+untyped_value	value_semantic.h	/^class untyped_value: public value_semantic_codecvt_helper$/;"	c
+v_	variables_map.h	/^        std::any v_;$/;"	m	class:variable_value
+validate	value_semantic.cpp	/^     void validate(any& v, const vector<string>& xs,$/;"	f
+validate	value_semantic.cpp	/^    void validate(any& v, const vector<string>& xs, std::string*, int)$/;"	f
+validate	value_semantic.h	/^void validate(std::any& v, const std::vector< std::basic_string<charT> >& xs, T*, long)$/;"	f
+validate	value_semantic.h	/^void validate(std::any& v, const std::vector<std::basic_string<charT> >& s, boost::optional<T>*, int)$/;"	f
+validate	value_semantic.h	/^void validate(std::any& v, const std::vector<std::basic_string<charT> >& s, std::vector<T>*, int)$/;"	f
+validation_error	errors.h	/^        validation_error(kind_t kind, $/;"	f	class:validation_error
+validation_error	errors.h	/^    class  validation_error : public error_with_option_name {$/;"	c
+validators	value_semantic.cpp	/^    namespace validators {$/;"	n	file:
+validators	value_semantic.h	/^namespace validators {$/;"	n
+value	option.h	/^	std::vector<std::string> value;$/;"	m	class:option
+value	value_semantic.h	/^typed_value<T>* value()$/;"	f
+value	value_semantic.h	/^typed_value<T>* value(T* v)$/;"	f
+value	variables_map.h	/^	   const std::any& value() const { return v_; }$/;"	f	class:variable_value
+value	variables_map.h	/^	   std::any& value() { return v_; }$/;"	f	class:variable_value
+value_name	value_semantic.h	/^    typed_value* value_name(const std::string& name)$/;"	f	class:typed_value
+value_semantic	value_semantic.h	/^class value_semantic $/;"	c
+value_semantic_	options_description.h	/^    std::shared_ptr<const value_semantic> value_semantic_;$/;"	m	class:option_description
+value_semantic_	variables_map.h	/^        std::shared_ptr<const value_semantic> value_semantic_;$/;"	m	class:variable_value
+value_semantic_codecvt_helper	value_semantic.h	/^class value_semantic_codecvt_helper : public value_semantic $/;"	c
+value_type	value_semantic.h	/^    const std::type_info& value_type() const$/;"	f	class:typed_value
+variable_value	variables_map.h	/^        variable_value() : defaulted_(false) {}$/;"	f	class:variable_value
+variable_value	variables_map.h	/^        variable_value(const std::any& xv, bool xdefaulted)$/;"	f	class:variable_value
+variable_value	variables_map.h	/^    class  variable_value {$/;"	c
+variables_map	variables_map.h	/^		variables_map() {}$/;"	f	class:variables_map
+variables_map	variables_map.h	/^		variables_map(const abstract_variables_map* next) : abstract_variables_map(next) {}$/;"	f	class:variables_map
+variables_map	variables_map.h	/^    class  variables_map : public abstract_variables_map,$/;"	c
+what	value_semantic.cpp	/^    const char* error_with_option_name::what() const throw()$/;"	f	class:error_with_option_name
+world_server_DEPENDENCIES	Makefile	/^world_server_DEPENDENCIES =$/;"	m
+world_server_LDADD	Makefile	/^world_server_LDADD = -lstdc++fs $/;"	m
+world_server_OBJECTS	Makefile	/^world_server_OBJECTS = $(am_world_server_OBJECTS)$/;"	m
+world_server_SOURCES	Makefile	/^world_server_SOURCES = main.cpp \\$/;"	m
+xparse	value_semantic.cpp	/^    untyped_value::xparse(std::any& value_store,$/;"	f	class:untyped_value
+xparse	value_semantic.h	/^void typed_value<T, charT>::xparse(std::any& value_store,$/;"	f	class:typed_value
+zero_tokens	value_semantic.h	/^    typed_value* zero_tokens() $/;"	f	class:typed_value
+zero_tokens_	value_semantic.h	/^    bool composing_, implicit_, multitoken_, zero_tokens_, required_;$/;"	m	class:typed_value
+zero_tokens_	value_semantic.h	/^    bool zero_tokens_;$/;"	m	class:untyped_value
+~abstract_variables_map	variables_map.h	/^        virtual ~abstract_variables_map() {}$/;"	f	class:abstract_variables_map
+~ambiguous_option	errors.h	/^        ~ambiguous_option() throw() {}$/;"	f	class:ambiguous_option
+~error_with_no_option_name	errors.h	/^        ~error_with_no_option_name() throw() {}$/;"	f	class:error_with_no_option_name
+~error_with_option_name	errors.h	/^        ~error_with_option_name() throw() {}$/;"	f	class:error_with_option_name
+~invalid_command_line_syntax	errors.h	/^        ~invalid_command_line_syntax() throw() {}$/;"	f	class:invalid_command_line_syntax
+~invalid_config_file_syntax	errors.h	/^        ~invalid_config_file_syntax() throw() {}$/;"	f	class:invalid_config_file_syntax
+~invalid_syntax	errors.h	/^        ~invalid_syntax() throw() {}$/;"	f	class:invalid_syntax
+~multiple_occurrences	errors.h	/^        ~multiple_occurrences() throw() {}$/;"	f	class:multiple_occurrences
+~multiple_values	errors.h	/^        ~multiple_values() throw() {}$/;"	f	class:multiple_values
+~option_description	options_description.h	/^	virtual ~option_description() {}$/;"	f	class:option_description
+~required_option	errors.h	/^       ~required_option() throw() {}$/;"	f	class:required_option
+~typed_value_base	value_semantic.h	/^	virtual ~typed_value_base() {}$/;"	f	class:typed_value_base
+~unknown_option	errors.h	/^        ~unknown_option() throw() {}$/;"	f	class:unknown_option
+~validation_error	errors.h	/^        ~validation_error() throw() {}$/;"	f	class:validation_error
+~value_semantic	value_semantic.h	/^    virtual ~value_semantic() {}$/;"	f	class:value_semantic

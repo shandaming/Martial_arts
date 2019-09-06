@@ -1,19 +1,22 @@
-/*
+ï»¿/*
  * Copyright (C) 2019
  */
 
 #include <cassert>
+#include <algorithm>
+#include <sstream>
+#include <iterator>
 #if 0
 #include <climits>
 #include <cstring>
 #include <cstdarg>
-#include <sstream>
-#include <iterator>
-#include <algorithm>
+
+
+
 #endif
 
 #include "options_description.h"
-#include "parsers.h"
+#include "cmdline.h"
 
 namespace 
 {
@@ -41,16 +44,15 @@ option_description::option_description(const char* names, const value_semantic* 
 	this->set_names(names);
 }
 
-match_result option_description::match(const std::string& option,  bool approx, 
-		bool long_ignore_case, bool short_ignore_case) const
+option_description::match_result option_description::match(const std::string& option) const
 {
 	match_result result = no_match; 
-    std::string local_option = (long_ignore_case ? tolower(option) : option);
+    std::string local_option =  option;
        
 	std::string local_long_name;
 	for(auto it : long_names_)
     {
-		local_long_name = (long_ignore_case ? tolower(it) : it);
+		local_long_name =  it;
         if (!local_long_name.empty()) 
 		{
 			if ((result == no_match) && (*local_long_name.rbegin() == '*'))
@@ -58,7 +60,7 @@ match_result option_description::match(const std::string& option,  bool approx,
 				if (local_option.find(local_long_name.substr(0, local_long_name.length()-1)) 
 						== 0)
 				{
-					result = approximate_match; // ¿¿¿¿
+					result = approximate_match; // é é 
 				}
             }
 			if (local_long_name == local_option)
@@ -66,19 +68,12 @@ match_result option_description::match(const std::string& option,  bool approx,
 				result = full_match;
                 break;
             }
-            else if (approx)
-            {
-				if (local_long_name.find(local_option) == 0)
-                {
-					result = approximate_match;
-                }
-            }
         }
     }
 
     if (result != full_match)
     {
-		std::string local_short_name(short_ignore_case ? tolower(short_name_) : short_name_);
+		std::string local_short_name(short_name_);
         if (local_short_name == local_option)
         {
 			result = full_match;
@@ -111,19 +106,19 @@ std::string option_description::canonical_display_name(int prefix_style) const
 {
     if (!long_names_.empty())
     {
-        if (prefix_style == style_t::allow_long)
+        if (prefix_style == static_cast<int>(style_t::allow_long))
 		{
             return "--" + *long_names_.begin();
 		}
     }
-        // ÍêÕûĞÔ¼ì²é£ºshort_name_ [0]Ó¦¸ÃÊÇ' - '»ò'/'
+        // å®Œæ•´æ€§æ£€æŸ¥ï¼šshort_name_ [0]åº”è¯¥æ˜¯' - 'æˆ–'/'
     if (short_name_.length() == 2)
     {
-        if (prefix_style == style_t::allow_slash_for_short)
+        if (prefix_style == static_cast<int>(style_t::allow_slash_for_short))
 		{
             return std::string("/") + short_name_[1];
 		}
-        if (prefix_style == style_t::allow_dash_for_short)
+        if (prefix_style == static_cast<int>(style_t::allow_dash_for_short))
 		{
             return std::string("-") + short_name_[1];
 		}
@@ -146,7 +141,7 @@ const std::string& option_description::long_name() const
 
 const std::pair<const std::string*, std::size_t> option_description::long_names() const
 {
-    // reinterpret_castÊÇÎªÁËÈ¡ÔÃmsvc 10¡£
+    // reinterpret_castæ˜¯ä¸ºäº†å–æ‚¦msvc 10ã€‚
     return (long_names_.empty())
         ? std::pair<const std::string*, size_t>(reinterpret_cast<const std::string*>(0), 0 )
         : std::pair<const std::string*, size_t>( &(*long_names_.begin()), long_names_.size());
@@ -186,10 +181,9 @@ std::string option_description::format_name() const
 {
     if (!short_name_.empty())
     {
-        return long_names_.empty()
-            ? short_name_ 
-            : string(short_name_).append(" [ --").
-              append(*long_names_.begin()).append(" ]");
+        return long_names_.empty() ? 
+			short_name_ : 
+			short_name_.append(" [ --").append(*long_names_.begin()).append(" ]");
     }
     return std::string("--").append(*long_names_.begin());
 }
@@ -238,27 +232,10 @@ options_description_easy_init& options_description_easy_init::operator()(const c
 
 /***************************** options_description ****************************/
 
-constexpr uint32_t options_description::default_line_length = 80;
-
-#if 0
-// ¿¿¿¿¿
-options_description::options_description(uint32_t line_length, 
-		uint32_t min_description_length) : 
-			line_length_(line_length)
-			, min_description_length_(min_description_length)
+options_description::options_description(const std::string& caption) : 
+			caption_(caption)
 {
-    // ÎÒÃÇĞèÒªÔÚÑ¡ÏîºÍÃèÊö²¿·ÖÖ®¼äÁôÒ»¸ö¿Õ¸ñ£¬ËùÒÔ¼Ó1¡£
-    assert(min_description_length_ < line_length_ - 1);    
-}
-#endif
-
-options_description::options_description(const std::string& caption, 
-		uint32_t line_length, uint32_t min_description_length) : 
-			caption_(caption),
-			line_length_(line_length), 
-			min_description_length_(min_description_length)
-{
-        // ÎÒÃÇĞèÒªÔÚÑ¡ÏîºÍÃèÊö²¿·ÖÖ®¼äÁôÒ»¸ö¿Õ¸ñ£¬ËùÒÔ¼Ó1¡£
+        // æˆ‘ä»¬éœ€è¦åœ¨é€‰é¡¹å’Œæè¿°éƒ¨åˆ†ä¹‹é—´ç•™ä¸€ä¸ªç©ºæ ¼ï¼Œæ‰€ä»¥åŠ 1ã€‚
     assert(min_description_length_ < line_length_ - 1);
 }
     
@@ -281,22 +258,17 @@ options_description& options_description::add(const options_description& desc)
     return *this;
 }
 
-const option_description& options_description::find(const std::string& name, 
-		bool approx, bool long_ignore_case, bool short_ignore_case) const
+const option_description& options_description::find(const std::string& name) const
 {
-	const option_description* d = find_nothrow(name, approx, 
-			long_ignore_case, short_ignore_case);
+	const option_description* d = find_nothrow(name);
     if (!d)
 	{
-        boost::throw_exception(unknown_option());
+        throw (unknown_option());
 	}
     return *d;
 }
 
-const option_description* options_description::find_nothrow(const std::string& name, 
-                                      bool approx,
-                                      bool long_ignore_case,
-                                      bool short_ignore_case) const
+const option_description* options_description::find_nothrow(const std::string& name) const
 {
     std::shared_ptr<option_description> found;
     bool had_full_match = false;
@@ -306,7 +278,7 @@ const option_description* options_description::find_nothrow(const std::string& n
     for(uint32_t i = 0; i < options_.size(); ++i)
     {
         option_description::match_result r = 
-            options_[i]->match(name, approx, long_ignore_case, short_ignore_case);
+            options_[i]->match(name);
 
         if (r == option_description::no_match)
             continue;
@@ -319,23 +291,23 @@ const option_description* options_description::find_nothrow(const std::string& n
         } 
         else 
         {                        
-                // FIXME£ºÕâÀïÊ¹ÓÃ'key'¿ÉÄÜ²»ĞĞ
-                 //ÊÇ×îºÃµÄ·½·¨
+                // FIXMEï¼šè¿™é‡Œä½¿ç”¨'key'å¯èƒ½ä¸è¡Œ
+                 //æ˜¯æœ€å¥½çš„æ–¹æ³•
             approximate_matches.push_back(options_[i]->key(name));
             if (!had_full_match)
                 found = options_[i];
         }
     }
     if (full_matches.size() > 1) 
-        boost::throw_exception(ambiguous_option(full_matches));
+        throw (ambiguous_option(full_matches));
         
-        // Èç¹ûÎÒÃÇÓĞÍêÕûµÄÆ¥ÅäºÍ½üËÆÆ¥Åä£¬
-         //ºöÂÔ½üËÆÆ¥Åä¶ø²»ÊÇ±¨¸æ´íÎó¡£
-         //Ëµ£¬Èç¹ûÎÒÃÇÓĞ¡°È«²¿¡±ºÍ¡°ËùÓĞchroots¡±Ñ¡Ïî£¬ÄÇÃ´
-         //ÃüÁîĞĞÉÏµÄ¡°--all¡±Ó¦¸ÃÑ¡ÔñµÚÒ»¸ö£¬
-         //Ã»ÓĞÆçÒå
+        // å¦‚æœæˆ‘ä»¬æœ‰å®Œæ•´çš„åŒ¹é…å’Œè¿‘ä¼¼åŒ¹é…ï¼Œ
+         //å¿½ç•¥è¿‘ä¼¼åŒ¹é…è€Œä¸æ˜¯æŠ¥å‘Šé”™è¯¯ã€‚
+         //è¯´ï¼Œå¦‚æœæˆ‘ä»¬æœ‰â€œå…¨éƒ¨â€å’Œâ€œæ‰€æœ‰chrootsâ€é€‰é¡¹ï¼Œé‚£ä¹ˆ
+         //å‘½ä»¤è¡Œä¸Šçš„â€œ--allâ€åº”è¯¥é€‰æ‹©ç¬¬ä¸€ä¸ªï¼Œ
+         //æ²¡æœ‰æ­§ä¹‰
     if (full_matches.empty() && approximate_matches.size() > 1)
-        boost::throw_exception(ambiguous_option(approximate_matches));
+        throw (ambiguous_option(approximate_matches));
 
     return found.get();
 }
@@ -351,15 +323,15 @@ namespace
 {
 void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32_t line_length)
 {                    
-            // Í¨¹ıÌáĞÑÕâ¸ö¹¦ÄÜ£¬'line_length'»á
-             //ÊÇ×Ö·û¿ÉÓÃµÄ³¤¶È£¬²»°üÀ¨
-             //Ëõ½ø
+            // é€šè¿‡æé†’è¿™ä¸ªåŠŸèƒ½ï¼Œ'line_length'ä¼š
+             //æ˜¯å­—ç¬¦å¯ç”¨çš„é•¿åº¦ï¼Œä¸åŒ…æ‹¬
+             //ç¼©è¿›
 	assert(indent < line_length);
     line_length -= indent;
 
-            // tabµÄË÷Òı£¨Èç¹û´æÔÚ£©ÓÃ×÷¸½¼ÓµÄËõ½øÏà¶Ô
-             //Èç¹ûparagrapth¿çÔ½¶à¸ö£¬Ôò·µ»Øfirst_column_width
-             //Èç¹ûtab²»ÔÚµÚÒ»ĞĞ£¬ÔòºöÂÔËü
+            // tabçš„ç´¢å¼•ï¼ˆå¦‚æœå­˜åœ¨ï¼‰ç”¨ä½œé™„åŠ çš„ç¼©è¿›ç›¸å¯¹
+             //å¦‚æœparagrapthè·¨è¶Šå¤šä¸ªï¼Œåˆ™è¿”å›first_column_width
+             //å¦‚æœtabä¸åœ¨ç¬¬ä¸€è¡Œï¼Œåˆ™å¿½ç•¥å®ƒ
     std::string::size_type par_indent = par.find('\t');
 
     if (par_indent == std::string::npos)
@@ -371,15 +343,14 @@ void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32
                 // only one tab per paragraph allowed
 		if (std::count(par.begin(), par.end(), '\t') > 1)
         {
-           throw program_options::error(
-                "Only one tab per paragraph is allowed in the options description");
+           throw std::logic_error("Only one tab per paragraph is allowed in the options description");
         }
           
                 // erase tab from string
         par.erase(par_indent, 1);
 
-                // ´Ë¶ÏÑÔ¿ÉÄÜÓÉÓÚÓÃ»§´íÎó»òÊ§°Ü¶øÊ§°Ü
-                 //»·¾³Ìõ¼ş£¡
+                // æ­¤æ–­è¨€å¯èƒ½ç”±äºç”¨æˆ·é”™è¯¯æˆ–å¤±è´¥è€Œå¤±è´¥
+                 //ç¯å¢ƒæ¡ä»¶ï¼
         assert(par_indent < line_length);
 
                 // ignore tab if not on first line
@@ -404,10 +375,10 @@ void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32
         {
             if (!first_line)
             {
-                        // Èç¹ûĞĞÒÔ¿Õ¸ñ¿ªÍ·£¬ÔòÎªµÚ¶ş¸ö×Ö·û
-                         //²»ÊÇ¿Õ¸ñ£¬É¾³ıÇ°µ¼¿Õ¸ñ¡£
-                         //ÎÒÃÇ²»É¾³ıË«¿Õ¸ñ£¬ÒòÎªÄÇĞ©
-                         //¿ÉÄÜÊÇintentianal¡£
+                        // å¦‚æœè¡Œä»¥ç©ºæ ¼å¼€å¤´ï¼Œåˆ™ä¸ºç¬¬äºŒä¸ªå­—ç¬¦
+                         //ä¸æ˜¯ç©ºæ ¼ï¼Œåˆ é™¤å‰å¯¼ç©ºæ ¼ã€‚
+                         //æˆ‘ä»¬ä¸åˆ é™¤åŒç©ºæ ¼ï¼Œå› ä¸ºé‚£äº›
+                         //å¯èƒ½æ˜¯intentianalã€‚
                 if ((*line_begin == ' ') &&
                     ((line_begin + 1 < par_end) &&
                      (*(line_begin + 1) != ' ')))
@@ -416,22 +387,22 @@ void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32
                 }
             }
 
-                    // ×¢ÒâÓÀÔ¶²»ÒªÔö¼Ó¹ıÈ¥µÄµü´úÆ÷
-                     //½áÊø£¬ÒòÎªMSVC 8.0£¨ÆÆËé£©£¬¼ÙÉè
-                     //ÕâÑù×ö£¬¼´Ê¹Ã»ÓĞ·ÃÎÊ£¬Ò²ÊÇÒ»¸ö´íÎó¡£
+                    // æ³¨æ„æ°¸è¿œä¸è¦å¢åŠ è¿‡å»çš„è¿­ä»£å™¨
+                     //ç»“æŸï¼Œå› ä¸ºMSVC 8.0ï¼ˆç ´ç¢ï¼‰ï¼Œå‡è®¾
+                     //è¿™æ ·åšï¼Œå³ä½¿æ²¡æœ‰è®¿é—®ï¼Œä¹Ÿæ˜¯ä¸€ä¸ªé”™è¯¯ã€‚
             uint32_t remaining = static_cast<uint32_t>(std::distance(line_begin, par_end));
             std::string::const_iterator line_end = line_begin + 
                 ((remaining < line_length) ? remaining : line_length);
             
-                    // ·ÀÖ¹ÇĞËéµÄ»°
-                     //Á½¸ö·Ç¿Õ¸ñ×Ö·ûÖ®¼äÊÇ·ñÓĞline_end£¿
+                    // é˜²æ­¢åˆ‡ç¢çš„è¯
+                     //ä¸¤ä¸ªéç©ºæ ¼å­—ç¬¦ä¹‹é—´æ˜¯å¦æœ‰line_endï¼Ÿ
             if ((*(line_end - 1) != ' ') &&
                 ((line_end < par_end) && (*line_end != ' ')))
             {
                         // find last ' ' in the second half of the current paragraph line
-                string::const_iterator last_space =
-                    find(reverse_iterator<string::const_iterator>(line_end),
-                         reverse_iterator<string::const_iterator>(line_begin),
+                std::string::const_iterator last_space =
+                    std::find(std::reverse_iterator<std::string::const_iterator>(line_end),
+                         std::reverse_iterator<std::string::const_iterator>(line_begin),
                          ' ')
                     .base();
                 
@@ -448,7 +419,7 @@ void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32
             } // prevent chopped words
              
                     // write line to stream
-            std::copy(line_begin, line_end, ostream_iterator<char>(os));
+            std::copy(line_begin, line_end, std::ostream_iterator<char>(os));
               
             if (first_line)
             {

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2019
  */
 
@@ -12,6 +12,7 @@
 #include <map>
 
 #include "value_semantic.h"
+#include "errors.h"
 
 class option_description 
 {
@@ -27,8 +28,7 @@ public:
 
 	enum match_result { no_match, full_match, approximate_match };
 
-    match_result match(const std::string& option, bool approx,
-                           bool long_ignore_case, bool short_ignore_case) const;
+    match_result match(const std::string& option) const;
 
     const std::string& key(const std::string& option) const;
 
@@ -75,17 +75,7 @@ private:
 class options_description 
 {
 public:
-	static constexpr uint32_t default_line_length;
-      
-#if 0
-	// 似乎用的少
-    options_description(uint32_t line_length = default_line_length,
-			uint32_t min_description_length = default_line_length / 2);
-#endif
-
-    options_description(const std::string& caption,
-			uint32_t line_length = default_line_length,
-			uint32_t min_description_length = default_line_length / 2);
+    options_description(const std::string& caption);
 
     void add(std::shared_ptr<option_description> desc);
 
@@ -98,11 +88,9 @@ public:
 		return options_description_easy_init(this);
 	}
 
-    const option_description& find(const std::string& name, bool approx, 
-			bool long_ignore_case = false, bool short_ignore_case = false) const;
+    const option_description& find(const std::string& name) const;
 
-    const option_description* find_nothrow(const std::string& name, bool approx,
-			bool long_ignore_case = false, bool short_ignore_case = false) const;
+    const option_description* find_nothrow(const std::string& name) const;
 
 	const std::vector< std::shared_ptr<option_description> >& options() const 
 	{
@@ -117,12 +105,14 @@ private:
     typedef std::pair<name2index_iterator, name2index_iterator> approximation_range;
 
     std::string caption_;
-    const uint32_t line_length_;
-    const uint32_t min_description_length_;
+    const uint32_t line_length_ = 80;
+    const uint32_t min_description_length_ = 40;
         
     std::vector<std::shared_ptr<option_description>> options_;
 
     std::vector<bool> belong_to_group_;
+
+	std::vector<std::shared_ptr<options_description> > groups_;
 };
 
     /** 找到重复选项描述时抛出的类。 */

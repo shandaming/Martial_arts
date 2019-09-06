@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef BOOST_VARIABLES_MAP_VP_2003_05_19
 #define BOOST_VARIABLES_MAP_VP_2003_05_19
 
@@ -7,91 +7,88 @@
 #include <set>
 #include <any>
 #include <memory>
-#include <any>
-
-
-    template<class charT>
-    class basic_parsed_options;
+    class parsed_options;
 
     class value_semantic;
     class variables_map;
     
-    void store(const basic_parsed_options<char>& options, variables_map& m,  bool utf8 = false);
-
-
+    void store(const parsed_options& options, variables_map& m,  bool utf8 = false);
 
     /** Runs all 'notify' function for options in 'm'. */
-	void notify(variables_map& m) { m.notify(); }
+//void notify(variables_map& m) { m.notify(); }
 
-    class  variable_value {
-    public:
-        variable_value() : defaulted_(false) {}
+class variable_value 
+{
+public:
+	variable_value() : defaulted_(false) {}
         variable_value(const std::any& xv, bool xdefaulted)
         : v_(xv), defaulted_(xdefaulted) {}
 
-       template<typename T>
-       const T& as() const { return std::any_cast<const T&>(v); }
+	template<typename T>
+    const T& as() const { return std::any_cast<const T&>(v); }
 
-       template<typename T>
-       T& as() { return std::any_cast<T&>(v); }
+    template<typename T>
+    T& as() { return std::any_cast<T&>(v); }
 
-	   bool empty() const { return v_.empty(); }
+	bool empty() const { return v_.empty(); }
 
-	   bool defaulted() const { return defaulted_; }
+	bool defaulted() const { return defaulted_; }
 
-	   const std::any& value() const { return v_; }
-	   std::any& value() { return v_; }
-    private:
-        std::any v_;
-        bool defaulted_;
+	const std::any& value() const { return v_; }
+	std::any& value() { return v_; }
+private:
+    std::any v_;
+    bool defaulted_;
 
-        std::shared_ptr<const value_semantic> value_semantic_;
+    std::shared_ptr<const value_semantic> value_semantic_;
 
-        friend void store(const basic_parsed_options<char>& options, variables_map& m, bool);
+    friend void store(const parsed_options& options, variables_map& m, bool);
+	friend class variables_map;
+};
 
-        friend class variables_map;
-    };
+class abstract_variables_map 
+{
+public:
+	abstract_variables_map() : next_(0) {}
+    abstract_variables_map(const abstract_variables_map* next) : next_(next) {}
 
-    class  abstract_variables_map {
-    public:
-		abstract_variables_map() : next_(0) {}
-        abstract_variables_map(const abstract_variables_map* next) : next_(next) {}
+    virtual ~abstract_variables_map() {}
 
-        virtual ~abstract_variables_map() {}
+    const variable_value& operator[](const std::string& name) const;
 
-        const variable_value& operator[](const std::string& name) const;
+	void next(abstract_variables_map* next) { next_ = next; }
+private:
+        /** è¿”å›å­˜å‚¨åœ¨* thisä¸­çš„å˜é‡'name'çš„å€¼ï¼Œå¦åˆ™è¿”å›ç©ºå€¼ã€‚ */
+    virtual const variable_value& get(const std::string& name) const = 0;
 
-		void next(abstract_variables_map* next) { next_ = next; }
-    private:
-        /** ·µ»Ø´æ´¢ÔÚ* thisÖĞµÄ±äÁ¿'name'µÄÖµ£¬·ñÔò·µ»Ø¿ÕÖµ¡£ */
-        virtual const variable_value& get(const std::string& name) const = 0;
+    const abstract_variables_map* next_;
+};
 
-        const abstract_variables_map* next_;
-    };
+class variables_map : public abstract_variables_map,
+                              public std::map<std::string, variable_value>
+{
+public:
+	variables_map() {}
+	variables_map(const abstract_variables_map* next) : abstract_variables_map(next) {}
 
-    class  variables_map : public abstract_variables_map,
-                               public std::map<std::string, variable_value>
+    const variable_value& operator[](const std::string& name) const
     {
-    public:
-		variables_map() {}
-		variables_map(const abstract_variables_map* next) : abstract_variables_map(next) {}
+		return abstract_variables_map::operator[](name); 
+	}
 
-        const variable_value& operator[](const std::string& name) const
-        { return abstract_variables_map::operator[](name); }
-
-		void clear();
-        void notify();
-    private:
+	void clear();
+        //void notify();
+private:
         const variable_value& get(const std::string& name) const;
 
         std::set<std::string> final_;
 
-        friend void store(const basic_parsed_options<char>& options,
+        friend void store(const parsed_options& options,
                           variables_map& xm,
                           bool utf8);
 
-        /** ±ØĞèÑ¡ÏîµÄÃû³Æ£¬ÓÉ¿ÉÒÔ·ÃÎÊoptions_descriptionµÄ½âÎöÆ÷Ìî³ä¡£ Ó³ÉäÖµÊÇÃ¿¸öÏàÓ¦Ñ¡ÏîµÄ¡°¹æ·¶¡±Ãû³Æ¡£ 
-		µ±Ñ¡Ïî²»´æÔÚÊ±£¬Õâ¶ÔÓÚ´´½¨Õï¶ÏÏûÏ¢ºÜÓĞÓÃ¡£ */
+        /** å¿…éœ€é€‰é¡¹çš„åç§°ï¼Œç”±å¯ä»¥è®¿é—®options_descriptionçš„è§£æå™¨å¡«å……ã€‚ æ˜ å°„å€¼æ˜¯æ¯ä¸ªç›¸åº”é€‰é¡¹çš„â€œè§„èŒƒâ€åç§°ã€‚ 
+		å½“é€‰é¡¹ä¸å­˜åœ¨æ—¶ï¼Œè¿™å¯¹äºåˆ›å»ºè¯Šæ–­æ¶ˆæ¯å¾ˆæœ‰ç”¨ã€‚ */
         std::map<std::string, std::string> required_;
     };
 

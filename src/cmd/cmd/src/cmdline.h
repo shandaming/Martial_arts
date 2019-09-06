@@ -1,4 +1,4 @@
-#ifndef UTIL_CMDLINE_H
+ï»¿#ifndef UTIL_CMDLINE_H
 #define UTIL_CMDLINE_H
 
 #include "options_description.h"
@@ -31,17 +31,17 @@ enum class style_t : uint8_t
 	/** Allow option parameter in the next token for
 		short options. */
 	short_allow_next = short_allow_adjacent << 1,
-	/** ÔÊĞí½«¼¸¸ö¶ÌÑ¡ÏîºÏ²¢ÔÚÒ»Æğ£¬
-		 ÕâÑù¡°-s -k¡±¾Í±ä³ÉÁË¡°-sk¡±¡£ ËùÓĞÑ¡Ïî
-		 µ«×îºóÓ¦¸Ã²»½ÓÊÜÈÎºÎ²ÎÊı¡£ ÀıÈç£¬Èç¹û
-		 ¡°-s¡±½ÓÊÜÒ»¸ö²ÎÊı£¬È»ºó¡°k¡±½«±»ÊÓÎª
-		 ²ÎÊı£¬²»ÊÇÁíÒ»¸ö¶ÌÑ¡Ïî¡£
-		 Dos·ç¸ñµÄ¶ÌÑ¡Ïî²»ÄÜÕ³¡£
+	/** å…è®¸å°†å‡ ä¸ªçŸ­é€‰é¡¹åˆå¹¶åœ¨ä¸€èµ·ï¼Œ
+		 è¿™æ ·â€œ-s -kâ€å°±å˜æˆäº†â€œ-skâ€ã€‚ æ‰€æœ‰é€‰é¡¹
+		 ä½†æœ€ååº”è¯¥ä¸æ¥å—ä»»ä½•å‚æ•°ã€‚ ä¾‹å¦‚ï¼Œå¦‚æœ
+		 â€œ-sâ€æ¥å—ä¸€ä¸ªå‚æ•°ï¼Œç„¶åâ€œkâ€å°†è¢«è§†ä¸º
+		 å‚æ•°ï¼Œä¸æ˜¯å¦ä¸€ä¸ªçŸ­é€‰é¡¹ã€‚
+		 Dosé£æ ¼çš„çŸ­é€‰é¡¹ä¸èƒ½ç²˜ã€‚
 	*/
 	allow_sticky = short_allow_next << 1,
-	/** Èç¹ûËûÃÇÃ÷È·µØÊ¶±ğ³¤Ñ¡Ïî£¬ÔòÔÊĞíËõĞ´Æ´Ğ´Îª³¤Ñ¡Ïî¡£ Èç¹û²Â²âÉúĞ§£¬ÔòÃ»ÓĞ³¤Ñ¡ÏîÃû³ÆÓ¦¸ÃÊÇÆäËû³¤Ñ¡ÏîÃû³ÆµÄÇ°×º¡£
+	/** å¦‚æœä»–ä»¬æ˜ç¡®åœ°è¯†åˆ«é•¿é€‰é¡¹ï¼Œåˆ™å…è®¸ç¼©å†™æ‹¼å†™ä¸ºé•¿é€‰é¡¹ã€‚ å¦‚æœçŒœæµ‹ç”Ÿæ•ˆï¼Œåˆ™æ²¡æœ‰é•¿é€‰é¡¹åç§°åº”è¯¥æ˜¯å…¶ä»–é•¿é€‰é¡¹åç§°çš„å‰ç¼€ã€‚
 	*/
-	allow_guessing = allow_sticky << 1,
+	//allow_guessing = allow_sticky << 1,
 
 	////__________________________
 	///** Ignore the difference in case for long options.
@@ -61,10 +61,34 @@ enum class style_t : uint8_t
 	/** The more-or-less traditional unix style. */
 	unix_style = (allow_short | short_allow_adjacent | short_allow_next
 	| allow_long | long_allow_adjacent | long_allow_next
-		| allow_sticky | allow_guessing
+		| allow_sticky //| allow_guessing
 		| allow_dash_for_short),
 	/** The default style. */
 	default_style = unix_style
+};
+
+class parsed_options 
+{
+public:
+	explicit parsed_options(const options_description* xdescription, int options_prefix = 0)
+        : description(xdescription), m_options_prefix(options_prefix) {}
+        /** Options found in the source. */
+    std::vector<option> options;
+        /** ç”¨äºè§£æçš„é€‰é¡¹æè¿°ã€‚ è§£æå™¨åº”è¿”å›æŒ‡å‘ä¼ é€’ç»™å®ƒä»¬çš„option_descriptionå®ä¾‹çš„æŒ‡é’ˆï¼Œå¹¶ä¸”ç”Ÿå‘½å‘¨æœŸé—®é¢˜ç”±è°ƒç”¨è€…å†³å®šã€‚
+		å¯ä»¥ä¸ºNULLã€‚
+         */
+    const options_description* description;
+
+        /** ä¸»è¦ç”¨äºå¼‚å¸¸ä¸­çš„è¯Šæ–­æ¶ˆæ¯ã€‚
+          *ç”Ÿæˆè¿™äº›ç»“æœçš„è§£æå™¨çš„è§„èŒƒé€‰é¡¹å‰ç¼€ï¼Œ
+          *å–å†³äºbasic_command_line_parser :: styleï¼ˆï¼‰æˆ–çš„è®¾ç½®
+          * cmdline :: styleï¼ˆï¼‰ã€‚ æŒ‰ç…§command_line_styleæšä¸¾çš„ä¼˜å…ˆé¡ºåºæ’åˆ—ï¼š
+          * allow_long
+          * allow_long_disguise
+          * allow_dash_for_short
+          * allow_slash_for_short
+        */
+    int m_options_prefix;
 };
 
 class cmdline 
@@ -81,14 +105,14 @@ public:
 	typedef std::function<std::vector<option>(
 				std::vector<std::string&>)> style_parser;
         
-        /** Îª£¨argc£¬argv£©¶Ô¹¹ÔìÃüÁîĞĞ½âÎöÆ÷¡£ Ê¹ÓÃ'style'ÖĞ´«µİµÄÑùÊ½Ñ¡Ïî£¬ËüÓ¦¸ÃÊÇstyle_tÃ¶¾ÙµÄ¶ş½øÖÆ»òÕßÖµ¡£ ËüÒ²¿ÉÒÔÎªÁã£¬
-		ÔÚÕâÖÖÇé¿öÏÂ½«Ê¹ÓÃ¡°Ä¬ÈÏ¡±ÑùÊ½¡£ Èç¹û'allow_unregistered'Îªtrue£¬ÔòÔÊĞíÎ´×¢²áµÄÑ¡Ïî¡£ ËüÃÇ½«±»·ÖÅäË÷Òı1²¢¼Ù¶¨¾ßÓĞ¿ÉÑ¡²ÎÊı¡£
+        /** ä¸ºï¼ˆargcï¼Œargvï¼‰å¯¹æ„é€ å‘½ä»¤è¡Œè§£æå™¨ã€‚ ä½¿ç”¨'style'ä¸­ä¼ é€’çš„æ ·å¼é€‰é¡¹ï¼Œå®ƒåº”è¯¥æ˜¯style_tæšä¸¾çš„äºŒè¿›åˆ¶æˆ–è€…å€¼ã€‚ å®ƒä¹Ÿå¯ä»¥ä¸ºé›¶ï¼Œ
+		åœ¨è¿™ç§æƒ…å†µä¸‹å°†ä½¿ç”¨â€œé»˜è®¤â€æ ·å¼ã€‚ å¦‚æœ'allow_unregistered'ä¸ºtrueï¼Œåˆ™å…è®¸æœªæ³¨å†Œçš„é€‰é¡¹ã€‚ å®ƒä»¬å°†è¢«åˆ†é…ç´¢å¼•1å¹¶å‡å®šå…·æœ‰å¯é€‰å‚æ•°ã€‚
         */
 	cmdline(const std::vector<std::string>& args) { init(args); }
 
     cmdline(int argc, const char*const * argv);
 
-    void style(int style = 0);
+	cmdline& style();
 
         /** returns the canonical option prefix associated with the command_line_style
          *  In order of precedence:
@@ -103,28 +127,29 @@ public:
 
     void allow_unregistered();
 
-    void set_options_description(const options_description& desc);
-    void set_positional_options(
-    const positional_options_description& positional_);
+	cmdline& options(const options_description& desc);
+    //void set_options_description(const options_description& desc);
+    //void set_positional_options(const positional_options_description& positional_);
+	cmdline& positional(const positional_options_description& desc);
 
     std::vector<option> run();
 
     std::vector<option> parse_long_option(std::vector<std::string>& args);
     std::vector<option> parse_short_option(std::vector<std::string>& args);
-    std::vector<option> parse_dos_option(std::vector<std::string>& args);
-    std::vector<option> parse_disguised_long_option(
-			std::vector<std::string>& args);
+    //std::vector<option> parse_dos_option(std::vector<std::string>& args);
+   // std::vector<option> parse_disguised_long_option(
+//			std::vector<std::string>& args);
     std::vector<option> parse_terminator(std::vector<std::string>& args);
     std::vector<option> handle_additional_parser(
 			std::vector<std::string>& args);
 
 
-        /** ÉèÖÃÆäËû½âÎöÆ÷¡£ ½«ÎªÃüÁîĞĞµÄÃ¿¸ö±ê¼Çµ÷ÓÃ´Ë·½·¨¡£ Èç¹ûpairÖĞµÄµÚÒ»¸ö×Ö·û´®²»Îª¿Õ£¬Ôò¸Ã½âÎöÆ÷ÈÏÎª¸ÃÁîÅÆÆ¥Åä£¬
-		²¢ÇÒµÚÒ»¸ö×Ö·û´®½«±»ÊÓÎªÑ¡ÏîÃû³Æ£¨¿ÉÒÔÊÇ³¤»ò¶Ì£©£¬¶øµÚ¶ş¸ö×Ö·û´®½«ÊÇÑ¡ÏîµÄ²ÎÊı£¨Èç¹û²»Îª¿Õ£©¡£ Çë×¢Òâ£¬ÆäËû½âÎöÆ÷Ö»ÄÜÆ¥ÅäÒ»¸öÁîÅÆ¡£
+        /** è®¾ç½®å…¶ä»–è§£æå™¨ã€‚ å°†ä¸ºå‘½ä»¤è¡Œçš„æ¯ä¸ªæ ‡è®°è°ƒç”¨æ­¤æ–¹æ³•ã€‚ å¦‚æœpairä¸­çš„ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²ä¸ä¸ºç©ºï¼Œåˆ™è¯¥è§£æå™¨è®¤ä¸ºè¯¥ä»¤ç‰ŒåŒ¹é…ï¼Œ
+		å¹¶ä¸”ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²å°†è¢«è§†ä¸ºé€‰é¡¹åç§°ï¼ˆå¯ä»¥æ˜¯é•¿æˆ–çŸ­ï¼‰ï¼Œè€Œç¬¬äºŒä¸ªå­—ç¬¦ä¸²å°†æ˜¯é€‰é¡¹çš„å‚æ•°ï¼ˆå¦‚æœä¸ä¸ºç©ºï¼‰ã€‚ è¯·æ³¨æ„ï¼Œå…¶ä»–è§£æå™¨åªèƒ½åŒ¹é…ä¸€ä¸ªä»¤ç‰Œã€‚
         */
-    void set_additional_parser(additional_parser p);
+   // void set_additional_parser(additional_parser p);
 
-    void extra_style_parser(style_parser s);
+   // void extra_style_parser(style_parser s);
 
     void check_style(int style) const;
         

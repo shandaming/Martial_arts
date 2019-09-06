@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2019
  */
 
@@ -12,6 +12,7 @@
 #include <any>
 #include <functional>
 
+// 值语义
 class value_semantic 
 {
 public:
@@ -82,68 +83,58 @@ public:
 
 template<class T>
 class typed_value : public value_semantic_codecvt_helper,
-	public typed_value_base
+			public typed_value_base
 {
 public:
 	typed_value(T* store_to) :
-		m_store_to(store_to), composing_(false), implicit_(false), 
+		store_to_(store_to), composing_(false), implicit_(false), 
 		multitoken_(false), zero_tokens_(false), required_(false) {} 
 
     typed_value* default_value(const T& v)
     {
-        m_default_value = std::any(v);
-        m_default_value_as_text = boost::lexical_cast<std::string>(v);
+        default_value_ = std::any(v);
+        default_value_as_text_ = static_cast<std::string>(v);
         return this;
     }
 
     typed_value* default_value(const T& v, const std::string& textual)
     {
-        m_default_value = std::any(v);
-        m_default_value_as_text = textual;
+        default_value_ = std::any(v);
+        default_value_as_text_ = textual;
         return this;
     }
 
     typed_value* implicit_value(const T &v)
     {
-        implicit__value = std::any(v);
-        implicit__value_as_text =
-        boost::lexical_cast<std::string>(v);
+        implicit__value_ = std::any(v);
+        implicit__value_as_text_ =
+        static_cast<std::string>(v);
         return this;
     }
 
     typed_value* value_name(const std::string& name)
     {
-        m_value_name = name;
+        value_name_ = name;
         return this;
     }
 
-        /** Specifies an implicit value, which will be used
-            if the option is given, but without an adjacent value.
-            Using this implies that an explicit value is optional, but if
-            given, must be strictly adjacent to the option, i.e.: '-ovalue'
-            or '--option=value'.  Giving '-o' or '--option' will cause the
-            implicit value to be applied.
-            Unlike the above overload, the type 'T' need not provide
-            operator<< for ostream, but textual representation of default
-            value must be provided by the user.
+        /** 指定隐式值，如果给出了选项，则将使用该值，但没有相邻值。 使用这意味着显式值是可选的，但如果给定，则必须严格地与选项相邻，即：' -  font'或'--option = value'。 给'-o'或'--option'将导致隐含值被应用。 与上述重载不同，类型'T'不需要为ostream提供operator <<，但是必须由用户提供默认值的文本表示。
         */
     typed_value* implicit_value(const T &v, const std::string& textual)
     {
-        implicit__value = std::any(v);
-        implicit__value_as_text = textual;
+        implicit__value_ = std::any(v);
+        implicit__value_as_text_ = textual;
         return this;
     }
 
-        /** Specifies a function to be called when the final value
-            is determined. */
+        /** 指定在确定最终值时要调用的函数。 */
     typed_value* notifier(std::function<void(const T&)> f)
     {
         notifier_ = f;
         return this;
     }
 
-        /** Specifies that the value is composing. See the 'is_composing' 
-            method for explanation. 
+        /** 指定值正在合成。 有关说明，请参阅'is_composing'方法。
         */
     typed_value* composing()
     {
@@ -151,7 +142,7 @@ public:
         return this;
     }
 
-        /** Specifies that the value can span multiple tokens. 
+        /** 指定该值可以跨越多个标记。 
         */
     typed_value* multitoken()
     {
@@ -159,20 +150,14 @@ public:
         return this;
     }
 
-        /** Specifies that no tokens may be provided as the value of
-            this option, which means that only presense of the option
-            is significant. For such option to be useful, either the
-            'validate' function should be specialized, or the 
-            'implicit_value' method should be also used. In most
-            cases, you can use the 'bool_switch' function instead of
-            using this method. */
+        /** 指定不能提供任何标记作为此选项的值，这意味着只有该选项的presense是重要的。 要使此选项有用，要么'validate'功能应该是专用的，要么也应该使用'implicit_value'方法。 在大多数情况下，您可以使用'bool_switch'函数而不是使用此方法。 */
     typed_value* zero_tokens() 
     {
         zero_tokens_ = true;
         return this;
     }
             
-        /** Specifies that the value must occur. */
+        /** 指定必须出现该值。 */
     typed_value* required()
     {
         required_ = true;
@@ -187,7 +172,7 @@ public: // value semantic overrides
 
     uint32_t min_tokens() const
     {
-       if (zero_tokens_ || !implicit__value.empty()) {
+       if (zero_tokens_ || implicit__value_.has_value()) {
             return 0;
         } else {
             return 1;
@@ -196,7 +181,7 @@ public: // value semantic overrides
 
     uint32_t max_tokens() const {
         if (multitoken_) {
-            return std::numeric_limits<uint32_t>::max BOOST_PREVENT_MACRO_SUBSTITUTION();
+            return std::numeric_limits<uint32_t>::max;
         } else if (zero_tokens_) {
             return 0;
         } else {
@@ -206,29 +191,24 @@ public: // value semantic overrides
 
     bool is_required() const { return required_; }
 
-        /** Creates an instance of the 'validator' class and calls
-            its operator() to perform the actual conversion. */
+        /** 创建'validator'类的实例并调用其operator（）来执行实际转换。 */
     void xparse(std::any& value_store, 
                 const std::vector<std::string>& new_tokens) 
             const;
 
-        /** If default value was specified via previous call to 
-            'default_value', stores that value into 'value_store'.
-            Returns true if default value was stored.
+        /** 如果通过先前调用'default_value'指定了默认值，则将该值存储到'value_store'中。 如果存储了默认值，则返回true。
         */
     virtual bool apply_default(std::any& value_store) const
     {
-        if (m_default_value.empty()) {
+        if (!default_value_.has_value()) {
             return false;
         } else {
-            value_store = m_default_value;
+            value_store = default_value_;
             return true;
         }
     }
 
-        /** If an address of variable to store value was specified
-            when creating *this, stores the value there. Otherwise,
-            does nothing. */
+        /** 如果在创建* this时指定了存储值变量的地址，则将值存储在那里。 否则，什么都不做。 */
     void notify(const std::any& value_store) const;
 
 public: // typed_value_base overrides
@@ -240,22 +220,21 @@ public: // typed_value_base overrides
         
 
 private:
-    T* m_store_to;
+    T* store_to_;
         
-        // Default value is stored as std::any and not
-        // as boost::optional to avoid unnecessary instantiations.
-    std::string m_value_name;
-    std::any m_default_value;
-    std::string m_default_value_as_text;
-    std::any implicit__value;
-    std::string implicit__value_as_text;
+        // 默认值存储为std :: any而不是boost :: optional以避免不必要的实例化。
+    std::string value_name_;
+    std::any default_value_;
+    std::string default_value_as_text_;
+    std::any implicit__value_;
+    std::string implicit__value_as_text_;
     bool composing_, implicit_, multitoken_, zero_tokens_, required_;
     std::function<void(const T&)> notifier_;
 };
 
 
-    /** ����һ��typed_value <T>ʵ���� �˺�����Ϊ�ض����ʹ���value_semanticʵ������Ҫ������
-	�Ժ�ɽ��䴫�ݸ���option_description�����캯���� ������ϣ����option��ֵ�洢�����������ʱ��ʹ�õڶ������ء�
+    /** 创建一个typed_value <T>实例。 此函数是为特定类型创建value_semantic实例的主要方法，
+	稍后可将其传递给“option_description”构造函数。 当另外希望将option的值存储到程序变量中时，使用第二个重载。
     */
 template<class T>
 typed_value<T>* value();
@@ -265,9 +244,7 @@ typed_value<T>* value();
 template<class T>
 typed_value<T>* value(T* v);
 
-    /** Works the same way as the 'value<bool>' function, but the created
-        value_semantic won't accept any explicit value. So, if the option 
-        is present on the command line, the value will be 'true'.
+    /** 与'value <bool>'函数的工作方式相同，但创建的value_semantic不接受任何显式值。 因此，如果命令行中存在该选项，则该值将为“true”。
     */
 typed_value<bool>*
 bool_switch();
@@ -278,29 +255,25 @@ typed_value<bool>*
 bool_switch(bool* v);
 
 
-//#include "boost/program_options/detail/value_semantic.hpp"
-namespace boost { template<class T> class optional; }
-
-
 extern  std::string arg;
 
 template<class T, class charT>
 std::string typed_value<T, charT>::name() const
 {
-	std::string const& var = (m_value_name.empty() ? arg : m_value_name);
-	if (!implicit__value.empty() && !implicit__value_as_text.empty()) 
+	std::string const& var = (value_name_.has_value() ? value_name_ : arg);
+	if (!implicit__value_.empty() && !implicit__value_as_text_.empty()) 
 	{
-		std::string msg = "[=" + var + "(=" + implicit__value_as_text + 
+		std::string msg = "[=" + var + "(=" + implicit__value_as_text_ + 
 			")]";
-		if (!m_default_value.empty() && !m_default_value_as_text.empty())
+		if (default_value_.has_value() && default_value_as_text_.has_value())
 		{
-				 msg += " (=" + m_default_value_as_text + ")";
+				 msg += " (=" + default_value_as_text_ + ")";
 		}
 		return msg;
 	}
-	else if (!m_default_value.empty() && !m_default_value_as_text.empty()) 
+	else if (default_value_.has_value() && default_value_as_text_.has_value()) 
 	{
-		return var + " (=" + m_default_value_as_text + ")";
+		return var + " (=" + default_value_as_text_ + ")";
 	}
 	else 
 	{
@@ -311,10 +284,10 @@ std::string typed_value<T, charT>::name() const
 template<class T, class charT>
 void typed_value<T, charT>::notify(const std::any& value_store) const
 {
-	const T* value = boost::any_cast<T>(&value_store);
-	if (m_store_to) 
+	const T* value = std::any_cast<T>(&value_store);
+	if (store_to_) 
 	{
-		*m_store_to = *value;
+		*store_to_ = *value;
 	}
 	if (notifier_) 
 	{
@@ -428,9 +401,9 @@ void typed_value<T, charT>::xparse(std::any& value_store,
 		 // If no tokens were given, and the option accepts an implicit
 		 // value, then assign the implicit value as the stored value;
 		 // otherwise, validate the user-provided token(s).
-	if (new_tokens.empty() && !implicit__value.empty())
+	if (new_tokens.empty() && !implicit__value_.empty())
 	{
-		value_store = implicit__value;
+		value_store = implicit__value_;
 	}
 	else
 	{
@@ -441,7 +414,7 @@ void typed_value<T, charT>::xparse(std::any& value_store,
 template<class T>
 typed_value<T>* value()
 { 
-	return boost::program_options::value<T>(0);
+	return value<T>(0);
 }
 
 template<class T>

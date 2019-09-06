@@ -1,4 +1,4 @@
-#define BOOST_PROGRAM_OPTIONS_SOURCE
+ï»¿#define BOOST_PROGRAM_OPTIONS_SOURCE
 
 #include <cassert>
 
@@ -7,46 +7,39 @@
 #include "value_semantic.h"
 #include "variables_map.h"
 
-    using namespace std;
     
     void store(const parsed_options& options, variables_map& xm,
                bool utf8)
     {
-        //TODO£ºÈç¹ûÎÒÃÇÔÚ²»Í¬µÄµ÷ÓÃ'store'ÖĞ¶ÔÏàÍ¬µÄÑ¡ÏîÃû³ÆÓĞ²»Í¬µÄ¶¨Òå£¬¸ÃÔõÃ´°ì£¿
+        //TODOï¼šå¦‚æœæˆ‘ä»¬åœ¨ä¸åŒçš„è°ƒç”¨'store'ä¸­å¯¹ç›¸åŒçš„é€‰é¡¹åç§°æœ‰ä¸åŒçš„å®šä¹‰ï¼Œè¯¥æ€ä¹ˆåŠï¼Ÿ
         assert(options.description);
         const options_description& desc = *options.description;
 
-        // ÎÒÃÇĞèÒª·ÃÎÊmapµÄoperator []£¬¶ø²»ÊÇ¸²¸Ç°æ±¾variables_map¡£ àÅ..ÁèÂÒ¡£
+        // æˆ‘ä»¬éœ€è¦è®¿é—®mapçš„operator []ï¼Œè€Œä¸æ˜¯è¦†ç›–ç‰ˆæœ¬variables_mapã€‚ å—¯..å‡Œä¹±ã€‚
         std::map<std::string, variable_value>& m = xm;
 
         std::set<std::string> new_final;
 
-        // Declared once, to please Intel in VC++ mode;
-        uint32_t i;
-
         // Declared here so can be used to provide context for exceptions
-        string option_name;
-        string original_token;
+        std::string option_name;
+        std::string original_token;
 
-#ifndef BOOST_NO_EXCEPTIONS
         try
-#endif
         {
-
-            //Ê×ÏÈ£¬×ª»»/´æ´¢ËùÓĞ¸ø¶¨µÄÑ¡Ïî
-            for (i = 0; i < options.options.size(); ++i) {
+            //é¦–å…ˆï¼Œè½¬æ¢/å­˜å‚¨æ‰€æœ‰ç»™å®šçš„é€‰é¡¹
+            for (uint32_t i = 0; i < options.options.size(); ++i) {
 
                 option_name = options.options[i].string_key;
-                // Ìø¹ıÃ»ÓĞÃû×ÖµÄÎ»ÖÃÑ¡Ïî
+                // è·³è¿‡æ²¡æœ‰åå­—çš„ä½ç½®é€‰é¡¹
                 if (option_name.empty())
                     continue;
 
-                // ºöÂÔÎ´×¢²áµÄÑ¡Ïî¡£ ½öµ±ÓÃ»§Ã÷È·ÒªÇóÔÊĞíÎ´×¢²áµÄÑ¡ÏîÊ±£¬¡°Î´×¢²á¡±×Ö¶Î²Å¿ÉÒÔÎªtrue¡£ 
-				//ÎÒÃÇ²»ÄÜ½«ËüÃÇ´æ´¢µ½±äÁ¿Ó³Éä£¨È±ÉÙ¹ØÓÚÅä¶ÔµÄÈÎºÎĞÅÏ¢£©£¬ËùÒÔÖ»ĞèºöÂÔËüÃÇ¡£
+                // å¿½ç•¥æœªæ³¨å†Œçš„é€‰é¡¹ã€‚ ä»…å½“ç”¨æˆ·æ˜ç¡®è¦æ±‚å…è®¸æœªæ³¨å†Œçš„é€‰é¡¹æ—¶ï¼Œâ€œæœªæ³¨å†Œâ€å­—æ®µæ‰å¯ä»¥ä¸ºtrueã€‚ 
+				//æˆ‘ä»¬ä¸èƒ½å°†å®ƒä»¬å­˜å‚¨åˆ°å˜é‡æ˜ å°„ï¼ˆç¼ºå°‘å…³äºé…å¯¹çš„ä»»ä½•ä¿¡æ¯ï¼‰ï¼Œæ‰€ä»¥åªéœ€å¿½ç•¥å®ƒä»¬ã€‚
                 if (options.options[i].unregistered)
                     continue;
 
-                //Èç¹ûÑ¡Ïî¾ßÓĞ×îÖÕÖµ£¬ÇëÌø¹ı´Ë·ÖÅä
+                //å¦‚æœé€‰é¡¹å…·æœ‰æœ€ç»ˆå€¼ï¼Œè¯·è·³è¿‡æ­¤åˆ†é…
                 if (xm.final_.count(option_name))
                     continue;
 
@@ -57,7 +50,7 @@
 
                 variable_value& v = m[option_name];
                 if (v.defaulted()) {
-                    // ÕâÀïµÄÏÔÊ½¸³Öµ»áÉ¾³ıÄ¬ÈÏÖµ
+                    // è¿™é‡Œçš„æ˜¾å¼èµ‹å€¼ä¼šåˆ é™¤é»˜è®¤å€¼
                     v = variable_value();
                 }
 
@@ -65,31 +58,30 @@
 
                 v.value_semantic_ = d.semantic();
 
-                // ¸ÃÑ¡Ïî²»ÊÇºÏ³É£¬²¢ÇÒÏÔÊ½Ìá¹©ÁË¸ÃÖµ¡£ ºöÂÔ´ËÑ¡ÏîµÄÖµÒÔ±ãºóĞøµ÷ÓÃ¡°store¡±¡£ 
-				//ÎÒÃÇ½«Æä´æ´¢µ½ÁÙÊ±¼¯ÖĞ£¬ÒÔ±ãÔÊĞíÔÚ* this *'store'µ÷ÓÃÄÚ½øĞĞ¶à´Î·ÖÅä¡£
+                // è¯¥é€‰é¡¹ä¸æ˜¯åˆæˆï¼Œå¹¶ä¸”æ˜¾å¼æä¾›äº†è¯¥å€¼ã€‚ å¿½ç•¥æ­¤é€‰é¡¹çš„å€¼ä»¥ä¾¿åç»­è°ƒç”¨â€œstoreâ€ã€‚ 
+				//æˆ‘ä»¬å°†å…¶å­˜å‚¨åˆ°ä¸´æ—¶é›†ä¸­ï¼Œä»¥ä¾¿å…è®¸åœ¨* this *'store'è°ƒç”¨å†…è¿›è¡Œå¤šæ¬¡åˆ†é…ã€‚
                 if (!d.semantic()->is_composing())
                     new_final.insert(option_name);
             }
         }
-#ifndef BOOST_NO_EXCEPTIONS
         catch(error_with_option_name& e)
         {
             // add context and rethrow
             e.add_context(option_name, original_token, options.m_options_prefix);
             throw;
         }
-#endif
+
         xm.final_.insert(new_final.begin(), new_final.end());
 
 
 
-        // Æä´Î£¬Ó¦ÓÃÄ¬ÈÏÖµ²¢´æ´¢ËùĞèÑ¡Ïî¡£
-        const vector<std::shared_ptr<option_description> >& all = desc.options();
-        for(i = 0; i < all.size(); ++i)
+        // å…¶æ¬¡ï¼Œåº”ç”¨é»˜è®¤å€¼å¹¶å­˜å‚¨æ‰€éœ€é€‰é¡¹ã€‚
+        const std::vector<std::shared_ptr<option_description> >& all = desc.options();
+        for(uint32_t i = 0; i < all.size(); ++i)
         {
             const option_description& d = *all[i];
-            string key = d.key("");
-            // FIXME£ºÕâ¸öÂß¼­ÒÀÀµÓÚoption_descriptionÄÚ²¿µÄÖªÊ¶¡£ Èç¹ûÑ¡ÏîËµÃ÷°üº¬'*'£¬Ôò'key'Îª¿Õ¡£ ÔÚÕâÖÖÇé¿öÏÂ£¬Ä¬ÈÏÖµ¸ù±¾Ã»ÓĞÒâÒå¡£
+            std::string key = d.key("");
+            // FIXMEï¼šè¿™ä¸ªé€»è¾‘ä¾èµ–äºoption_descriptionå†…éƒ¨çš„çŸ¥è¯†ã€‚ å¦‚æœé€‰é¡¹è¯´æ˜åŒ…å«'*'ï¼Œåˆ™'key'ä¸ºç©ºã€‚ åœ¨è¿™ç§æƒ…å†µä¸‹ï¼Œé»˜è®¤å€¼æ ¹æœ¬æ²¡æœ‰æ„ä¹‰ã€‚
             if (key.empty())
             {
                 continue;
@@ -103,11 +95,11 @@
                 }
             }
 
-            // Èç¹ûÕâÊÇ±ØĞèÑ¡Ïî£¬ÇëÌí¼Ó¿ÕÖµ
+            // å¦‚æœè¿™æ˜¯å¿…éœ€é€‰é¡¹ï¼Œè¯·æ·»åŠ ç©ºå€¼
             if (d.semantic()->is_required()) {
 
-                //¶ÔÓÚÒÔ¶àÖÖ·½Ê½Ö¸¶¨µÄÑ¡ÏîÃû³Æ£¬ÀıÈç ÔÚÃüÁîĞĞ£¬ÅäÖÃÎÄ¼şµÈÉÏ£¬ÒÔÏÂÓÅÏÈ¹æÔòÊÊÓÃ£º¡° - ¡±>£¨¡° - ¡±»ò¡°/¡±£©>¡°¡±Í¨¹ıµ¥´Îµ÷ÓÃlength£¨£©¿ÉÒÔ·½±ãµØÉèÖÃÓÅÏÈ¼¶
-                string canonical_name = d.canonical_display_name(options.m_options_prefix);
+                //å¯¹äºä»¥å¤šç§æ–¹å¼æŒ‡å®šçš„é€‰é¡¹åç§°ï¼Œä¾‹å¦‚ åœ¨å‘½ä»¤è¡Œï¼Œé…ç½®æ–‡ä»¶ç­‰ä¸Šï¼Œä»¥ä¸‹ä¼˜å…ˆè§„åˆ™é€‚ç”¨ï¼šâ€œ - â€>ï¼ˆâ€œ - â€æˆ–â€œ/â€ï¼‰>â€œâ€é€šè¿‡å•æ¬¡è°ƒç”¨lengthï¼ˆï¼‰å¯ä»¥æ–¹ä¾¿åœ°è®¾ç½®ä¼˜å…ˆçº§
+                std::string canonical_name = d.canonical_display_name(options.m_options_prefix);
                 if (canonical_name.length() > xm.required_[key].length())
                     xm.required_[key] = canonical_name;
             }
@@ -115,13 +107,12 @@
     }
 
     
-    void store(const wparsed_options& options, variables_map& m)
+    void store(const parsed_options& options, variables_map& m)
     {
         store(options.utf8_encoded_options, m, true);
     }
 
-    const variable_value&
-    abstract_variables_map::operator[](const std::string& name) const
+    const variable_value& abstract_variables_map::operator[](const std::string& name) const
     {
         const variable_value& v = get(name);
         if (v.empty() && next_)
@@ -153,6 +144,7 @@
             return i->second;
     }
 
+/*
     void variables_map::notify()
     {
         // This checks if all required options occur
@@ -182,8 +174,9 @@
                will be called after that, so we check that value_sematics is
                not NULL. See:
                    https://svn.boost.org/trac/boost/ticket/2782
-            */
-            if (k->second.value_semantic_)
-                k->second.value_semantic_->notify(k->second.value());
-        }
-    }
+    //        */
+    //        if (k->second.value_semantic_)
+    //            k->second.value_semantic_->notify(k->second.value());
+    //    }
+    //}
+

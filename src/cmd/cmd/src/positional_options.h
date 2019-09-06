@@ -1,4 +1,4 @@
-
+ï»¿
 
 #ifndef BOOST_PROGRAM_OPTIONS_POSITIONAL_OPTIONS_VP_2004_03_02
 #define BOOST_PROGRAM_OPTIONS_POSITIONAL_OPTIONS_VP_2004_03_02
@@ -10,12 +10,12 @@
     public:
 		positional_options_description() {}
 
-        /** ×î¶àÎª'max_count'ÏÂÒ»¸öÎ»ÖÃÑ¡ÏîµÄÎïÖÖÓ¦¸Ã±»¸³Óè'name'¡£ Öµ¡°-1¡±±íÊ¾¡°ÎŞÏŞÖÆ¡±¡£ 
-		µ÷ÓÃ'max_value'µÈÓÚ'-1'ºó£¬²»ÄÜµ÷ÓÃ'add'¡£          
+        /** æœ€å¤šä¸º'max_count'ä¸‹ä¸€ä¸ªä½ç½®é€‰é¡¹çš„ç‰©ç§åº”è¯¥è¢«èµ‹äºˆ'name'ã€‚ å€¼â€œ-1â€è¡¨ç¤ºâ€œæ— é™åˆ¶â€ã€‚ 
+		è°ƒç”¨'max_value'ç­‰äº'-1'åï¼Œä¸èƒ½è°ƒç”¨'add'ã€‚          
         */
         positional_options_description& add(const char* name, int max_count);
 
-        /** ·µ»Ø¿ÉÒÔ´æÔÚµÄ×î´óÎ»ÖÃÑ¡ÏîÊı¡£ ¿ÉÒÔ·µ»Ø£¨numeric_limits <uint32_t> :: max£©£¨£©ÒÔÖ¸Ê¾ÎŞÏŞÊıÁ¿¡£ */
+        /** è¿”å›å¯ä»¥å­˜åœ¨çš„æœ€å¤§ä½ç½®é€‰é¡¹æ•°ã€‚ å¯ä»¥è¿”å›ï¼ˆnumeric_limits <uint32_t> :: maxï¼‰ï¼ˆï¼‰ä»¥æŒ‡ç¤ºæ— é™æ•°é‡ã€‚ */
         uint32_t max_total_count() const;
 
         /** Returns the name that should be associated with positional

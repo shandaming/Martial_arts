@@ -60,7 +60,9 @@ main.o: main.cpp /usr/include/stdc-predef.h options_description.h \
  /usr/include/x86_64-linux-gnu/bits/endian.h \
  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
  /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/timesize.h \
  /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/time64.h \
  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h /usr/include/sched.h \
  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
@@ -150,7 +152,7 @@ main.o: main.cpp /usr/include/stdc-predef.h options_description.h \
  /usr/include/c++/8/bits/stl_algo.h \
  /usr/include/c++/8/bits/algorithmfwd.h \
  /usr/include/c++/8/bits/stl_heap.h \
- /usr/include/c++/8/bits/uniform_int_dist.h
+ /usr/include/c++/8/bits/uniform_int_dist.h errors.h
 
 /usr/include/stdc-predef.h:
 
@@ -306,7 +308,11 @@ options_description.h:
 
 /usr/include/x86_64-linux-gnu/bits/types.h:
 
+/usr/include/x86_64-linux-gnu/bits/timesize.h:
+
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/x86_64-linux-gnu/bits/time64.h:
 
 /usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
 
@@ -545,3 +551,5 @@ value_semantic.h:
 /usr/include/c++/8/bits/stl_heap.h:
 
 /usr/include/c++/8/bits/uniform_int_dist.h:
+
+errors.h:

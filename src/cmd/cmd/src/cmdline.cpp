@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2019
  */
 
@@ -60,25 +60,23 @@ std::string invalid_syntax::get_template(kind_t kind)
 
 cmdline::cmdline(int argc, const char*const * argv)
 {
-    init(vector<string>(argv+1, argv+argc+!argc));
+    init(std::vector<std::string>(argv+1, argv+argc+!argc));
 }
 
-void cmdline::init(const vector<string>& args)
+void cmdline::init(const std::vector<std::string>& args)
 {
     this->args_ = args;        
-    style_ = default_style;
+    style_ = style_t::default_style;
     desc_ = 0;
     positional_ = 0;
     allow_unregistered_ = false;
 }
 
-void cmdline::style(int style)
+cmdline& cmdline::style()
 {
-    if (style == 0) 
-        style = default_style;        
-
-    check_style(style);
-    this->style_ = style_t(style);
+	check_style(style_t::default_style);
+	style_ = (style_t::default_style);
+	return *this;
 }
     
 void cmdline::allow_unregistered()
@@ -89,7 +87,7 @@ void cmdline::allow_unregistered()
 void cmdline::check_style(int style) const
 {
     bool allow_some_long = 
-        (style & allow_long) || (style & allow_long_disguise);
+        (style & allow_long) /*|| (style & allow_long_disguise)*/;
 
     const char* error = 0;
     if (allow_some_long && 
@@ -116,7 +114,7 @@ void cmdline::check_style(int style) const
                     "short options.";
 
     if (error)
-        boost::throw_exception(invalid_command_line_style(error));
+        throw (invalid_command_line_style(error));
 
         // Need to check that if guessing and long disguise are enabled
         // -f will mean the same as -foo
@@ -125,26 +123,24 @@ void cmdline::check_style(int style) const
 bool cmdline::is_style_active(style_t style) const
 {
     return ((style_ & style) ? true : false);
-}    
-
-void cmdline::set_options_description(const options_description& desc)
-{
-    desc_ = &desc;
 }
 
-void  cmdline::set_positional_options(
-    const positional_options_description& positional)
+cmdline& options(const options_description& desc)
 {
-    positional_ = &positional;
+	desc_ = &desc;
+	return *this;
+}
+
+cmdline& positional(const positional_options_description& desc)
+{
+	positional_ = &positional;
+	return *this;
 }
 
 int cmdline::get_canonical_option_prefix()
 {
     if (style_ & allow_long)
         return allow_long;
-
-    if (style_ & allow_long_disguise)
-        return allow_long_disguise;
 
     if ((style_ & allow_short) && (style_ & allow_dash_for_short))
         return allow_dash_for_short;
@@ -155,36 +151,35 @@ int cmdline::get_canonical_option_prefix()
     return 0;
 }
 
-vector<option>
- cmdline::run()
+parsed_options run()
 {
+			// save the canonical prefixes which were used by this cmdline parser
+			//    eventually inside the parsed results
+			//    This will be handy to format recognisable options
+			//    for diagnostic messages if everything blows up much later on
+parsed_options result(desc_, cmdline::get_canonical_option_prefix());
+result.options = cmdline::run();
+
+			// Presense of parsed_options -> wparsed_options conversion
+			// does the trick.
+	return parsed_options(result);
+}
+
+vector<option> cmdline::run()
+{
+	using namespace std::placeholders;
+
     assert(desc_);
 
     vector<style_parser> style_parsers;      
 
-    if (style_parser_)
-        style_parsers.push_back(style_parser_);
-
-    if (additional_parser_)
-        style_parsers.push_back(
-            boost::bind(&cmdline::handle_additional_parser, this, _1));
-
     if (style_ & allow_long)
-        style_parsers.push_back(
-            boost::bind(&cmdline::parse_long_option, this, _1));
-
-    if ((style_ & allow_long_disguise))
-        style_parsers.push_back(
-            boost::bind(&cmdline::parse_disguised_long_option, this, _1));
+        style_parsers.push_back(std::bind(&cmdline::parse_long_option, this, _1));
 
     if ((style_ & allow_short) && (style_ & allow_dash_for_short))
-        style_parsers.push_back(
-            boost::bind(&cmdline::parse_short_option, this, _1));
+        style_parsers.push_back(std::bind(&cmdline::parse_short_option, this, _1));
 
-    if ((style_ & allow_short) && (style_ & allow_slash_for_short))
-        style_parsers.push_back(boost::bind(&cmdline::parse_dos_option, this, _1));
-
-    style_parsers.push_back(boost::bind(&cmdline::parse_terminator, this, _1));
+    style_parsers.push_back(std::bind(&cmdline::parse_terminator, this, _1));
 
     vector<option> result;
     vector<string>& args = args_;
@@ -196,17 +191,15 @@ vector<option>
             uint32_t current_size = static_cast<uint32_t>(args.size());
             vector<option> next = style_parsers[i](args);
 
-                // Check that option names
-                // are valid, and that all values are in place.
+                //检查选项名称是否有效，以及所有值都已到位。
             if (!next.empty())
             {
                  vector<string> e;
-                 for(uint32_t k = 0; k < next.size()-1; ++k) {
+                 for(uint32_t k = 0; k < next.size()-1; ++k) 
+				{
                     finish_option(next[k], e, style_parsers);
                 }
-                    // For the last option, pass the unparsed tokens
-                    // so that they can be added to next.back()'s values
-                    // if appropriate.
+                    ////对于最后一个选项，传递未解析的标记，以便可以将它们添加到next.back（）的值（如果适用）。
                     finish_option(next.back(), args, style_parsers);
                     for (uint32_t j = 0; j < next.size(); ++j)
                         result.push_back(next[j]);                    
@@ -227,9 +220,7 @@ vector<option>
             }
         }
 
-        /* If an key option is followed by a positional option,
-           can can consume more tokens (e.g. it's multitoken option),
-           give those tokens to it.  */
+        /* 如果一个键选项后跟一个位置选项，可以消耗更多的标记（例如它的多重标记选项），给它们这些标记。 */
         vector<option> result2;
         for (uint32_t i = 0; i < result.size(); ++i)
         {
@@ -242,10 +233,7 @@ vector<option>
             const option_description* xd;
             try
             {
-                xd = desc_->find_nothrow(opt.string_key, 
-                                            is_style_active(allow_guessing),
-                                            is_style_active(long_case_insensitive),
-                                            is_style_active(short_case_insensitive));
+                xd = desc_->find_nothrow(opt.string_key);
             } 
             catch(error_with_option_name& e)
             {
@@ -261,9 +249,7 @@ vector<option>
             uint32_t max_tokens = xd->semantic()->max_tokens();
             if (min_tokens < max_tokens && opt.value.size() < max_tokens)
             {
-                // This option may grab some more tokens.
-                // We only allow to grab tokens that are not already
-                // recognized as key options.
+                // 此选项可能会获取更多令牌。 我们只允许抓取尚未被识别为关键选项的令牌。
 
                 int can_take_more = max_tokens - static_cast<int>(opt.value.size());
                 uint32_t j = i+1;
@@ -275,9 +261,7 @@ vector<option>
 
                     if (opt2.position_key == INT_MAX)
                     {
-                        // We use INT_MAX to mark positional options that
-                        // were found after the '--' terminator and therefore
-                        // should stay positional forever.
+                        // 我们使用INT_MAX标记在' - '终止符后找到的位置选项，因此应该永远保持位置。
                         break;
                     }
 
@@ -318,18 +302,18 @@ vector<option>
             }
         }
         
-        // set case sensitive flag
+        // 设置区分大小写标志
         for (uint32_t i = 0; i < result.size(); ++i) {
             if (result[i].string_key.size() > 2 ||
                         (result[i].string_key.size() > 1 && result[i].string_key[0] != '-'))
             {
                 // it is a long option
-                result[i].case_insensitive = is_style_active(long_case_insensitive);
+                result[i].case_insensitive = false;//is_style_active(long_case_insensitive);
             }
             else
             {
                 // it is a short option
-                result[i].case_insensitive = is_style_active(short_case_insensitive);
+                result[i].case_insensitive = false;//is_style_active(short_case_insensitive);
             }
         }
 
@@ -343,20 +327,15 @@ vector<option>
         if (opt.string_key.empty())
             return;
 
-        // 
-        // Be defensive:
-        // will have no original token if option created by handle_additional_parser()
+        //防守：如果handle_additional_parser（）创建的选项将没有原始令牌
         std::string original_token_for_exceptions = opt.string_key;
         if (opt.original_tokens.size())
             original_token_for_exceptions = opt.original_tokens[0];
 
         try
         {
-            // First check that the option is valid, and get its description.
-            const option_description* xd = desc_->find_nothrow(opt.string_key, 
-                    is_style_active(allow_guessing),
-                    is_style_active(long_case_insensitive),
-                    is_style_active(short_case_insensitive));
+            // 首先检查该选项是否有效，并获取其描述。
+            const option_description* xd = desc_->find_nothrow(opt.string_key);
 
             if (!xd)
             {
@@ -372,11 +351,7 @@ vector<option>
             // Canonize the name
             opt.string_key = d.key(opt.string_key);
 
-            // We check that the min/max number of tokens for the option
-            // agrees with the number of tokens we have. The 'adjacent_value'
-            // (the value in --foo=1) counts as a separate token, and if present
-            // must be consumed. The following tokens on the command line may be
-            // left unconsumed.
+            //我们检查该选项的最小/最大令牌数是否与我们拥有的令牌数一致。 'adjacent_value'（--foo = 1中的值）计为单独的标记，如果存在则必须使用。 命令行上的以下标记可能未被占用。
             uint32_t min_tokens = d.semantic()->min_tokens();
             uint32_t max_tokens = d.semantic()->max_tokens();
             
@@ -390,8 +365,7 @@ vector<option>
                         invalid_command_line_syntax(invalid_command_line_syntax::extra_parameter));
                 }
                 
-                // Grab min_tokens values from other_tokens, but only if those tokens
-                // are not recognized as options themselves.
+                // 从other_tokens中获取min_tokens值，但前提是这些令牌本身不被识别为选项。
                 if (opt.value.size() <= min_tokens) 
                 {
                     min_tokens -= static_cast<uint32_t>(opt.value.size());
@@ -401,12 +375,10 @@ vector<option>
                     min_tokens = 0;
                 }
 
-                // Everything's OK, move the values to the result.
+                // 一切都OK，将值移动到结果中。
                 for(;!other_tokens.empty() && min_tokens--; ) 
                 {
-                    // check if extra parameter looks like a known option
-                    // we use style parsers to check if it is syntactically an option, 
-                    // additionally we check if an option_description exists
+                    //检查额外参数是否看起来像已知选项我们使用样式解析器检查它是否在语法上是一个选项，另外我们检查是否存在option_description
                     vector<option> followed_option;  
                     vector<string> next_token(1, other_tokens[0]);      
                     for (uint32_t i = 0; followed_option.empty() && i < style_parsers.size(); ++i)
@@ -416,10 +388,7 @@ vector<option>
                     if (!followed_option.empty()) 
                     {
                         original_token_for_exceptions = other_tokens[0];
-                        const option_description* od = desc_->find_nothrow(other_tokens[0], 
-                                  is_style_active(allow_guessing),
-                                  is_style_active(long_case_insensitive),
-                                  is_style_active(short_case_insensitive));
+                        const option_description* od = desc_->find_nothrow(other_tokens[0]);
                         if (od) 
                             boost::throw_exception(
                                 invalid_command_line_syntax(invalid_command_line_syntax::missing_parameter));
@@ -436,8 +405,7 @@ vector<option>
 
             }
         } 
-        // use only original token for unknown_option / ambiguous_option since by definition
-        //    they are unrecognised / unparsable
+        // 仅对unknown_option / ambiguous_option使用原始令牌，因为根据定义它们是无法识别/不可解析的
         catch(error_with_option_name& e)
         {
             // add context and rethrow
@@ -493,19 +461,13 @@ vector<option>
             string name = tok.substr(0,2);
             string adjacent = tok.substr(2);
 
-            // Short options can be 'grouped', so that
-            // "-d -a" becomes "-da". Loop, processing one
-            // option at a time. We exit the loop when either
-            // we've processed all the token, or when the remainder
-            // of token is considered to be value, not further grouped
-            // option.
+            // 短选项可以“分组”，因此“-d -a”变为“-da”。 循环，一次处理一个选项。 当我们处理了所有令牌时，或者当令牌的剩余部分被认为是值时，我们退出循环，而不是进一步分组选项。
             for(;;) {
                 const option_description* d;
                 try
                 {
                      
-                    d = desc_->find_nothrow(name, false, false,
-                                                is_style_active(short_case_insensitive));
+                    d = desc_->find_nothrow(name);
                 } 
                 catch(error_with_option_name& e)
                 {
@@ -548,6 +510,7 @@ vector<option>
         return vector<option>();
     }
 
+/*
     vector<option> 
     cmdline::parse_dos_option(vector<string>& args)
     {
@@ -568,6 +531,7 @@ vector<option>
         }
         return result;
     }
+
 
     vector<option> 
     cmdline::parse_disguised_long_option(vector<string>& args)
@@ -599,6 +563,7 @@ vector<option>
         }
         return vector<option>();
     }
+*/
 
     vector<option> 
     cmdline::parse_terminator(vector<string>& args)
@@ -620,6 +585,7 @@ vector<option>
         return result;
     }
 
+/*
     vector<option> 
     cmdline::handle_additional_parser(vector<string>& args)
     {
@@ -636,6 +602,7 @@ vector<option>
         return result;
     }
 
+
 void cmdline::set_additional_parser(additional_parser p)
 {
 	additional_parser_ = p;
@@ -645,3 +612,4 @@ void cmdline::extra_style_parser(style_parser s)
 {
 	style_parser_ = s;
 }
+*/

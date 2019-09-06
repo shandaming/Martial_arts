@@ -1,7 +1,5 @@
-#include "options_description.h"
+﻿#include "options_description.h"
 
-:q
-:quit
 
 int main(int argc, char* argv[])
 {
@@ -20,8 +18,7 @@ int main(int argc, char* argv[])
 		("debug-lua", "enables some Lua debugging mechanisms");
 
 	variables_map vm;
-	const int parsing_style = style_t::default_style ^ style_t::allow_guessing;
-	store(command_line_parser(args_).options(all_).positional(positional).style(parsing_style).run(), vm);
+	store(command_line_parser(args_).options(all_).positional(positional).style().run(), vm);
 
 	if (vm.count("ai-config"))
 		std::string multiplayer_ai_config = (vm["ai-config"].as<std::vector<std::string>>());

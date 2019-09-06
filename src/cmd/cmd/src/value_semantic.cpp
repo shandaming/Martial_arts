@@ -1,4 +1,4 @@
-
+ï»¿
 #define BOOST_PROGRAM_OPTIONS_SOURCE
 
 #include "value_semantic.h"
@@ -7,22 +7,13 @@
 
 #include <cctype>
 
-
-    using namespace std;
-
     void 
     //value_semantic_codecvt_helper<char>::
 	value_semantic_codecvt_helper::
     parse(std::any& value_store, const std::vector<std::string>& new_tokens,
           bool utf8) const
     {
-        if (utf8) {
-            boost::throw_exception(
-                std::runtime_error("UTF-8 conversion not supported."));
-        } else {
-            // Already in local encoding, pass unmodified
-            xparse(value_store, new_tokens);
-        }        
+         xparse(value_store, new_tokens);      
     }
 
      std::string arg("arg");
@@ -297,7 +288,7 @@
 
     string validation_error::get_template(kind_t kind)
     {
-        // ×î³õ£¬½«ÏûÏ¢´æ´¢ÔÚ'const char *'±äÁ¿ÖĞ£¬ÒÔ±ÜÃâÔÚËùÓĞÇé¿öÏÂ¶¼×ª»»Îªstd :: string¡£
+        // æœ€åˆï¼Œå°†æ¶ˆæ¯å­˜å‚¨åœ¨'const char *'å˜é‡ä¸­ï¼Œä»¥é¿å…åœ¨æ‰€æœ‰æƒ…å†µä¸‹éƒ½è½¬æ¢ä¸ºstd :: stringã€‚
         const char* msg;
         switch(kind)
         {
