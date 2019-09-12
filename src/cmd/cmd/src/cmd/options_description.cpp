@@ -52,7 +52,7 @@ option_description::match_result option_description::match(const std::string& op
 	std::string local_long_name;
 	for(auto it : long_names_)
     {
-		local_long_name =  it;
+		const local_long_name =  it;
         if (!local_long_name.empty()) 
 		{
 			if ((result == no_match) && (*local_long_name.rbegin() == '*'))
@@ -208,7 +208,6 @@ options_description_easy_init& options_description_easy_init:: operator()(const 
 {
     std::shared_ptr<option_description> d(
 			new option_description(name, new untyped_value(true), description));
-
     owner_->add(d);
     return *this;
 }
@@ -225,7 +224,6 @@ options_description_easy_init& options_description_easy_init::operator()(const c
 		const value_semantic* s, const char* description)
 {
     std::shared_ptr<option_description> d(new option_description(name, s, description));
-
     owner_->add(d);
     return *this;
 }
@@ -277,11 +275,12 @@ const option_description* options_description::find_nothrow(const std::string& n
         
     for(uint32_t i = 0; i < options_.size(); ++i)
     {
-        option_description::match_result r = 
-            options_[i]->match(name);
+        option_description::match_result r = options_[i]->match(name);
 
         if (r == option_description::no_match)
+		{
             continue;
+		}
 
         if (r == option_description::full_match)
         {                

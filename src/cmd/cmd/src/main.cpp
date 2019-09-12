@@ -1,11 +1,12 @@
-﻿#include "options_description.h"
+﻿#include "option_description.h"
 
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
-	options_description general_opts("General options");
+	options_description general_opts("Options");
 	general_opts.add_options()
-		("all-translations", "Show all translations, even incomplete ones."
+		("all-translations", "Show all translations, even incomplete ones.")
 		 ("bunzip2", value<std::string>(), "decompresses a file (<arg>.bz2) in bzip2 format and stores it without the .bz2 suffix. <arg>.bz2 will be removed.")
 		("bzip2", value<std::string>(), "compresses a file (<arg>) in bzip2 format, stores it as <arg>.bz2 and removes <arg>.")
 		("clock", "Adds the option to show a clock for testing the drawing timer.")
@@ -16,7 +17,8 @@ int main(int argc, char* argv[])
 		("data-path", "prints the path of the data directory and exits.")
 		("debug,d", "enables additional command mode options in-game.")
 		("debug-lua", "enables some Lua debugging mechanisms");
-
+		std::cout << general_opts << std::endl;
+#if 0
 	variables_map vm;
 	store(command_line_parser(args_).options(all_).positional(positional).style().run(), vm);
 
@@ -38,4 +40,5 @@ int main(int argc, char* argv[])
 		bool campaign_skip_story = true;
 	if (vm.count("clock"))
 		bool clock = true;
+#endif
 }

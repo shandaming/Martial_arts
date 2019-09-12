@@ -173,12 +173,8 @@ vector<option> cmdline::run()
 
     vector<style_parser> style_parsers;      
 
-    if (style_ & allow_long)
-        style_parsers.push_back(std::bind(&cmdline::parse_long_option, this, _1));
-
-    if ((style_ & allow_short) && (style_ & allow_dash_for_short))
-        style_parsers.push_back(std::bind(&cmdline::parse_short_option, this, _1));
-
+    style_parsers.push_back(std::bind(&cmdline::parse_long_option, this, _1));
+    style_parsers.push_back(std::bind(&cmdline::parse_short_option, this, _1));
     style_parsers.push_back(std::bind(&cmdline::parse_terminator, this, _1));
 
     vector<option> result;
@@ -320,296 +316,224 @@ vector<option> cmdline::run()
         return result;
     }
 
-    void cmdline::finish_option(option& opt,
-                           vector<string>& other_tokens,
-                           const vector<style_parser>& style_parsers)
-    {          
-        if (opt.string_key.empty())
-            return;
+void cmdline::finish_option(option& opt, vector<string>& other_tokens,
+		const vector<style_parser>& style_parsers)
+{          
+	if (opt.string_key.empty())
+	{
+        return;
+	}
 
-        //防守：如果handle_additional_parser（）创建的选项将没有原始令牌
-        std::string original_token_for_exceptions = opt.string_key;
-        if (opt.original_tokens.size())
-            original_token_for_exceptions = opt.original_tokens[0];
+    //防守：如果handle_additional_parser（）创建的选项将没有原始令牌
+    std::string original_token_for_exceptions = opt.string_key;
+    if (opt.original_tokens.size())
+	{
+        original_token_for_exceptions = opt.original_tokens[0];
+	}
 
-        try
-        {
-            // 首先检查该选项是否有效，并获取其描述。
-            const option_description* xd = desc_->find_nothrow(opt.string_key);
-
-            if (!xd)
-            {
-                if (allow_unregistered_) {
-                    opt.unregistered = true;
-                    return;
-                } else {
-                    boost::throw_exception(unknown_option());
-                }                
-            }
-            const option_description& d = *xd;
-
-            // Canonize the name
-            opt.string_key = d.key(opt.string_key);
-
-            //我们检查该选项的最小/最大令牌数是否与我们拥有的令牌数一致。 'adjacent_value'（--foo = 1中的值）计为单独的标记，如果存在则必须使用。 命令行上的以下标记可能未被占用。
-            uint32_t min_tokens = d.semantic()->min_tokens();
-            uint32_t max_tokens = d.semantic()->max_tokens();
-            
-            uint32_t present_tokens = static_cast<uint32_t>(opt.value.size() + other_tokens.size());
-            
-            if (present_tokens >= min_tokens)
-            {
-                if (!opt.value.empty() && max_tokens == 0) 
-                {
-                    boost::throw_exception(
-                        invalid_command_line_syntax(invalid_command_line_syntax::extra_parameter));
-                }
-                
-                // 从other_tokens中获取min_tokens值，但前提是这些令牌本身不被识别为选项。
-                if (opt.value.size() <= min_tokens) 
-                {
-                    min_tokens -= static_cast<uint32_t>(opt.value.size());
-                }
-                else
-                {
-                    min_tokens = 0;
-                }
-
-                // 一切都OK，将值移动到结果中。
-                for(;!other_tokens.empty() && min_tokens--; ) 
-                {
-                    //检查额外参数是否看起来像已知选项我们使用样式解析器检查它是否在语法上是一个选项，另外我们检查是否存在option_description
-                    vector<option> followed_option;  
-                    vector<string> next_token(1, other_tokens[0]);      
-                    for (uint32_t i = 0; followed_option.empty() && i < style_parsers.size(); ++i)
-                    {
-                        followed_option = style_parsers[i](next_token);
-                    }
-                    if (!followed_option.empty()) 
-                    {
-                        original_token_for_exceptions = other_tokens[0];
-                        const option_description* od = desc_->find_nothrow(other_tokens[0]);
-                        if (od) 
-                            boost::throw_exception(
-                                invalid_command_line_syntax(invalid_command_line_syntax::missing_parameter));
-                    }
-                    opt.value.push_back(other_tokens[0]);
-                    opt.original_tokens.push_back(other_tokens[0]);
-                    other_tokens.erase(other_tokens.begin());
-                }
-            }
-            else
-            {
-                boost::throw_exception(
-                            invalid_command_line_syntax(invalid_command_line_syntax::missing_parameter)); 
-
-            }
-        } 
-        // 仅对unknown_option / ambiguous_option使用原始令牌，因为根据定义它们是无法识别/不可解析的
-        catch(error_with_option_name& e)
-        {
-            // add context and rethrow
-            e.add_context(opt.string_key, original_token_for_exceptions, get_canonical_option_prefix());
-            throw;
-        }
-
-    }
-
-    vector<option> cmdline::parse_long_option(vector<string>& args)
+    try
     {
-        vector<option> result;
-        const string& tok = args[0];
-        if (tok.size() >= 3 && tok[0] == '-' && tok[1] == '-')
-        {   
-            string name, adjacent;
+	// 首先检查该选项是否有效，并获取其描述。
+	const option_description* xd = desc_->find_nothrow(opt.string_key);
 
-            string::size_type p = tok.find('=');
-            if (p != tok.npos)
-            {
-                name = tok.substr(2, p-2);
-                adjacent = tok.substr(p+1);
-                if (adjacent.empty())
-                    boost::throw_exception( invalid_command_line_syntax(
-                                                      invalid_command_line_syntax::empty_adjacent_parameter, 
-                                                      name,
-                                                      name,
-                                                      get_canonical_option_prefix()) );
+	if (!xd)
+	{
+		if (allow_unregistered_) 
+		{
+			opt.unregistered = true;
+			return;
+		}
+		else 
+		{
+			boost::throw_exception(unknown_option());
+		}                
+	}
+	const option_description& d = *xd;
+
+		// Canonize the name
+		opt.string_key = d.key(opt.string_key);
+
+		//我们检查该选项的最小/最大令牌数是否与我们拥有的令牌数一致。 'adjacent_value'（--foo = 1中的值）计为单独的标记，如果存在则必须使用。 命令行上的以下标记可能未被占用。
+		uint32_t min_tokens = d.semantic()->min_tokens();
+		uint32_t max_tokens = d.semantic()->max_tokens();
+		
+		uint32_t present_tokens = static_cast<uint32_t>(opt.value.size() + other_tokens.size());
+		
+		if (present_tokens >= min_tokens)
+		{
+			if (!opt.value.empty() && max_tokens == 0) 
+			{
+				boost::throw_exception(
+					invalid_command_line_syntax(invalid_command_line_syntax::extra_parameter));
+			}
+			
+			// 从other_tokens中获取min_tokens值，但前提是这些令牌本身不被识别为选项。
+			if (opt.value.size() <= min_tokens) 
+			{
+				min_tokens -= static_cast<uint32_t>(opt.value.size());
+			}
+			else
+			{
+				min_tokens = 0;
+			}
+
+			// 一切都OK，将值移动到结果中。
+			for(;!other_tokens.empty() && min_tokens--; ) 
+			{
+				//检查额外参数是否看起来像已知选项我们使用样式解析器检查它是否在语法上是一个选项，另外我们检查是否存在option_description
+				vector<option> followed_option;  
+				vector<string> next_token(1, other_tokens[0]);      
+				for (uint32_t i = 0; followed_option.empty() && i < style_parsers.size(); ++i)
+				{
+					followed_option = style_parsers[i](next_token);
+				}
+				if (!followed_option.empty()) 
+				{
+					original_token_for_exceptions = other_tokens[0];
+					const option_description* od = desc_->find_nothrow(other_tokens[0]);
+					if (od) 
+						boost::throw_exception(
+							invalid_command_line_syntax(invalid_command_line_syntax::missing_parameter));
+				}
+				opt.value.push_back(other_tokens[0]);
+				opt.original_tokens.push_back(other_tokens[0]);
+				other_tokens.erase(other_tokens.begin());
+			}
+		}
+		else
+		{
+			boost::throw_exception(
+						invalid_command_line_syntax(invalid_command_line_syntax::missing_parameter)); 
+
+		}
+	} 
+	// 仅对unknown_option / ambiguous_option使用原始令牌，因为根据定义它们是无法识别/不可解析的
+	catch(error_with_option_name& e)
+	{
+		// add context and rethrow
+		e.add_context(opt.string_key, original_token_for_exceptions, get_canonical_option_prefix());
+		throw;
+	}
+
+}
+
+// 解析长选项 "--"
+vector<option> cmdline::parse_long_option(vector<string>& args)
+{
+	vector<option> result;
+    const string& tok = args[0];
+    if (tok.size() >= 3 && tok[0] == '-' && tok[1] == '-')
+    {   
+		string name, adjacent;
+
+        string::size_type p = tok.find('=');
+        if (p != tok.npos)
+        {
+			name = tok.substr(2, p - 2);
+            adjacent = tok.substr(p + 1);
+            if (adjacent.empty())
+			{
+                throw std::log_error(invalid_command_line_syntax(invalid_command_line_syntax::empty_adjacent_parameter, name, name, get_canonical_option_prefix()));
             }
             else
             {
                 name = tok.substr(2);
             }
+
             option opt;
             opt.string_key = name;
             if (!adjacent.empty())
+			{
                 opt.value.push_back(adjacent);
-            opt.original_tokens.push_back(tok);
-            result.push_back(opt);
-            args.erase(args.begin());
-        }
-        return result;
+			}
+		}
+
+        opt.original_tokens.push_back(tok);
+        result.push_back(opt);
+        args.erase(args.begin());
     }
+    return result;
+}
 
+// 解析短选项
+vector<option> cmdline::parse_short_option(vector<string>& args)
+{
+	const string& tok = args[0];
+	if (tok.size() >= 2 && tok[0] == '-' && tok[1] != '-')
+    {   
+        vector<option> result;
 
-    vector<option> cmdline::parse_short_option(vector<string>& args)
-    {
-        const string& tok = args[0];
-        if (tok.size() >= 2 && tok[0] == '-' && tok[1] != '-')
-        {   
-            vector<option> result;
-
-            string name = tok.substr(0,2);
-            string adjacent = tok.substr(2);
+        string name = tok.substr(0, 2);
+        string adjacent = tok.substr(2);
 
             // 短选项可以“分组”，因此“-d -a”变为“-da”。 循环，一次处理一个选项。 当我们处理了所有令牌时，或者当令牌的剩余部分被认为是值时，我们退出循环，而不是进一步分组选项。
-            for(;;) {
-                const option_description* d;
-                try
-                {
-                     
-                    d = desc_->find_nothrow(name);
-                } 
-                catch(error_with_option_name& e)
-                {
-                    // add context and rethrow
-                    e.add_context(name, name, get_canonical_option_prefix());
-                    throw;
-                }
-
-
-                // FIXME: check for 'allow_sticky'.
-                if (d && (style_ & allow_sticky) &&
-                    d->semantic()->max_tokens() == 0 && !adjacent.empty()) {
-                    // 'adjacent' is in fact further option.
-                    option opt;
-                    opt.string_key = name;
-                    result.push_back(opt);
-
-                    if (adjacent.empty())
-                    {
-                        args.erase(args.begin());
-                        break;
-                    }
-
-                    name = string("-") + adjacent[0];
-                    adjacent.erase(adjacent.begin());
-                } else {
-                    
-                    option opt;
-                    opt.string_key = name;
-                    opt.original_tokens.push_back(tok);
-                    if (!adjacent.empty())
-                        opt.value.push_back(adjacent);
-                    result.push_back(opt);
-                    args.erase(args.begin());                    
-                    break;
-                }
-            }
-            return result;
-        }
-        return vector<option>();
-    }
-
-/*
-    vector<option> 
-    cmdline::parse_dos_option(vector<string>& args)
-    {
-        vector<option> result;
-        const string& tok = args[0];
-        if (tok.size() >= 2 && tok[0] == '/')
-        {   
-            string name = "-" + tok.substr(1,1);
-            string adjacent = tok.substr(2);
-
-            option opt;
-            opt.string_key = name;
-            if (!adjacent.empty())
-                opt.value.push_back(adjacent);
-            opt.original_tokens.push_back(tok);
-            result.push_back(opt);
-            args.erase(args.begin());
-        }
-        return result;
-    }
-
-
-    vector<option> 
-    cmdline::parse_disguised_long_option(vector<string>& args)
-    {
-        const string& tok = args[0];
-        if (tok.size() >= 2 && 
-            ((tok[0] == '-' && tok[1] != '-') ||
-             ((style_ & allow_slash_for_short) && tok[0] == '/')))            
-        {
+        for(;;) 
+		{
+			const option_description* d;
             try
-            {
-                if (desc_->find_nothrow(tok.substr(1, tok.find('=')-1), 
-                                         is_style_active(allow_guessing),
-                                         is_style_active(long_case_insensitive),
-                                         is_style_active(short_case_insensitive)))
-                {
-                    args[0].insert(0, "-");
-                    if (args[0][1] == '/')
-                        args[0][1] = '-';
-                    return parse_long_option(args);
-                }
+            {     
+                d = desc_->find_nothrow(name);
             } 
             catch(error_with_option_name& e)
             {
                 // add context and rethrow
-                e.add_context(tok, tok, get_canonical_option_prefix());
+                e.add_context(name, name, get_canonical_option_prefix());
                 throw;
             }
-        }
-        return vector<option>();
-    }
-*/
 
-    vector<option> 
-    cmdline::parse_terminator(vector<string>& args)
-    {
-        vector<option> result;
-        const string& tok = args[0];
-        if (tok == "--")
-        {
-            for(uint32_t i = 1; i < args.size(); ++i)
-            {
-                option opt;
-                opt.value.push_back(args[i]);
-                opt.original_tokens.push_back(args[i]);
-                opt.position_key = INT_MAX;
+
+            // FIXME: check for 'allow_sticky'.
+            if (d && (style_ & allow_sticky) && d->semantic()->max_tokens() == 0 && 
+					!adjacent.empty()) 
+			{
+                // 'adjacent' is in fact further option.
+				option opt;
+                opt.string_key = name;
                 result.push_back(opt);
+
+                if (adjacent.empty())
+                {
+					args.erase(args.begin());
+                    break;
+                }
+
+				name = string("-") + adjacent.erase(adjacent.begin());
             }
-            args.clear();
+			else 
+			{       
+                option opt;
+                opt.string_key = name;
+                opt.original_tokens.push_back(tok);
+                if (!adjacent.empty())
+				{
+                    opt.value.push_back(adjacent);
+				}
+                result.push_back(opt);
+                args.erase(args.begin());                    
+                break;
+            }
         }
         return result;
     }
+    return vector<option>();
+}
 
-/*
-    vector<option> 
-    cmdline::handle_additional_parser(vector<string>& args)
+vector<option> cmdline::parse_terminator(vector<string>& args)
+{
+	vector<option> result;
+    const string& tok = args[0];
+    if (tok == "--")
     {
-        vector<option> result;
-        pair<string, string> r = additional_parser_(args[0]);
-        if (!r.first.empty()) {
-            option next;
-            next.string_key = r.first;
-            if (!r.second.empty())
-                next.value.push_back(r.second);
-            result.push_back(next);
-            args.erase(args.begin());
+		for(uint32_t i = 1; i < args.size(); ++i)
+        {
+			option opt;
+            opt.value.push_back(args[i]);
+            opt.original_tokens.push_back(args[i]);
+            opt.position_key = INT_MAX;
+            result.push_back(opt);
         }
-        return result;
+        args.clear();
     }
-
-
-void cmdline::set_additional_parser(additional_parser p)
-{
-	additional_parser_ = p;
+    return result;
 }
 
-void cmdline::extra_style_parser(style_parser s)
-{
-	style_parser_ = s;
-}
-*/

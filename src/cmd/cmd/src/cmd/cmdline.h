@@ -102,8 +102,7 @@ public:
 
         //typedef function1<std::vector<option>, std::vector<std::string>&>
           //  style_parser;
-	typedef std::function<std::vector<option>(
-				std::vector<std::string&>)> style_parser;
+	typedef std::function<std::vector<option>(std::vector<std::string&>)> style_parser;
         
         /** 为（argc，argv）对构造命令行解析器。 使用'style'中传递的样式选项，它应该是style_t枚举的二进制或者值。 它也可以为零，
 		在这种情况下将使用“默认”样式。 如果'allow_unregistered'为true，则允许未注册的选项。 它们将被分配索引1并假定具有可选参数。

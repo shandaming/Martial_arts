@@ -11,8 +11,10 @@
 #include <vector>
 #include <map>
 
-#include "value_semantic.h"
+//#include "value_semantic.h"
 #include "errors.h"
+
+typedef  std::string value_semantic;
 
 class option_description 
 {
@@ -62,12 +64,10 @@ class  options_description_easy_init
 public:
 	options_description_easy_init(options_description* owner_) : owner_(owner_) {}
 	
-	options_description_easy_init& operator()(const char* name, 
+	options_description_easy_init& operator()(const char* name, const char* description);
+	options_description_easy_init& operator()(const char* name, const value_semantic* s);
+    options_description_easy_init& operator()(const char* name, const value_semantic* s, 
 			const char* description);
-	options_description_easy_init& operator()(const char* name,
-			const value_semantic* s);
-    options_description_easy_init& operator()(const char* name,
-			const value_semantic* s, const char* description);
 private:
     options_description* owner_;
 };

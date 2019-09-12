@@ -7,12 +7,13 @@
 #include <set>
 #include <any>
 #include <memory>
-    class parsed_options;
 
-    class value_semantic;
-    class variables_map;
+class parsed_options;
+
+class value_semantic;
+class variables_map;
     
-    void store(const parsed_options& options, variables_map& m,  bool utf8 = false);
+void store(const parsed_options& options, variables_map& m,  bool utf8 = false);
 
     /** Runs all 'notify' function for options in 'm'. */
 //void notify(variables_map& m) { m.notify(); }
