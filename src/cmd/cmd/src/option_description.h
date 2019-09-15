@@ -14,7 +14,7 @@
 class option_description
 {
 public:
-	option_description() = default;
+	option_description() : value_semantic_(nullptr) {}
 	option_description(const std::string& name, const value_semantic* vs);
 	option_description(const std::string& name, const value_semantic* vs,
 			const std::string& description);

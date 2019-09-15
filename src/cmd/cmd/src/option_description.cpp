@@ -58,9 +58,11 @@ std::string option_description::format_name() const
 	{
 		return long_names_.empty() ? short_name_ : 
 			//short_name_.append("[ --").append(*long_names_.begin()).append(" ]");
-			(short_name_ + "[ --" + *long_names_.begin() + " ]");
+			//(short_name_ + " [--" + *long_names_.begin() + "]");
+			(short_name_ + ", --" + *long_names_.begin());
 	}
-	return "--" + *long_names_.begin();
+	
+	return "    --" + *long_names_.begin();
 }
 
 std::string option_description::format_parameter() const
@@ -204,8 +206,8 @@ void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32
 	}
 }
 
-void format_description(std::ostream& os, const std::string& description, uint32_t first_column_width,
-		uint32_t line_length)
+void format_description(std::ostream& os, const std::string& description, 
+		uint32_t first_column_width, uint32_t line_length)
 {
 	assert(line_length > 1);
 
@@ -246,13 +248,13 @@ void format_description(std::ostream& os, const std::string& description, uint32
 void format_one(std::ostream& os, const option_description& option, uint32_t first_column_width,
 		uint32_t line_length)
 {
-	std::stringstream ss;
-	ss << "  " << option.format_name() << ' ' << option.format_parameter();
-	os << ss.str();
+	std::string format_option = "  " + option.format_name();
+	format_option += (" " + option.format_parameter());
+	os << format_option;
 
 	if(!option.description().empty())
 	{
-		if(ss.str().size() >= first_column_width)
+		if(format_option.size() >= first_column_width)
 		{
 			// 第一列太常，将描述放到新行
 			os.put('\n');
@@ -263,7 +265,7 @@ void format_one(std::ostream& os, const option_description& option, uint32_t fir
 		}
 		else
 		{
-			for(uint32_t pad = first_column_width - ss.str().size(); pad > 0; --pad)
+			for(uint32_t pad = first_column_width - format_option.size(); pad > 0; --pad)
 			{
 				os.put(' ');
 			}
@@ -288,7 +290,7 @@ void options_description::print(std::ostream& os) const
 		{
 			continue;
 		}
-		auto& opt = *options_[i];
+		auto opt = *options_[i];
 		format_one(os, opt, width, line_length_);
 		os << std::endl;
 	}
