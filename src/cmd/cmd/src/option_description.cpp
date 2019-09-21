@@ -52,6 +52,46 @@ option_description& option_description::set_name(const std::string& name)
 	return *this;
 }
 
+bool option_description::match(const std::string& option) const
+{
+	bool match = false;
+
+	for(auto& it : long_names_)
+	{
+		const std::string& local_long_name = it;
+		if(!local_long_name.empty())
+		{
+			if(local_long_name == option)
+			{
+				match = true;
+				break;
+			}
+		}
+	}
+	
+	if(!match)
+	{
+		if(option == short_name_)
+		{
+			match = true;
+		}
+	}
+	return match;
+}
+
+const std::string& option_description::key(const std::string& option) const
+{
+	if(!long_names_.empty())
+	{
+		const std::string first_long_name = *long_names_.begin();
+		return first_long_name;
+	}
+	else
+	{
+		return short_name_;
+	}
+}
+
 std::string option_description::format_name() const
 {
 	if(!short_name_.empty())
@@ -85,6 +125,28 @@ void options_description::add(const std::shared_ptr<option_description>& descrip
 {
 	options_.push_back(description);
 	belong_to_group_.emplace_back(false);
+}
+
+const option_description* options_description::find(const std::string& name) const
+{
+	std::shared_ptr<option_description> found;
+	std::vector<std::string> matches;
+
+	for(auto& it : options_)
+	{
+		if(it->match(name))
+		{
+			matches.emplace_back(it->key(name));
+			found = it;
+		}
+	}
+
+	if(matches.size() > 1)
+	{
+		throw std::logic_error("Ambiguous option.");
+	}
+
+	return found.get();
 }
 
 uint32_t options_description::get_option_column_width() const
@@ -249,6 +311,7 @@ void format_one(std::ostream& os, const option_description& option, uint32_t fir
 		uint32_t line_length)
 {
 	std::string format_option = "  " + option.format_name();
+	const std::string format_parameter =  option.format_parameter();
 	format_option += (" " + option.format_parameter());
 	os << format_option;
 

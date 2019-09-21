@@ -1,4 +1,5 @@
 ﻿#include "option_description.h"
+#include "cmdline.h"
 
 #include <iostream>
 
@@ -18,6 +19,9 @@ int main(int argc, char* argv[])
 		("debug,d", "enables additional command mode options in-game.")
 		("debug-lua", "enables some Lua debugging mechanisms");
 		std::cout << general_opts << std::endl;
+		cmdline cmd(argc, argv);
+		cmd.options(general_opts);
+		cmd.run();
 #if 0
 	variables_map vm;
 	store(command_line_parser(args_).options(all_).positional(positional).style().run(), vm);

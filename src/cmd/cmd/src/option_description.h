@@ -19,6 +19,11 @@ public:
 	option_description(const std::string& name, const value_semantic* vs,
 			const std::string& description);
 
+	bool match(const std::string& option) const;
+	const std::string& key(const std::string& option) const;
+
+	std::shared_ptr<const value_semantic> semantic() const { return value_semantic_; }
+
 	std::string format_name() const;
 	std::string format_parameter() const;
 	std::string description() const { return description_; }
@@ -59,6 +64,8 @@ public:
 
 	// 添加一个options_description，且添加一个不是组的标志
 	void add(const std::shared_ptr<option_description>& description);
+
+	const option_description* find(const std::string& name) const;
 private:
 	uint32_t get_option_column_width() const;
 

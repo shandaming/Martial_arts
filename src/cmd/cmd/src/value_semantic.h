@@ -23,9 +23,9 @@ class value_semantic_codecvt_helper : public value_semantic
 {
 public:
 	value_semantic_codecvt_helper() {}
-	uint32_t min_tokens() const override {}
-	uint32_t max_tokens() const override {}
-	std::string name() const override {}
+	uint32_t min_tokens() const override { return 0; }
+	uint32_t max_tokens() const override { return 0; }
+	std::string name() const override { return ""; }
 };
 
 // options_description中 只有选项名和描述，没有值。
@@ -55,9 +55,9 @@ class typed_value : public value_semantic_codecvt_helper, public typed_value_bas
 public:
 	typed_value(T* store_to) : store_to_(store_to) {}
 
-	uint32_t min_tokens() const override {}
-	uint32_t max_tokens() const override {}
-	std::string name() const override {}
+	uint32_t min_tokens() const override { return 1; }
+	uint32_t max_tokens() const override { return 1; }
+	std::string name() const override { return ""; }
 private:
 	T* store_to_;
 };
