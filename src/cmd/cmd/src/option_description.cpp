@@ -83,7 +83,7 @@ const std::string& option_description::key(const std::string& option) const
 {
 	if(!long_names_.empty())
 	{
-		const std::string first_long_name = *long_names_.begin();
+		const std::string& first_long_name = *long_names_.begin();
 		return first_long_name;
 	}
 	else

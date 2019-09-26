@@ -1,5 +1,6 @@
 ﻿#include "option_description.h"
 #include "cmdline.h"
+#include "variables_map.h"
 
 #include <iostream>
 
@@ -7,42 +8,37 @@ int main(int argc, char* argv[])
 {
 	options_description general_opts("Options");
 	general_opts.add_options()
-		("all-translations", "Show all translations, even incomplete ones.")
-		 ("bunzip2", value<std::string>(), "decompresses a file (<arg>.bz2) in bzip2 format and stores it without the .bz2 suffix. <arg>.bz2 will be removed.")
-		("bzip2", value<std::string>(), "compresses a file (<arg>) in bzip2 format, stores it as <arg>.bz2 and removes <arg>.")
-		("clock", "Adds the option to show a clock for testing the drawing timer.")
-		("config-dir", value<std::string>(), "sets the path of the userdata directory to $HOME/<arg> or My Documents\\My Games\\<arg> for Windows. You can specify also an absolute path outside the $HOME or My Documents\\My Games directory. DEPRECATED: use userdata-dir instead.")
-		("config-path", "prints the path of the userdata directory and exits. DEPRECATED: use userdata-path instead.")
-		("core", value<std::string>(), "overrides the loaded core with the one whose id is specified.")
+		("version,v", "output the version number")
+		 ("include-path,I", value<std::vector<std::string> >(),"include path")
+		("log-dir", value<std::string>())
 		("data-dir", value<std::string>(), "overrides the data directory with the one specified.")
-		("data-path", "prints the path of the data directory and exits.")
-		("debug,d", "enables additional command mode options in-game.")
-		("debug-lua", "enables some Lua debugging mechanisms");
-		std::cout << general_opts << std::endl;
-		cmdline cmd(argc, argv);
-		cmd.options(general_opts);
-		cmd.run();
-#if 0
-	variables_map vm;
-	store(command_line_parser(args_).options(all_).positional(positional).style().run(), vm);
+		("num-threads", value<int>(), "the initial number of threads")
+		("debug,d", "enables additional command mode options in-game.");
+		//std::cout << general_opts << std::endl;
+		//cmdline cmd(argc, argv);
+		//cmd.options(general_opts);
+		//cmd.run();
 
-	if (vm.count("ai-config"))
-		std::string multiplayer_ai_config = (vm["ai-config"].as<std::vector<std::string>>());
-	if (vm.count("algorithm"))
-		std::vector<std::string> multiplayer_algorithm = (vm["algorithm"].as<std::vector<std::string>>());
-	if (vm.count("bunzip2"))
-		std::string bunzip2 = vm["bunzip2"].as<std::string>();
-	if (vm.count("bzip2"))
-		std::string bzip2 = vm["bzip2"].as<std::string>();
-	if (vm.count("campaign"))
-		std::string campaign = vm["campaign"].as<std::string>();
-	if (vm.count("campaign-difficulty"))
-		int campaign_difficulty = vm["campaign-difficulty"].as<int>();
-	if (vm.count("campaign-scenario"))
-		std::string campaign_scenario = vm["campaign-scenario"].as<std::string>();
-	if (vm.count("campaign-skip-story"))
-		bool campaign_skip_story = true;
-	if (vm.count("clock"))
-		bool clock = true;
+	variables_map vm;
+	store(cmdline(argc, argv).options(general_opts).run(), vm);
+#if 1
+	if (vm.count("help"))
+		std::cout << general_opts << std::endl;
+	if (vm.count("h"))
+		std::cout << general_opts;
+	if (vm.count("version"))
+		std::cout << "version 5.2" << std::endl;
+	if (vm.count("v"))
+		std::cout << "version 5.3" << std::endl;
+	if (vm.count("log-dir"))
+		std::cout << vm["log-dir"].as<std::string>() << std::endl;
+	if (vm.count("num-threads"))
+		std::cout << vm["num-threads"].as<int>() << std::endl;
+	if (vm.count("I"))
+		std::cout << vm["I"].as<int>() << std::endl;
+	if (vm.count("data-dir"))
+		std::cout << vm["data-dir"].as<std::string>() << std::endl;
+	if (vm.count("debug"))
+		std::cout << "Debug" << std::endl;
 #endif
 }

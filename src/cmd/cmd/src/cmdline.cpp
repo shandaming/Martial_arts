@@ -45,17 +45,17 @@ std::vector<option> cmdline::parse_long_option(std::vector<std::string>& args)
 					throw std::logic_error("Invalid command line syntax: empty adjacent parameter"
 							" name = "+ name);
 				}
-				else
-				{
-					name = tok.substr(2);
-				}
 			}
-				option opt;
-				opt.key = name;
-				if(!adjacent.empty())
-				{
-					opt.value.emplace_back(adjacent);
-				}
+			else
+			{
+				name = tok.substr(2);
+			}
+			option opt;
+			opt.key = name;
+			if(!adjacent.empty())
+			{
+				opt.value.emplace_back(adjacent);
+			}
 			opt.original_tokens.emplace_back(tok);
 			result.emplace_back(opt);
 			args.erase(args.begin());
@@ -91,7 +91,7 @@ std::vector<option> cmdline::parse_short_option(std::vector<std::string>& args)
 						args.erase(args.begin());
 						break;
 					}
-					name = "-" + adjacent[0];
+					name = std::string("-") + adjacent[0];
 					adjacent.erase(adjacent.begin());
 				}
 				else

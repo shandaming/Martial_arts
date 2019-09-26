@@ -5,7 +5,7 @@ dep = $(obj:.o=.d)
 
 obj = $(csrc:.c=.o) $(ccsrc:.cpp=.o)
 
-CXXFLAGS = -std=c++1z -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines  -O3
+CXXFLAGS = -std=c++1z -g -O0 -pthread -Wall -Wextra -Werror=non-virtual-dtor -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wold-style-cast -Wtrampolines 
 
 LDFLAGS = -lstdc++fs
 
