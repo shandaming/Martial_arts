@@ -291,7 +291,7 @@ void cmdline::finish_option(option& opt, std::vector<std::string>& other_tokens,
 			throw std::logic_error("Unknown option.");
 		}
 		
-		opt.key = d->key(opt.key);
+		opt.key = d->key();
 		// 检测该选项的最小/最大tokens是否和现在拥有的tokens一样多,
 		uint32_t min_tokens = d->semantic()->min_tokens();
 		uint32_t max_tokens = d->semantic()->max_tokens();

@@ -16,7 +16,7 @@ typedef std::map<std::string, variable_value> variables_map;
 
 class variable_value
 {
-	friend void store(const std::vector<option>& options, variables_map& vm);
+	//friend void store(const std::vector<option>& options, variables_map& vm);
 public:
 	variable_value() {}
 	variable_value(const std::any& v) : v_(v) {}
@@ -33,16 +33,6 @@ public:
 private:
 	std::any v_;
 };
-/*
-class variables_map : public std::map<std::string, variable_value>
-{
-public:
-	variables_map() {}
-	
-private:
-};
-*/
-
 
 void store(const std::vector<option>& options, variables_map& vm);
 

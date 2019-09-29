@@ -21,10 +21,6 @@ void store(const std::vector<option>& options, variables_map& vm)
 			continue;
 		}
 
-		//std::string original_token = it.original_tokens.size() ? it.original_tokens[0] : "";
-
-		//const option_description& d = desc.find(option_name);
-
 		if(it.value.size() > 1)
 		{
 			throw std::logic_error("multiple_values.");

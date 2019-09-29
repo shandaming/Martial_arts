@@ -13,7 +13,8 @@ int main(int argc, char* argv[])
 		("log-dir", value<std::string>())
 		("data-dir", value<std::string>(), "overrides the data directory with the one specified.")
 		("num-threads", value<int>(), "the initial number of threads")
-		("debug,d", "enables additional command mode options in-game.");
+		("debug,d", "enables additional command mode options in-game.")
+		("help,h", "print description");
 		//std::cout << general_opts << std::endl;
 		//cmdline cmd(argc, argv);
 		//cmd.options(general_opts);
@@ -24,8 +25,8 @@ int main(int argc, char* argv[])
 #if 1
 	if (vm.count("help"))
 		std::cout << general_opts << std::endl;
-	if (vm.count("h"))
-		std::cout << general_opts;
+	if (vm.count("include-path"))
+		std::cout << vm["include-path"].as<std::string>();
 	if (vm.count("version"))
 		std::cout << "version 5.2" << std::endl;
 	if (vm.count("v"))

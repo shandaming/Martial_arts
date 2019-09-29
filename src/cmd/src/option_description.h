@@ -14,13 +14,13 @@
 class option_description
 {
 public:
-	option_description() : value_semantic_(nullptr) {}
+	option_description() {}
 	option_description(const std::string& name, const value_semantic* vs);
 	option_description(const std::string& name, const value_semantic* vs,
 			const std::string& description);
 
 	bool match(const std::string& option) const;
-	const std::string& key(const std::string& option) const;
+	const std::string& key() const;
 
 	std::shared_ptr<const value_semantic> semantic() const { return value_semantic_; }
 

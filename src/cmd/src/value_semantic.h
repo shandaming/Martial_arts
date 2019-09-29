@@ -19,17 +19,8 @@ public:
 	virtual std::string name() const = 0;
 };
 
-class value_semantic_codecvt_helper : public value_semantic
-{
-public:
-	value_semantic_codecvt_helper() {}
-	uint32_t min_tokens() const override { return 0; }
-	uint32_t max_tokens() const override { return 0; }
-	std::string name() const override { return ""; }
-};
-
 // options_description中 只有选项名和描述，没有值。
-class untyped_value : public value_semantic_codecvt_helper
+class untyped_value : public value_semantic
 {
 public:
 	untyped_value(const bool zero_tokens = false) : zero_tokens_(zero_tokens) {}
@@ -42,15 +33,8 @@ private:
 	bool zero_tokens_;
 };
 
-class typed_value_base
-{
-public:
-	typed_value_base() {}
-	virtual ~typed_value_base() {}
-};
-
 template<typename T>
-class typed_value : public value_semantic_codecvt_helper, public typed_value_base
+class typed_value : public value_semantic
 {
 public:
 	typed_value(T* store_to) : store_to_(store_to) {}

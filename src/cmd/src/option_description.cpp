@@ -16,7 +16,7 @@ option_description::option_description(const std::string& name, const value_sema
 }
 
 option_description::option_description(const std::string& name, const value_semantic* vs,
-		const std::string& description) : value_semantic_(vs), description_(description)
+		const std::string& description) : description_(description), value_semantic_(vs) 
 {
 	set_name(name);
 }
@@ -79,7 +79,7 @@ bool option_description::match(const std::string& option) const
 	return match;
 }
 
-const std::string& option_description::key(const std::string& option) const
+const std::string& option_description::key() const
 {
 	if(!long_names_.empty())
 	{
@@ -136,7 +136,7 @@ const option_description* options_description::find(const std::string& name) con
 	{
 		if(it->match(name))
 		{
-			matches.emplace_back(it->key(name));
+			matches.emplace_back(it->key());
 			found = it;
 		}
 	}
