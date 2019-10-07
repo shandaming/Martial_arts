@@ -16,7 +16,7 @@ endif
 
 LDFLAGS = -lstdc++fs
 
-PROGRAMS = cmd
+PROGRAMS = service
 
 $(PROGRAMS): $(obj)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)

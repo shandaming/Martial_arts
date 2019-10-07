@@ -12,27 +12,27 @@ namespace net
 {
 Socket::~Socket()
 {
-	close_sockfd(fd_);
+	close(fd_);
 }
 
 bool Socket::bind(const Inet_address& addr)
 {
-	return bind_socket(fd_, addr.get_addr());
+	return bind(fd_, addr.get_addr());
 }
 
 bool Socket::listen()
 {
-	return listen_socket(fd_);
+	return listen(fd_);
 }
 
 int Socket::accept(Inet_address& addr)
 {
-	return accept_net_connection(fd_, addr);
+	return accept(fd_, addr);
 }
 
 bool Socket::connect(Inet_address& addr)
 {
-	return connect_server(fd_, addr);
+	return connect(fd_, addr);
 }
 
 void Socket::shutdown_write()

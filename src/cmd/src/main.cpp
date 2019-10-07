@@ -9,16 +9,12 @@ int main(int argc, char* argv[])
 	options_description general_opts("Options");
 	general_opts.add_options()
 		("version,v", "output the version number")
-		 ("include-path,I", value<std::vector<std::string> >(),"include path")
-		("log-dir", value<std::string>())
-		("data-dir", value<std::string>(), "overrides the data directory with the one specified.")
-		("num-threads", value<int>(), "the initial number of threads")
+		 ("include-path,I", "include path", true)
+		("log-dir", "", true)
+		("data-dir", "overrides the data directory with the one specified.", true)
+		("num-threads", "the initial number of threads", true)
 		("debug,d", "enables additional command mode options in-game.")
 		("help,h", "print description");
-		//std::cout << general_opts << std::endl;
-		//cmdline cmd(argc, argv);
-		//cmd.options(general_opts);
-		//cmd.run();
 
 	variables_map vm;
 	store(cmdline(argc, argv).options(general_opts).run(), vm);

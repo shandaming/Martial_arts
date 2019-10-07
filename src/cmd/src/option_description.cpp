@@ -9,13 +9,13 @@
 
 #include "option_description.h"
 
-option_description::option_description(const std::string& name, const value_semantic* vs) :
+option_description::option_description(const std::string& name, bool vs) :
 	value_semantic_(vs)
 {
 	set_name(name);
 }
 
-option_description::option_description(const std::string& name, const value_semantic* vs,
+option_description::option_description(const std::string& name, bool vs,
 		const std::string& description) : description_(description), value_semantic_(vs) 
 {
 	set_name(name);
@@ -97,8 +97,6 @@ std::string option_description::format_name() const
 	if(!short_name_.empty())
 	{
 		return long_names_.empty() ? short_name_ : 
-			//short_name_.append("[ --").append(*long_names_.begin()).append(" ]");
-			//(short_name_ + " [--" + *long_names_.begin() + "]");
 			(short_name_ + ", --" + *long_names_.begin());
 	}
 	
@@ -107,10 +105,6 @@ std::string option_description::format_name() const
 
 std::string option_description::format_parameter() const
 {
-	if(value_semantic_->max_tokens() != 0)
-	{
-		return value_semantic_->name();
-	}
 	return "";
 }
 
@@ -143,7 +137,7 @@ const option_description* options_description::find(const std::string& name) con
 
 	if(matches.size() > 1)
 	{
-		throw std::logic_error("Ambiguous option.");
+		throw options_error("Ambiguous option.");
 	}
 
 	return found.get();
@@ -190,7 +184,8 @@ void format_paragraph(std::ostream& os, std::string par, uint32_t indent, uint32
 		// 每个段落只允许有一个tab
 		if(std::count(par.begin(), par.end(), '\t') > 1)
 		{
-			throw std::logic_error("Only one tab par paragraph is allowed in the options description");
+			throw options_error("Only one tab par paragraph is allowed in the options "
+					"description");
 		}
 
 		// 将tab删了
@@ -372,28 +367,12 @@ std::ostream& operator<<(std::ostream& os, const options_description& desc)
 	return os;
 }
 // ------------------------------- options_description_easy_init ----------------------------------
-
 options_description_easy_init& options_description_easy_init::operator()(const std::string& name,
-		const std::string& description)
+		const std::string& description, const bool vs)
 {
-	std::shared_ptr<option_description> d(new option_description(name, new untyped_value(true),
-				description));
-	owner_->add(d);
-	return *this;
-}
-
-options_description_easy_init& options_description_easy_init::operator()(const std::string& name,
-		const value_semantic* vs)
-{
-	std::shared_ptr<option_description> d(new option_description(name, vs));
-	owner_->add(d);
-	return *this;
-}
-
-options_description_easy_init& options_description_easy_init::operator()(const std::string& name,
-		const value_semantic* vs, const std::string& description)
-{
-	std::shared_ptr<option_description> d(new option_description(name, vs, description));
+	std::shared_ptr<option_description> d(description.empty() ? 
+			new option_description(name, vs) : 
+			new option_description(name, vs, description));
 	owner_->add(d);
 	return *this;
 }

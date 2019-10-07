@@ -2,31 +2,40 @@
  * Copyright (C) 2019
  */
 
-#include <vector>
+#include <iostream>
 
 #include "variables_map.h"
+#include "option_description.h"
 
 void store(const std::vector<option>& options, variables_map& vm)
 {
-	for(auto& it : options)
+	try
 	{
-		std::string option_name = it.key;
-		if(option_name.empty())
+		for(auto& it : options)
 		{
-			continue;
-		}
+			std::string option_name = it.key;
+			if(option_name.empty())
+			{
+				continue;
+			}
 
-		if(vm.count(option_name))
-		{
-			continue;
-		}
+			if(vm.count(option_name))
+			{
+				continue;
+			}
 
-		if(it.value.size() > 1)
-		{
-			throw std::logic_error("multiple_values.");
+			if(it.value.size() > 1)
+			{
+				throw options_error("multiple_values.");
+			}
+			vm[option_name] = it.value.empty() ? 
+				variable_value("") : 
+				variable_value(it.value.front());
 		}
-		vm[option_name] = it.value.empty() ? 
-			variable_value("") : 
-			variable_value(it.value.front());
+	}
+	catch(options_error& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return;
 	}
 }

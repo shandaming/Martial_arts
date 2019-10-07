@@ -26,9 +26,18 @@ for arg in "$@"; do
 done
 
 echo 'generating makefile ...'
-echo "PREFIX = $prefix" >makefile
-if $debug; then
-	echo 'debug = -g' >> makefile
+
+if [ $debug = false ]; then
+	sed -i 's/\(debug = \)\S*/\1false/' makefile
+elif [ $debug = true ]; then
+	sed -i 's/\(debug = \)\S*/\1true/' makefile
 fi
-cat configure >>makefile
+
+sed -i 's/\(PREFIX = \)\S*/\1"$prefix"/' makefile
+
+#echo "PREFIX = $prefix" >config.mak
+#if $debug; then
+#	echo 'debug = -g' >> config.mak
+#fi
+#cat configure >>config.mak
 echo 'configuration coplete, type make to build.'

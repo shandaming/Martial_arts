@@ -8,21 +8,20 @@
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "value_semantic.h"
+#include <exception>
 
 class option_description
 {
 public:
-	option_description() {}
-	option_description(const std::string& name, const value_semantic* vs);
-	option_description(const std::string& name, const value_semantic* vs,
+	option_description() : value_semantic_(false) {}
+	option_description(const std::string& name, bool vs);
+	option_description(const std::string& name, bool vs,
 			const std::string& description);
 
 	bool match(const std::string& option) const;
 	const std::string& key() const;
 
-	std::shared_ptr<const value_semantic> semantic() const { return value_semantic_; }
+	bool semantic() const { return value_semantic_; }
 
 	std::string format_name() const;
 	std::string format_parameter() const;
@@ -35,7 +34,7 @@ private:
 	std::vector<std::string> long_names_;
 	std::string description_;
 
-	std::shared_ptr<const value_semantic> value_semantic_;
+	bool value_semantic_;
 };
 
 class options_description;
@@ -45,11 +44,7 @@ public:
 	options_description_easy_init(options_description* owner) : owner_(owner) {}
 
 	// 添加选项-描述
-	options_description_easy_init& operator()(const std::string& name, 
-			const std::string& description);
-	options_description_easy_init& operator()(const std::string& name, const value_semantic* vs);
-	options_description_easy_init& operator()(const std::string& name, const value_semantic* vs, 
-			const std::string& description);
+	options_description_easy_init& operator()(const std::string& name, const std::string& description, const bool vs = false);
 private:
 	options_description* owner_;
 };
@@ -82,6 +77,13 @@ private:
 	std::vector<std::shared_ptr<options_description>> groups_;
 };
 
+struct options_error : std::exception
+{
+	options_error(const std::string& str) : msg(str) {}
 
+	const char* what() noexcept { return msg.c_str(); }
+
+	std::string msg;
+};
 
 #endif

@@ -4,6 +4,7 @@
 
 #include <climits>
 #include <cassert>
+#include <iostream>
 
 #include "cmdline.h"
 
@@ -16,7 +17,6 @@ void cmdline::init(const std::vector<std::string>& args)
 {
 	this->args = args;
 	desc = 0;
-	//positional = 0;
 }
 
 cmdline& cmdline::options(const options_description& desc_)
@@ -42,7 +42,7 @@ std::vector<option> cmdline::parse_long_option(std::vector<std::string>& args)
 				adjacent = tok.substr(pos + 1);
 				if(adjacent.empty())
 				{
-					throw std::logic_error("Invalid command line syntax: empty adjacent parameter"
+					throw options_error("Invalid command line syntax: empty adjacent parameter"
 							" name = "+ name);
 				}
 			}
@@ -80,7 +80,7 @@ std::vector<option> cmdline::parse_short_option(std::vector<std::string>& args)
 			while(1)
 			{
 				const option_description* d = desc->find(name);
-				if(d && d->semantic()->max_tokens() == 0 && !adjacent.empty())
+				if(d && d->semantic() == false && !adjacent.empty())
 				{
 					option opt;
 					opt.key = name;
@@ -202,17 +202,20 @@ std::vector<option> cmdline::run()
 		{
 			d = desc->find(opt.key);
 		}
-		catch(...)
+		catch(options_error& e)
 		{
-			throw std::logic_error("Find description error.");
+			std::cerr << e.what() << std::endl;
+			//throw options_error("Find description error.");
+			continue;
 		}
 		if(!d)
 		{
 			continue;
 		}
 
-		uint32_t min_tokens = d->semantic()->min_tokens();
-		uint32_t max_tokens = d->semantic()->max_tokens();
+		uint32_t min_tokens = d->semantic() ? 1 : 0;
+		uint32_t max_tokens = d->semantic() ? 1 : 0;
+
 		if(min_tokens < max_tokens && opt.value.size() < max_tokens)
 		{
 			//
@@ -254,17 +257,6 @@ std::vector<option> cmdline::run()
 		}
 	}
 
-	for(auto& it : result)
-	{
-		if(it.key.size() > 2 || it.key[0] != '-')
-		{
-			//it.case_insensitive = false;
-		}
-		else
-		{
-			//it.case_insensitive = false;
-		}
-	}
 	return result;
 }
 
@@ -288,20 +280,20 @@ void cmdline::finish_option(option& opt, std::vector<std::string>& other_tokens,
 		const option_description* d = desc->find(opt.key);
 		if(!d)
 		{
-			throw std::logic_error("Unknown option.");
+			throw options_error("Unknown option.");
 		}
 		
 		opt.key = d->key();
 		// 检测该选项的最小/最大tokens是否和现在拥有的tokens一样多,
-		uint32_t min_tokens = d->semantic()->min_tokens();
-		uint32_t max_tokens = d->semantic()->max_tokens();
+		uint32_t min_tokens = d->semantic() ? 1 : 0;
+		uint32_t max_tokens = d->semantic() ? 1 : 0;
 
 		uint32_t present_tokens = opt.value.size() + other_tokens.size();
 		if(present_tokens >= min_tokens)
 		{
 			if(!opt.value.empty() && max_tokens == 0)
 			{
-				throw std::logic_error("Invalid command line syntax: extra parameter");
+				throw options_error("Invalid command line syntax: extra parameter");
 			}
 			// 从other_tokens中获取的min_tokens值，但前提是这些tokens不被识别为选项
 			if(opt.value.size() <= min_tokens)
@@ -330,7 +322,7 @@ void cmdline::finish_option(option& opt, std::vector<std::string>& other_tokens,
 					const option_description* od = desc->find(other_tokens[0]);
 					if(od)
 					{
-						throw std::logic_error("Invalid command line syntax : missing parameter");
+						throw options_error("Invalid command line syntax : missing parameter");
 					}
 				}
 				opt.value.push_back(other_tokens[0]);
@@ -340,11 +332,13 @@ void cmdline::finish_option(option& opt, std::vector<std::string>& other_tokens,
 		}
 		else
 		{
-			throw std::logic_error("Invalid command line syntax: missing parameter.");
+			throw options_error("Invalid command line syntax: missing parameter.");
 		}
 	}
-	catch(...)
+	catch(options_error& e)
 	{
-		throw std::logic_error("Finish option error.");
+		std::cerr << e.what() << std::endl;
+		return;
+		//throw options_error("Finish option error.");
 	}
 }

@@ -13,19 +13,22 @@
 #include "common/timestamp.h"
 
 namespace net
-{	
-int create_tcp_socket(int domain);
+{
+bool set_nonblock(int sockfd);
+bool set_close_on_exec(int sockfd);
 
-bool bind_socket(int sockfd, const sockaddr_in& addr);
-bool listen_socket(int sockfd);
-bool connect_server(int sockfd, const sockaddr_in& addr);
-int accept_net_connection(int sockfd, sockaddr_in& addr);
+int socket(int domain);
+
+bool bind(int sockfd, const sockaddr_in& addr);
+bool listen(int sockfd);
+bool connect(int sockfd, const sockaddr_in& addr);
+int accept(int sockfd, sockaddr_in& addr);
 
 ssize_t read(int fd, void *buf, size_t count);
 ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
 ssize_t write(int fd, const void *buf, size_t count);
 
-void close_sockfd(int sockfd);
+void close(int sockfd);
 void shutdown_write(int sockfd);
 
 int get_socket_error(int sockfd);

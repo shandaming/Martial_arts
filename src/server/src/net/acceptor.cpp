@@ -15,7 +15,7 @@ namespace net
 
 Acceptor::Acceptor(Event_loop* loop, const Inet_address& listen_addr, bool reuseport)
   : loop_(loop),
-    accept_socket_(create_tcp_socket(listen_addr.family())),
+    accept_socket_(socket(listen_addr.family())),
     accept_channel_(loop, accept_socket_),
     listenning_(false),
     idle_fd_(open("/dev/null", O_RDONLY | O_CLOEXEC))
@@ -60,7 +60,7 @@ void Acceptor::handle_read()
     }
     else
     {
-      close_sockfd(connfd);
+      close(connfd);
     }
   }
   else
