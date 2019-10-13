@@ -1,5 +1,9 @@
 csrc = $(wildcard src/*.c)
-ccsrc = $(wildcard src/*.cpp)
+ccsrc = $(wildcard src/*.cpp) \
+		$(wildcard src/common/cmdline/*.cpp) \
+		$(wildcard src/server/*.cpp) \
+		$(wildcard src/server/database/*.cpp) \
+		$(wildcard src/server/database/update/*.cpp)
 
 dep = $(obj:.o=.d)
 

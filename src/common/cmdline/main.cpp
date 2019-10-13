@@ -3,7 +3,7 @@
 #include "variables_map.h"
 
 #include <iostream>
-
+#if 0
 int main(int argc, char* argv[])
 {
 	options_description general_opts("Options");
@@ -39,3 +39,4 @@ int main(int argc, char* argv[])
 		std::cout << "Debug" << std::endl;
 #endif
 }
+#endif
