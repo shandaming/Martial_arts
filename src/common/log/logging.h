@@ -8,7 +8,7 @@
 #include <experimental/filesystem>
 
 #include "log_stream.h"
-#include "common/timestamp.h"
+#include "common/utility/timestamp.h"
 
 namespace lg
 {

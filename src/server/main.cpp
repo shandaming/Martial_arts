@@ -2,7 +2,11 @@
  * Copyright (C) 2019
  */
 
-#include "error.h"
+#include <iostream>
+
+#include "common/cmdline/option_description.h"
+#include "common/cmdline/cmdline.h"
+#include "common/cmdline/variables_map.h"
 
 variables_map get_console_arguments(int argc, char** argv)
 {
