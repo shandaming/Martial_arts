@@ -16,35 +16,6 @@
 
 namespace lg
 {
-#if 0
-class Count_down_latch
-{
-public:
-	explicit Count_down_latch(int count) : count_(count) {}
-
-	void wait()
-{
-	std::unique_lock<std::mutex> lock(mutex_);
-	condition_.wait(lock, [this]{ return count_ > 0; });
-}
-
-	void count_down()
-{
-	--count_;
-	if (count_ == 0)
-	{
-		condition_.notify_all();
-	}
-}
-
-	int get_count() const { return count_; }
-private:
-	mutable std::mutex mutex_;
-	std::condition_variable condition_;
-	std::atomic<int> count_;
-};
-
-#endif
 
 class Async_log
 {
@@ -60,7 +31,6 @@ public:
 	{
 		running_ = true;
 		thread_ = std::make_unique<std::thread>([this]{ this->thread_func(); });
-		//latch_.wait();
 	}
 
 	void stop()

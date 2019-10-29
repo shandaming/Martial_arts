@@ -7,6 +7,8 @@
 
 #include "logging.h"
 #include "common/thread.h"
+#include "async_log.h"
+#include "commont/serialization/string_utils.h"
 
 namespace
 {
@@ -14,31 +16,6 @@ constexpr int MAX_ERROR_BUF = 64;
  __thread char error_buf[MAX_ERROR_BUF];
 
 __thread time_t t_lastSecond;
-/*
-  extern __thread int t_cachedTid;
-  extern __thread char t_tidString[32];
-  extern __thread int t_tidStringLength;
-extern __thread const char* t_threadName;
-
-void CurrentThread::cacheTid()
-{
-  if (t_cachedTid == 0)
-  {
-    t_cachedTid = static_cast<pid_t>(::syscall(SYS_gettid));;
-    t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
-  }
-}
-
-
- inline int tid()
-  {
-    if (__builtin_expect(t_cachedTid == 0, 0))
-    {
-      cacheTid();
-    }
-    return t_cachedTid;
-	}
-*/
 
 }
 
@@ -77,13 +54,6 @@ inline Log_stream& operator<<(Log_stream& s, std::string& v)
   s << v;
   return s;
 }
-/*
-inline Log_stream& operator<<(Log_stream& s, const Logger::Source_file& v)
-{
-  s.append(v.data_, v.size_);
-  return s;
-}
-*/
 
 void defaultOutput(const char* msg, int len)
 {
@@ -93,65 +63,58 @@ void defaultOutput(const char* msg, int len)
 Logger::Output_func g_output = defaultOutput;
 
 
-void Logger::init(Logger::Log_level level, int old_errno, const fs::path& file, int line)
+void Logger::init(Logger::Log_level level, int old_errno, const std::string& file, int line, 
+		const std::string& msg)
 {
   format_time();
   //CurrentThread::tid();
   stream_ << get_current_thread_id();
   stream_ << Log_level_name[level];
+  std::string log_msg;
   if (old_errno != 0)
   {
     stream_ << strerror_tl(old_errno) << " (errno=" << old_errno << ") ";
+	log_msg = msg + std::string(strerror_tl(old_errno)) + " (errno=" + old_errno + ") ";
   }
+  log_msg = string_format("%s[%d]%s: %s", format_time(NULL), get_current_pthread_id(), 
+		  log_level_name[level], log_msg.c_str());
+	ASYNC_LOG->append(log_msg.c_str(), log_msg.size());
 }
 
-void Logger::format_time()
+const char* Logger::format_time(time_t time)
 {
-  int64_t microSecondsSinceEpoch = Timestamp::now().micro_seconds_since_epoch();
-  time_t seconds = static_cast<time_t>(microSecondsSinceEpoch / Timestamp::kMicro_seconds_per_second);
-  int microseconds = static_cast<int>(microSecondsSinceEpoch % Timestamp::kMicro_seconds_per_second);
-
-std::ostringstream os;
-  if (seconds != t_lastSecond)
-  {
-    t_lastSecond = seconds;
-    struct tm tm_time;
-	time_t t = time(nullptr);
-os << std::put_time(std::localtime(&t), "&F &T");
-    //assert(os.str().size() == 19);
-  }
-
-	char buf[16];
-	sprintf(buf, ".%06d", microseconds);
-
-	//os << format_string(".%06d", microseconds);
-	os << buf;
-	stream_ << os.str();
+	tm atm;
+	localtime_t(&time, &atm);
+	char buf[20];
+	snprintf(buf, 20, "%04d-%02d-%02d_%02d:%02d:%02d", atm.tm_year + 1900, atm.tm_mon + 1, 
+			atm.tm_mday, atm.tm_hour, atm.tm_min, atm.tm_sec);
+	return buf;
 }
 
-void Logger::finish(const fs::path& file, int line)
+void Logger::finish(const std::string& file, int line)
 {
   stream_ << " - " << file.string() << ':' << line << '\n';
 }
 
 
-Logger::Logger(const fs::path& file, int line)
+Logger::Logger(const std::string& file, int line, const std::string& msg)
 {
 init(INFO, 0, file, line);
 }
 
-Logger::Logger(const fs::path& file, int line, Logger::Log_level level)
+Logger::Logger(const std::string& file, int line, Logger::Log_level level, const std::string& msg)
 {
 init(level, 0, file, line);
 }
 
-Logger::Logger(const fs::path& file, int line, Logger::Log_level level, const char* func)
+Logger::Logger(const std::string& file, int line, Logger::Log_level level, const char* func,
+		const std::string& msg)
 {
   init(level, 0, file, line);
 	stream_ << func << ' ';
 }
 
-Logger::Logger(const fs::path& file, int line, bool to_abort)
+Logger::Logger(const std::string& file, int line, bool to_abort, const std::string& msg)
 {
 init(to_abort?FATAL:ERROR, errno, file, line);
 }
@@ -159,8 +122,6 @@ init(to_abort?FATAL:ERROR, errno, file, line);
 Logger::~Logger()
 {
   finish(basename_, line_);
-  //const Log_stream::Buffer& buf(stream().buffer());
-  //g_output(buf.data(), buf.length());
   if (level_ == FATAL)
   {
      fflush(stdout);
@@ -185,3 +146,9 @@ void Logger::set_flush(Flush_func flush)
 
 
 } // end namespac
+
+void init_log(const std::string& file, int rolle_size)
+{
+	ASYNC_LOG->init(file, rolle_size);
+	ASYNC_LOG->start();
+}
