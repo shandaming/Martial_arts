@@ -2,6 +2,9 @@
  * Copyright (C) 2018
  */
 
+#include <sstream>
+#include <cstdio>
+
 #include "appender_console.h"
 
 appender_console::appender_console(uint8 id, const std::string& name, log_level level, 
@@ -9,7 +12,7 @@ appender_console::appender_console(uint8 id, const std::string& name, log_level 
 	appender(id, name, level, flags), colored_(false)
 {
 	for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
-		colors_[i] = Color_types(max_colors);
+		colors_[i] = color_types(max_colors);
 
 	if (!extra_args.empty())
 		init_colors(extra_args[0]);

@@ -2,6 +2,8 @@
  * Copyright (C) 2018
  */
 
+#include <cstdio>
+
 #include "appender_file.h"
 
 appender_file::appender_file(uint8 id, const std::string& name, log_level level, 

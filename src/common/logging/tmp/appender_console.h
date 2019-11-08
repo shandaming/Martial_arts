@@ -5,6 +5,10 @@
 #ifndef APPENDER_CONSOLE_H
 #define APPENDER_SONSOLE_H
 
+#include  <type_traits>
+
+#include "appender.h"
+
 enum color_types : uint8
 {
 	BLACK,

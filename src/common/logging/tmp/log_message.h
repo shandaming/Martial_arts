@@ -5,7 +5,10 @@
 #ifndef LOG_MESSAGE_H
 #define LOG_MESSAGE_H
 
-#include "log_utils.h"
+#include <string>
+#include <ctime>
+
+#include "log_common.h"
 
 struct log_message
 {
@@ -19,14 +22,13 @@ struct log_message
 	static std::string get_time_str(time_t time);
 	std::string get_time_str();
 
-	const Log_level level;
+	const log_level level;
 	const std::string type;
 	const std::string text;
 	std::string prefix;
 	std::string param1;
 	time_t mtime;
 
-	// @ Returns size of the log message content in bytes
 	uint32 size() const
 	{
 		return static_cast<uint32>(prefix.size() + text.size());

@@ -5,10 +5,12 @@
 #ifndef LOG_H
 #define LOG_H
 
-class Log
+#include "common/serialization/string_utils.h"
+
+class log
 {
 public:
-	static Log* instance();
+	static log* instance();
 
 	void Initialize(Trinity::Asio::IoContext* ioContext);
 	void SetSynchronous();
@@ -17,10 +19,10 @@ public:
 	bool ShouldLog(std::string const& type, LogLevel level) const;
 	bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
 
-	template<typename Format, typename... Args>
-	inline void outMessage(std::string const& filter, LogLevel const level, Format&& fmt, Args&&... args)
+	template<typename Fmt, typename... Args>
+	inline void out_message(std::string const& filter, log_level const level, Fmt&& fmt, Args&&... args)
 	{
-		outMessage(filter, level, Trinity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...));
+		out_message(filter, level, string_format(std::forward<Format>(fmt), std::forward<Args>(args)...));
 	}
 
 	template<typename Format, typename... Args>
@@ -64,7 +66,7 @@ private:
 	void ReadAppendersFromConfig();
 	void ReadLoggersFromConfig();
 	void RegisterAppender(uint8 index, AppenderCreatorFn appenderCreateFn);
-	void outMessage(std::string const& filter, LogLevel const level, std::string&& message);
+	void out_message(std::string const& filter, LogLevel const level, std::string&& message);
 	void outCommand(std::string&& message, std::string&& param1);
 
 	std::unordered_map<uint8, AppenderCreatorFn> appenderFactory;

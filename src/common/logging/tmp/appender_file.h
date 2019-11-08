@@ -5,6 +5,11 @@
 #ifndef APPENDER_FILE_H
 #define APPENDER_FILE_H
 
+#include  <type_traits>
+#include <atomic>
+
+#include "appender.h"
+
 class appender_file : public appender
 {
 public:

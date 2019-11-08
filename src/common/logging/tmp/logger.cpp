@@ -25,7 +25,6 @@ void logger::write(log_message* message) const
 {
     if (!level_ || level_ > message->level || message->text.empty())
     {
-        //fprintf(stderr, "logger::write: logger %s, Level %u. Msg %s Level %u WRONG LEVEL MASK OR EMPTY MSG\n", getName().c_str(), getLogLevel(), message.text.c_str(), message.level);
         return;
     }
 

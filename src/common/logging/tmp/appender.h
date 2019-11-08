@@ -5,7 +5,9 @@
 #ifndef APPENDER_H
 #define APPENDER_H
 
-#include "log_utils.h"
+#include <string>
+
+#include "log_message.h"
 
 class appender
 {
@@ -29,7 +31,7 @@ private:
 
 	uint8 id_;
 	std::string name_;
-	Log_level level_;
+	log_level level_;
 	appender_flags flags_;
 };
 

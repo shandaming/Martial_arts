@@ -6,12 +6,13 @@
 #define LOG_OPERATION_H
 
 #include <memory>
+
 #include "logger.h"
 
 class log_operation
 {
 public:
-	log_operation(const Logger* logger, std::unique_ptr<LogMessage>&& msg);
+	log_operation(const logger* logger, std::unique_ptr<log_message>&& msg);
 
 	~log_operation() {}
 
