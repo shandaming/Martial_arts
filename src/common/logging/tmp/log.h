@@ -12,12 +12,12 @@ class log
 public:
 	static log* instance();
 
-	void Initialize(Trinity::Asio::IoContext* ioContext);
+	void initialize(Trinity::Asio::IoContext* ioContext);
 	void SetSynchronous();
 	void LoadFromConfig();
-	void Close();
-	bool ShouldLog(std::string const& type, LogLevel level) const;
-	bool SetLogLevel(std::string const& name, char const* level, bool isLogger = true);
+	void close();
+	bool should_log(std::string const& type, log_level level) const;
+	bool set_log_level(std::string const& name, char const* level, bool islogger = true);
 
 	template<typename Fmt, typename... Args>
 	inline void out_message(std::string const& filter, log_level const level, Fmt&& fmt, Args&&... args)
@@ -28,7 +28,7 @@ public:
 	template<typename Format, typename... Args>
 	void outCommand(uint32 account, Format&& fmt, Args&&... args)
 	{
-		if (!ShouldLog("commands.gm", LOG_LEVEL_INFO))
+		if (!Shouldlog("commands.gm", LOG_LEVEL_INFO))
 		return;
 
 		outCommand(Trinity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
@@ -36,47 +36,47 @@ public:
 
 	void outCharDump(char const* str, uint32 account_id, uint64 guid, char const* name);
 
-	void SetRealmId(uint32 id);
+	void set_realm_id(uint32 id);
 
-	template<class AppenderImpl>
-	void RegisterAppender()
+	template<class appenderImpl>
+	void register_appender()
 	{
-		using Index = typename AppenderImpl::TypeIndex;
-		RegisterAppender(Index::value, &CreateAppender<AppenderImpl>);
+		using Index = typename appenderImpl::TypeIndex;
+		register_appender(Index::value, &Createappender<appenderImpl>);
 	}
 
-	std::string const& GetLogsDir() const { return m_logsDir; }
-	std::string const& GetLogsTimestamp() const { return m_logsTimestamp; }
+	std::string const& get_logs_dir() const { return logs_dir_; }
+	std::string const& get_logs_timestamp() const { return log_timestamp_; }
 private:
-	Log();
-	~Log();
-	Log(Log const&) = delete;
-	Log(Log&&) = delete;
-	Log& operator=(Log const&) = delete;
-	Log& operator=(Log&&) = delete;
+	log();
+	~log();
+	log(log const&) = delete;
+	log(log&&) = delete;
+	log& operator=(log const&) = delete;
+	log& operator=(log&&) = delete;
 
-	static std::string GetTimestampStr();
-	void write(std::unique_ptr<LogMessage>&& msg) const;
+	static std::string get_timestamp_str();
+	void write(std::unique_ptr<log_message>&& msg) const;
 
-	Logger const* GetLoggerByType(std::string const& type) const;
-	Appender* GetAppenderByName(std::string const& name);
-	uint8 NextAppenderId();
-	void CreateAppenderFromConfig(std::string const& name);
-	void CreateLoggerFromConfig(std::string const& name);
-	void ReadAppendersFromConfig();
-	void ReadLoggersFromConfig();
-	void RegisterAppender(uint8 index, AppenderCreatorFn appenderCreateFn);
-	void out_message(std::string const& filter, LogLevel const level, std::string&& message);
+	logger const* GetloggerByType(std::string const& type) const;
+	appender* GetappenderByName(std::string const& name);
+	uint8 Nextappender_id();
+	void CreateappenderFromConfig(std::string const& name);
+	void CreateloggerFromConfig(std::string const& name);
+	void ReadappendersFromConfig();
+	void ReadloggersFromConfig();
+	void register_appender(uint8 index, appenderCreatorFn appenderCreateFn);
+	void out_message(std::string const& filter, log_level const level, std::string&& message);
 	void outCommand(std::string&& message, std::string&& param1);
 
-	std::unordered_map<uint8, AppenderCreatorFn> appenderFactory;
-	std::unordered_map<uint8, std::unique_ptr<Appender>> appenders;
-	std::unordered_map<std::string, std::unique_ptr<Logger>> loggers;
-	uint8 AppenderId;
-	LogLevel lowestLogLevel;
+	std::unordered_map<uint8, appenderCreatorFn> appenderFactory;
+	std::unordered_map<uint8, std::unique_ptr<appender>> appenders;
+	std::unordered_map<std::string, std::unique_ptr<logger>> loggers;
+	uint8 appender_id_;
+	log_level lowest_log_level;
 
-	std::string m_logsDir;
-	std::string m_logsTimestamp;
+	std::string logs_dir_;
+	std::string log_timestamp_;
 
 	Trinity::Asio::IoContext* _ioContext;
 	Trinity::Asio::Strand* _strand;
