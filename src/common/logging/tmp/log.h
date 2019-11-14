@@ -6,6 +6,17 @@
 #define LOG_H
 
 #include "common/serialization/string_utils.h"
+#include "appender.h"
+
+#define LOGGER_ROOT "root"
+
+typedef appender*(*appender_creator_fn)(uint8_t id, std::string const& name, log_level level, appender_flags flags, std::vector<char const*>&& extra_args);
+
+template<typename AppenderImpl>
+appender* create_appender(uint8_t id, std::string const& name, log_level level, appender_flags flags, std::vector<char const*>&& extra_args)
+{
+    return new AppenderImpl(id, name, level, flags, std::forward<std::vector<char const*>>(extra_args));
+}
 
 class log
 {
@@ -13,11 +24,11 @@ public:
 	static log* instance();
 
 	void initialize(Trinity::Asio::IoContext* ioContext);
-	void SetSynchronous();
-	void LoadFromConfig();
+	void set_synchronous();
+	void load_from_config();
 	void close();
 	bool should_log(std::string const& type, log_level level) const;
-	bool set_log_level(std::string const& name, char const* level, bool islogger = true);
+	bool set_log_level(std::string const& name, char const* level, bool is_logger = true);
 
 	template<typename Fmt, typename... Args>
 	inline void out_message(std::string const& filter, log_level const level, Fmt&& fmt, Args&&... args)
@@ -26,23 +37,23 @@ public:
 	}
 
 	template<typename Format, typename... Args>
-	void outCommand(uint32 account, Format&& fmt, Args&&... args)
+	void out_command(uint32_t account, Format&& fmt, Args&&... args)
 	{
-		if (!Shouldlog("commands.gm", LOG_LEVEL_INFO))
+		if (!should_log("commands.gm", LOG_LEVEL_INFO))
 		return;
 
-		outCommand(Trinity::StringFormat(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
+		out_command(string_format(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
 	}
 
-	void outCharDump(char const* str, uint32 account_id, uint64 guid, char const* name);
+	void out_char_dump(char const* str, uint32_t account_id, uint64 guid, char const* name);
 
-	void set_realm_id(uint32 id);
+	void set_realm_id(uint32_t id);
 
-	template<class appenderImpl>
+	template<typename AppenderImpl>
 	void register_appender()
 	{
-		using Index = typename appenderImpl::TypeIndex;
-		register_appender(Index::value, &Createappender<appenderImpl>);
+		using index = typename AppenderImpl::type_index;
+		register_appender(index::value, &create_appender<AppenderImpl>);
 	}
 
 	std::string const& get_logs_dir() const { return logs_dir_; }
@@ -58,22 +69,22 @@ private:
 	static std::string get_timestamp_str();
 	void write(std::unique_ptr<log_message>&& msg) const;
 
-	logger const* GetloggerByType(std::string const& type) const;
-	appender* GetappenderByName(std::string const& name);
-	uint8 Nextappender_id();
-	void CreateappenderFromConfig(std::string const& name);
-	void CreateloggerFromConfig(std::string const& name);
-	void ReadappendersFromConfig();
-	void ReadloggersFromConfig();
-	void register_appender(uint8 index, appenderCreatorFn appenderCreateFn);
+	logger const* get_logger_by_type(std::string const& type) const;
+	appender* get_appender_by_name(std::string const& name);
+	uint8_t next_appender_id();
+	void create_appender_from_config(std::string const& name);
+	void create_logger_from_config(std::string const& name);
+	void read_appenders_from_config();
+	void read_loggers_from_config();
+	void register_appender(uint8_t index, appender_creator_fn appender_create_fn);
 	void out_message(std::string const& filter, log_level const level, std::string&& message);
-	void outCommand(std::string&& message, std::string&& param1);
+	void out_command(std::string&& message, std::string&& param1);
 
-	std::unordered_map<uint8, appenderCreatorFn> appenderFactory;
-	std::unordered_map<uint8, std::unique_ptr<appender>> appenders;
-	std::unordered_map<std::string, std::unique_ptr<logger>> loggers;
-	uint8 appender_id_;
-	log_level lowest_log_level;
+	std::unordered_map<uint8_t, appender_creator_fn> appender_factory_;
+	std::unordered_map<uint8_t, std::unique_ptr<appender>> appenders_;
+	std::unordered_map<std::string, std::unique_ptr<logger>> loggers_;
+	uint8_t appender_id_;
+	log_level lowest_log_level_;
 
 	std::string logs_dir_;
 	std::string log_timestamp_;

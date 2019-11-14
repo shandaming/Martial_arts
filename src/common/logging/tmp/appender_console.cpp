@@ -101,7 +101,7 @@ void appender_console::set_color(bool stdout_stream, color_types color)
 		FG_WHITE                                           // LWHITE
 	};
 
-	fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", Unix_colors[color], 
+	fprintf((stdout_stream ? stdout : stderr), "\x1b[%d%sm", unix_colors[color], 
 			(color >= YELLOW && color < max_colors ? ";1" : ""));
 }
 

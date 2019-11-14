@@ -3,12 +3,17 @@
  */
 
 #include "log.h"
+#include "appender_console.h"
+#include "appender_file.h"
+#include "async_log.h"
+#include "common/debugging/errors.h"
+#include "common/configuration/config.h"
 
 log::log() : appender_id_(0), lowestlog_level(LOG_LEVEL_FATAL), _ioContext(nullptr), _strand(nullptr)
 {
 	logs_timestamp_ = "_" + get_timestamp_str();
-	register_appender<appenderConsole>();
-	register_appender<appenderFile>();
+	register_appender<appender_console>();
+	register_appender<appender_file>();
 }
 
 log::~log()
@@ -17,88 +22,90 @@ log::~log()
 	close();
 }
 
-uint8 log::next_appender_id()
+uint8_t log::next_appender_id()
 {
 	return appender_id++;
 }
 
 appender* log::get_appender_by_name(std::string const& name)
 {
-	auto it = appenders.begin();
-	while (it != appenders.end() && it->second && it->second->getName() != name)
+	auto it = appenders_.begin();
+	while (it != appenders_.end() && it->second && it->second->getName() != name)
 		++it;
 
-	return it == appenders.end() ? nullptr : it->second.get();
+	return it == appenders_.end() ? nullptr : it->second.get();
 }
 
-void log::CreateappenderFromConfig(std::string const& appenderName)
+void log::create_appender_from_config(std::string const& appender_name)
 {
-	if (appenderName.empty())
-	return;
+	if (appender_name.empty())
+		return;
 
 	// Format=type, level, flags, optional1, optional2
 	// if type = File. optional1 = file and option2 = mode
 	// if type = Console. optional1 = Color
-	std::string options = sConfigMgr->GetStringDefault(appenderName.c_str(), "");
+	//std::string options = sConfigMgr->GetStringDefault(appender_name.c_str(), "");
+	std::string options = CONFIG_MGR->get_value_default("worldserver", appender_name.c_str(), "");
 
 	Tokenizer tokens(options, ',');
 	auto iter = tokens.begin();
 
 	size_t size = tokens.size();
-	std::string name = appenderName.substr(9);
+	std::string name = appender_name.substr(9);
 
 	if (size < 2)
 	{
-	fprintf(stderr, "log::CreateappenderFromConfig: Wrong configuration for appender %s. Config line: %s\n", name.c_str(), options.c_str());
-	return;
+		fprintf(stderr, "log::create_appender_from_config: Wrong configuration for appender %s. Config line: %s\n", name.c_str(), options.c_str());
+		return;
 	}
 
-	appenderFlags flags = APPENDER_FLAGS_NONE;
+	appender_flags flags = APPENDER_FLAGS_NONE;
 	appenderType type = appenderType(atoi(*iter++));
 	log_level level = log_level(atoi(*iter++));
 
 	if (level > LOG_LEVEL_FATAL)
 	{
-	fprintf(stderr, "log::CreateappenderFromConfig: Wrong log Level %d for appender %s\n", level, name.c_str());
-	return;
+		fprintf(stderr, "log::create_appender_from_config: Wrong log Level %d for appender %s\n", level, name.c_str());
+		return;
 	}
 
 	if (size > 2)
-	flags = appenderFlags(atoi(*iter++));
+		flags = appender_flags(atoi(*iter++));
 
-	auto factoryFunction = appenderFactory.find(type);
-	if (factoryFunction == appenderFactory.end())
+	auto factoryFunction = appender_factory_.find(type);
+	if (factoryFunction == appender_factory_.end())
 	{
-	fprintf(stderr, "log::CreateappenderFromConfig: Unknown type %d for appender %s\n", type, name.c_str());
-	return;
+		fprintf(stderr, "log::create_appender_from_config: Unknown type %d for appender %s\n", type, name.c_str());
+		return;
 	}
 
 	try
 	{
-	appender* appender = factoryFunction->second(Nextappender_id(), name, level, flags, std::vector<char const*>(iter, tokens.end()));
-	appenders[appender->getId()].reset(appender);
+		appender* appender = factoryFunction->second(next_appender_id(), name, level, flags, std::vector<char const*>(iter, tokens.end()));
+		appenders_[appender->getId()].reset(appender);
 	}
-	catch (InvalidappenderArgsException const& iaae)
+	catch (invalid_appender_args_exception const& iaae)
 	{
-	fprintf(stderr, "%s", iaae.what());
+		fprintf(stderr, "%s", iaae.what());
 	}
 }
 
-void log::CreateloggerFromConfig(std::string const& appenderName)
+void log::create_logger_from_config(std::string const& appender_name)
 {
-	if (appenderName.empty())
-	return;
+	if (appender_name.empty())
+		return;
 
 	log_level level = LOG_LEVEL_DISABLED;
-	uint8 type = uint8(-1);
+	uint8_t type = uint8_t(-1);
 
-	std::string options = sConfigMgr->GetStringDefault(appenderName.c_str(), "");
-	std::string name = appenderName.substr(7);
+	//std::string options = sConfigMgr->GetStringDefault(appender_name.c_str(), "");
+	std::string options = CONFIG_MGR->get_value_default("worldserver", appender_name.c_str(), "");
+	std::string name = appender_name.substr(7);
 
 	if (options.empty())
 	{
-	fprintf(stderr, "log::CreateloggerFromConfig: Missing config option logger.%s\n", name.c_str());
-	return;
+		fprintf(stderr, "log::create_logger_from_config: Missing config option logger.%s\n", name.c_str());
+		return;
 	}
 
 	Tokenizer tokens(options, ',');
@@ -106,29 +113,29 @@ void log::CreateloggerFromConfig(std::string const& appenderName)
 
 	if (tokens.size() != 2)
 	{
-	fprintf(stderr, "log::CreateloggerFromConfig: Wrong config option logger.%s=%s\n", name.c_str(), options.c_str());
-	return;
+		fprintf(stderr, "log::create_logger_from_config: Wrong config option logger.%s=%s\n", name.c_str(), options.c_str());
+		return;
 	}
 
-	std::unique_ptr<logger>& logger = loggers[name];
+	std::unique_ptr<logger>& logger = loggers_[name];
 	if (logger)
 	{
-	fprintf(stderr, "Error while configuring logger %s. Already defined\n", name.c_str());
-	return;
+		fprintf(stderr, "Error while configuring logger %s. Already defined\n", name.c_str());
+		return;
 	}
 
 	level = log_level(atoi(*iter++));
 	if (level > LOG_LEVEL_FATAL)
 	{
-	fprintf(stderr, "log::CreateloggerFromConfig: Wrong log Level %u for logger %s\n", type, name.c_str());
-	return;
+		fprintf(stderr, "log::create_logger_from_config: Wrong log Level %u for logger %s\n", type, name.c_str());
+		return;
 	}
 
-	if (level < lowestlog_level)
-	lowestlog_level = level;
+	if (level < lowest_log_level_)
+		lowest_log_level_ = level;
 
-	logger = Trinity::make_unique<logger>(name, level);
-	//fprintf(stdout, "log::CreateloggerFromConfig: Created logger %s, Level %u\n", name.c_str(), level);
+	logger = std::make_unique<logger>(name, level);
+	//fprintf(stdout, "log::create_logger_from_config: Created logger %s, Level %u\n", name.c_str(), level);
 
 	std::istringstream ss(*iter);
 	std::string str;
@@ -136,52 +143,52 @@ void log::CreateloggerFromConfig(std::string const& appenderName)
 	ss >> str;
 	while (ss)
 	{
-	if (appender* appender = GetappenderByName(str))
-	{
-		logger->addappender(appender->getId(), appender);
-		//fprintf(stdout, "log::CreateloggerFromConfig: Added appender %s to logger %s\n", appender->getName().c_str(), name.c_str());
-	}
-	else
-		fprintf(stderr, "Error while configuring appender %s in logger %s. appender does not exist", str.c_str(), name.c_str());
-	ss >> str;
+		if (appender* appender = get_appender_by_name(str))
+		{
+			logger->addappender(appender->getId(), appender);
+			//fprintf(stdout, "log::create_logger_from_config: Added appender %s to logger %s\n", appender->getName().c_str(), name.c_str());
+		}
+		else
+			fprintf(stderr, "Error while configuring appender %s in logger %s. appender does not exist", str.c_str(), name.c_str());
+		ss >> str;
 	}
 }
 
-void log::ReadappendersFromConfig()
+void log::read_appenders_from_config()
 {
 	std::vector<std::string> keys = sConfigMgr->GetKeysByString("appender.");
-	for (std::string const& appenderName : keys)
-	CreateappenderFromConfig(appenderName);
+	for (std::string const& appender_name : keys)
+		create_appender_from_config(appender_name);
 }
 
-void log::ReadloggersFromConfig()
+void log::read_loggers_from_config()
 {
 	std::vector<std::string> keys = sConfigMgr->GetKeysByString("logger.");
 	for (std::string const& loggerName : keys)
-	CreateloggerFromConfig(loggerName);
+		create_logger_from_config(loggerName);
 
 	// Bad config configuration, creating default config
-	if (loggers.find(LOGGER_ROOT) == loggers.end())
+	if (loggers_.find(LOGGER_ROOT) == loggers_.end())
 	{
-	fprintf(stderr, "Wrong loggers configuration. Review your logger config section.\n"
-					"Creating default loggers [root (Error), server (Info)] to console\n");
+		fprintf(stderr, "Wrong loggers_ configuration. Review your logger config section.\n"
+					"Creating default loggers_ [root (Error), server (Info)] to console\n");
 
-	close(); // Clean any logger or appender created
+		close(); // Clean any logger or appender created
 
-	appenderConsole* appender = new appenderConsole(Nextappender_id(), "Console", LOG_LEVEL_DEBUG, APPENDER_FLAGS_NONE, std::vector<char const*>());
-	appenders[appender->getId()].reset(appender);
+		appender_console* appender = new appender_console(next_appender_id(), "Console", LOG_LEVEL_DEBUG, APPENDER_FLAGS_NONE, std::vector<char const*>());
+		appenders_[appender->getId()].reset(appender);
 
-	logger* rootlogger = new logger(LOGGER_ROOT, LOG_LEVEL_ERROR);
-	rootlogger->addappender(appender->getId(), appender);
-	loggers[LOGGER_ROOT].reset(rootlogger);
+		logger* root_logger = new logger(LOGGER_ROOT, LOG_LEVEL_ERROR);
+		root_logger->add_appender(appender->get_id(), appender);
+		loggers_[LOGGER_ROOT].reset(root_logger);
 
-	logger* serverlogger = new logger("server", LOG_LEVEL_INFO);
-	serverlogger->addappender(appender->getId(), appender);
-	loggers["server"].reset(serverlogger);
+		logger* server_logger = new logger("server", LOG_LEVEL_INFO);
+		server_logger->add_appender(appender->getId(), appender);
+		loggers_["server"].reset(server_logger);
 	}
 }
 
-void log::register_appender(uint8 index, appender_creator_fn appender_create_fn)
+void log::register_appender(uint8_t index, appender_creator_fn appender_create_fn)
 {
 	auto itr = appender_factory.find(index);
 	ASSERT(itr == appender_factory.end());
@@ -193,7 +200,7 @@ void log::out_message(std::string const& filter, log_level const level, std::str
 	write(std::make_unique<log_message>(level, filter, std::move(message)));
 }
 
-void log::outCommand(std::string&& message, std::string&& param1)
+void log::out_command(std::string&& message, std::string&& param1)
 {
 	write(Trinity::make_unique<log_message>(LOG_LEVEL_INFO, "commands.gm", std::move(message), std::move(param1)));
 }
@@ -204,8 +211,10 @@ void log::write(std::unique_ptr<log_message>&& msg) const
 
 	if (_ioContext)
 	{
-	std::shared_ptr<logOperation> logOperation = std::make_shared<logOperation>(logger, std::move(msg));
-	Trinity::Asio::post(*_ioContext, Trinity::Asio::bind_executor(*_strand, [logOperation]() { logOperation->call(); }));
+		std::shared_ptr<log_operation> log_operation = std::make_shared<log_operation>(logger, std::move(msg));
+		log_task task(std::bind(&log_operation::call(), log_operation));
+		ASYNC_LOG->add_log_task(task);
+		//Trinity::Asio::post(*_ioContext, Trinity::Asio::bind_executor(*_strand, [log_operation]() { log_operation->call(); }));
 	}
 	else
 		logger->write(msg.get());
@@ -213,8 +222,8 @@ void log::write(std::unique_ptr<log_message>&& msg) const
 
 const logger* log::get_logger_by_type(const std::string& type) const
 {
-	auto it = loggers.find(type);
-	if (it != loggers.end())
+	auto it = loggers_.find(type);
+	if (it != loggers_.end())
 		return it->second.get();
 
 	if (type == LOGGER_ROOT)
@@ -243,7 +252,7 @@ std::string log::get_timestamp_str()
 	//       SS     seconds (2 digits 00-59)
 	try
 	{
-		return Trinity::StringFormat("%04d-%02d-%02d_%02d-%02d-%02d",
+		return string_format("%04d-%02d-%02d_%02d-%02d-%02d",
 		aTm.tm_year + 1900, aTm.tm_mon + 1, aTm.tm_mday, aTm.tm_hour, aTm.tm_min, aTm.tm_sec);
 	}
 	catch (std::exception const& ex)
@@ -260,19 +269,19 @@ bool log::set_log_level(std::string const& name, const char* new_levelc, bool is
 	if (newLevel < 0)
 		return false;
 
-	if (islogger)
+	if (is_logger)
 	{
-		auto it = loggers.begin();
-		while (it != loggers.end() && it->second->get_name() != name)
+		auto it = loggers_.begin();
+		while (it != loggers_.end() && it->second->get_name() != name)
 			++it;
 
-	if (it == loggers.end())
+	if (it == loggers_.end())
 		return false;
 
 	it->second->set_log_level(new_level);
 
-	if (new_level != LOG_LEVEL_DISABLED && new_level < lowest_log_level)
-		lowest_log_level = new_level;
+	if (new_level != LOG_LEVEL_DISABLED && new_level < lowest_log_level_)
+		lowest_log_level_ = new_level;
 	}
 	else
 	{
@@ -286,10 +295,10 @@ bool log::set_log_level(std::string const& name, const char* new_levelc, bool is
 	return true;
 }
 
-void log::outCharDump(char const* str, uint32 accountId, uint64 guid, char const* name)
+void log::out_char_dump(char const* str, uint32_t accountId, uint64 guid, char const* name)
 {
 	if (!str || !Shouldlog("entities.player.dump", LOG_LEVEL_INFO))
-	return;
+		return;
 
 	std::ostringstream ss;
 	ss << "== START DUMP == (account: " << accountId << " guid: " << guid << " name: " << name
@@ -304,16 +313,17 @@ void log::outCharDump(char const* str, uint32 accountId, uint64 guid, char const
 	write(std::move(msg));
 }
 
-void log::set_realm_id(uint32 id)
+void log::set_realm_id(uint32_t id)
 {
-	for (auto it = appenders.begin(); it != appenders.end(); ++it)
+	for (auto it = appenders_.begin(); it != appenders_.end(); ++it)
 		it->second->set_realm_id(id);
 }
 
 void log::close()
 {
-	loggers.clear();
-	appenders.clear();
+	loggers_.clear();
+	appenders_.clear();
+	ASYNC_LOG->stop();
 }
 
 bool log::should_log(const std::string& type, log_level level) const
@@ -322,11 +332,11 @@ bool log::should_log(const std::string& type, log_level level) const
 	// Speed up in cases where requesting "Type.sub1.sub2" but only configured
 	// logger "Type"
 
-	// Don't even look for a logger if the log_level is lower than lowest log levels across all loggers
-	if (level < lowest_log_level)
+	// Don't even look for a logger if the log_level is lower than lowest log levels across all loggers_
+	if (level < lowest_log_level_)
 		return false;
 
-	const logger* logger = Get_logger_by_type(type);
+	const logger* logger = get_logger_by_type(type);
 	if (!logger)
 		return false;
 
@@ -344,31 +354,32 @@ void log::initialize(Trinity::Asio::IoContext* ioContext)
 {
 	if (ioContext)
 	{
-	_ioContext = ioContext;
-	_strand = new Trinity::Asio::Strand(*ioContext);
+		//_ioContext = ioContext;
+		//_strand = new Trinity::Asio::Strand(*ioContext);
+		ASYNC_LOG->start();
 	}
 
-	LoadFromConfig();
+	load_from_config();
 }
 
-void log::SetSynchronous()
+void log::set_synchronous()
 {
 	delete _strand;
 	_strand = nullptr;
 	_ioContext = nullptr;
 }
 
-void log::LoadFromConfig()
+void log::load_from_config()
 {
 	close();
 
-	lowestlog_level = LOG_LEVEL_FATAL;
+	lowest_log_level_ = LOG_LEVEL_FATAL;
 	appender_id = 0;
-	m_logsDir = sConfigMgr->GetStringDefault("logsDir", "");
-	if (!m_logsDir.empty())
-	if ((m_logsDir.at(m_logsDir.length() - 1) != '/') && (m_logsDir.at(m_logsDir.length() - 1) != '\\'))
-		m_logsDir.push_back('/');
+	logs_dir_ = sConfigMgr->GetStringDefault("logsDir", "");
+	if (!logs_dir_.empty())
+		if ((logs_dir_.at(logs_dir_.length() - 1) != '/') && (logs_dir_.at(logs_dir_.length() - 1) != '\\'))
+			logs_dir_.push_back('/');
 
-	ReadappendersFromConfig();
-	ReadloggersFromConfig();
+	read_appenders_from_config();
+	read_loggers_from_config();
 }
