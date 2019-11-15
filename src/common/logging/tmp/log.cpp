@@ -5,11 +5,10 @@
 #include "log.h"
 #include "appender_console.h"
 #include "appender_file.h"
-#include "async_log.h"
 #include "common/debugging/errors.h"
 #include "common/configuration/config.h"
 
-log::log() : appender_id_(0), lowestlog_level(LOG_LEVEL_FATAL), _ioContext(nullptr), _strand(nullptr)
+log::log() : appender_id_(0), lowestlog_level(LOG_LEVEL_FATAL), async_(false)
 {
 	logs_timestamp_ = "_" + get_timestamp_str();
 	register_appender<appender_console>();
@@ -18,7 +17,6 @@ log::log() : appender_id_(0), lowestlog_level(LOG_LEVEL_FATAL), _ioContext(nullp
 
 log::~log()
 {
-	delete _strand;
 	close();
 }
 
@@ -209,12 +207,11 @@ void log::write(std::unique_ptr<log_message>&& msg) const
 {
 	logger const* logger = get_logger_by_type(msg->type);
 
-	if (_ioContext)
+	if (async_)
 	{
 		std::shared_ptr<log_operation> log_operation = std::make_shared<log_operation>(logger, std::move(msg));
 		log_task task(std::bind(&log_operation::call(), log_operation));
-		ASYNC_LOG->add_log_task(task);
-		//Trinity::Asio::post(*_ioContext, Trinity::Asio::bind_executor(*_strand, [log_operation]() { log_operation->call(); }));
+		log_worker_.add_log_task(task);
 	}
 	else
 		logger->write(msg.get());
@@ -323,7 +320,8 @@ void log::close()
 {
 	loggers_.clear();
 	appenders_.clear();
-	ASYNC_LOG->stop();
+	log_worker_.stop();
+	async_ = false;
 }
 
 bool log::should_log(const std::string& type, log_level level) const
@@ -350,13 +348,12 @@ log* log::instance()
 	return &instance;
 }
 
-void log::initialize(Trinity::Asio::IoContext* ioContext)
+void log::initialize(bool async)
 {
-	if (ioContext)
+	if (async)
 	{
-		//_ioContext = ioContext;
-		//_strand = new Trinity::Asio::Strand(*ioContext);
-		ASYNC_LOG->start();
+		async_ = true;
+		log_worker_.working();
 	}
 
 	load_from_config();
@@ -364,9 +361,8 @@ void log::initialize(Trinity::Asio::IoContext* ioContext)
 
 void log::set_synchronous()
 {
-	delete _strand;
-	_strand = nullptr;
-	_ioContext = nullptr;
+	log_worker_.stop();
+	async_ = false;
 }
 
 void log::load_from_config()

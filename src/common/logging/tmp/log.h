@@ -7,6 +7,7 @@
 
 #include "common/serialization/string_utils.h"
 #include "appender.h"
+#include "log_worker.h"
 
 #define LOGGER_ROOT "root"
 
@@ -23,7 +24,7 @@ class log
 public:
 	static log* instance();
 
-	void initialize(Trinity::Asio::IoContext* ioContext);
+	void initialize(bool async);
 	void set_synchronous();
 	void load_from_config();
 	void close();
@@ -89,8 +90,10 @@ private:
 	std::string logs_dir_;
 	std::string log_timestamp_;
 
-	Trinity::Asio::IoContext* _ioContext;
-	Trinity::Asio::Strand* _strand;
+	//Trinity::Asio::IoContext* _ioContext;
+	//Trinity::Asio::Strand* _strand;
+	bool async_;
+	log_worker log_worker_;
 };
 
 #define LOG log::instance()

@@ -47,50 +47,40 @@ class log_worker
 public:
 	static log_worker* instance();
 
-	void add_log_task(const log_task& task);
+	void add_task(const log_task& task);
 
-	void working()
-	{
-		running_ = true;
-		thread_ = std::make_unique<std::thread>([this]{ this->thread_func(); });
-	}
-
-	void stop()
-	{
-		running_ = false;
-		cond_.notify_one();
-		thread_->join();
-	}
+	void working();
+	void stop();
 private:
 	log_worker();
 
 	~log_worker()
 	{
-		if (running_)
+		if (is_working_)
 		{
-			stop_working();
+			stop();
 		}
 	}
 
 	log_worker(const log_worker&) = delete;  
 	log_worker& operator=(const log_worker&) = delete;
 
-	void thread_func();
+	void do_work();
 
-	typedef log_task_list<large_buffer> buffer;
-	typedef std::vector<std::unique_ptr<buffer>> buffer_vector;
-	typedef buffer_vector::value_type buffer_ptr;
+	typedef log_task_list<maximum_tasks> task_list;
+	typedef std::vector<std::unique_ptr<task_list>> tasks_list_vector;
+	typedef tasks_list_vector::value_type task_list_ptr;
 
 	const int flush_interval_ = 3;
-	bool running_ = false;
+	bool is_working_;
   
 	std::unique_ptr<std::thread> thread_;
 	std::mutex mutex_;
 	std::condition_variable cond_;
 
-	buffer_ptr current_buffer_;
-	buffer_ptr next_buffer_;
-	buffer_vector buffers_;
+	task_list_ptr current_task_list_;
+	task_list_ptr next_task_list_;
+	task_list_vector tasks_list_;
 };
 
 #define ASYNC_LOG lg::log_worker::instance()
