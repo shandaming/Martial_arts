@@ -6,12 +6,12 @@
 
 logger::logger(const std::string& name, log_level level): name_(name), level_(level) { }
 
-void logger::add_appender(uint8 id, appender* appender)
+void logger::add_appender(uint8_t id, appender* appender)
 {
     appenders_[id] = appender;
 }
 
-void logger::del_appender(uint8 id)
+void logger::del_appender(uint8_t id)
 {
     appenders_.erase(id);
 }

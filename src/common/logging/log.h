@@ -5,9 +5,10 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include "common/serialization/string_utils.h"
-#include "appender.h"
+//#include "appender.h"
+#include "logger.h"
 #include "log_worker.h"
+#include "common/serialization/string_utils.h"
 
 #define LOGGER_ROOT "root"
 
@@ -34,7 +35,7 @@ public:
 	template<typename Fmt, typename... Args>
 	inline void out_message(std::string const& filter, log_level const level, Fmt&& fmt, Args&&... args)
 	{
-		out_message(filter, level, string_format(std::forward<Format>(fmt), std::forward<Args>(args)...));
+		out_message(filter, level, string_format(std::forward<Fmt>(fmt), std::forward<Args>(args)...));
 	}
 
 	template<typename Format, typename... Args>
@@ -46,7 +47,7 @@ public:
 		out_command(string_format(std::forward<Format>(fmt), std::forward<Args>(args)...), std::to_string(account));
 	}
 
-	void out_char_dump(char const* str, uint32_t account_id, uint64 guid, char const* name);
+	void out_char_dump(char const* str, uint32_t account_id, uint64_t guid, char const* name);
 
 	void set_realm_id(uint32_t id);
 
@@ -58,7 +59,7 @@ public:
 	}
 
 	std::string const& get_logs_dir() const { return logs_dir_; }
-	std::string const& get_logs_timestamp() const { return log_timestamp_; }
+	std::string const& get_logs_timestamp() const { return logs_timestamp_; }
 private:
 	log();
 	~log();
@@ -88,7 +89,7 @@ private:
 	log_level lowest_log_level_;
 
 	std::string logs_dir_;
-	std::string log_timestamp_;
+	std::string logs_timestamp_;
 
 	//Trinity::Asio::IoContext* _ioContext;
 	//Trinity::Asio::Strand* _strand;

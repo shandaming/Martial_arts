@@ -5,11 +5,12 @@
 #ifndef APPENDER_CONSOLE_H
 #define APPENDER_SONSOLE_H
 
-#include  <type_traits>
+#include <type_traits>
+#include <vector>
 
 #include "appender.h"
 
-enum color_types : uint8
+enum color_types : uint8_t
 {
 	BLACK,
 	RED,
@@ -28,14 +29,14 @@ enum color_types : uint8
 	WHITE
 };
 
-constexpr uint8 max_colors = WHITE + 1;
+constexpr uint8_t max_colors = WHITE + 1;
 
 class appender_console : public appender
 {
 public:
 	typedef std::integral_constant<appender_type, APPENDER_CONSOLE>::type type_index;
 
-	appender_console(uint8 id, const std::string& name, log_level level, appender_flags flags, 
+	appender_console(uint8_t id, const std::string& name, log_level level, appender_flags flags, 
 			std::vector<const char*> extra_args);
 	void init_colors(const std::string& init_str);
 	appender_type get_type() const override { return type_index::value; }

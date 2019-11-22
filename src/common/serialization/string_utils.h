@@ -9,7 +9,7 @@
 #include <vector>
 #include <cstdio>
 
-#include "define.h"
+#include "common/define.h"
 
 enum 
 {
@@ -30,7 +30,7 @@ std::vector<std::string> split(const std::string& val, char c = ',',
 bool wildcard_string_match(const std::string& str, const std::string& match);
 
 template<typename... Args>
-std::string string_format(const std::string& fmt, Args&&... args) ATTR_PRINTF(1, 2)
+std::string string_format(const std::string& fmt, Args&&... args)
 {
 	int size = snprintf(nullptr, 0, fmt.c_str(), std::forward<Args>(args)...);
 	std::string buffer;

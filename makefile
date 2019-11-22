@@ -3,9 +3,17 @@ INC_DIR = -I ./src -I ./src/client -I ./src/server
 csrc = $(wildcard src/*.c)
 ccsrc = $(wildcard src/*.cpp) \
 		$(wildcard src/common/cmdline/*.cpp) \
+		$(wildcard src/common/configuration/*.cpp) \
+		$(wildcard src/common/debugging/*.cpp) \
+		$(wildcard src/common/logging/*.cpp) \
+		$(wildcard src/common/serialization/*.cpp) \
+		$(wildcard src/common/utility/*.cpp) \
 		$(wildcard src/server/*.cpp) \
 		$(wildcard src/server/database/*.cpp) \
-		$(wildcard src/server/database/update/*.cpp)
+		$(wildcard src/server/database/update/*.cpp) \
+		$(wildcard src/server/database/logging/*.cpp) \
+		$(wildcard src/server/net/*.cpp) \
+		$(wildcard src/server/process/*.cpp)
 
 dep = $(obj:.o=.d)
 
@@ -15,9 +23,9 @@ CXXFLAGS = -pthread -Wall -Wno-attributes $(INC_DIR)
 debug = true
 
 ifeq ($(debug), false)
-	CXXFLAGS += -std=c++1z -O3 -DNDEBUG
+	CXXFLAGS += -std=gnu++17 -O3 -DNDEBUG
 else ifeq ($(debug), true)
-	CXXFLAGS += -std=c++1z -g -O0
+	CXXFLAGS += -std=gnu++17 -g -O0
 endif
 
 LDFLAGS = -lstdc++fs

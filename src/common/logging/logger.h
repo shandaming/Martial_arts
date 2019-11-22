@@ -15,8 +15,8 @@ class logger
 public:
 	logger(const std::string& name, log_level level);
 
-	void add_appender(uint8 id, appender* appender);
-	void del_appender(uint8 id);
+	void add_appender(uint8_t id, appender* appender);
+	void del_appender(uint8_t id);
 
 	const std::string& get_name() const { return name_; }
 	log_level get_log_level() const { return level_; }
@@ -25,7 +25,7 @@ public:
 private:
 	std::string name_;
 	log_level level_;
-	std::unordered_map<uint8, appender*> appenders_;
+	std::unordered_map<uint8_t, appender*> appenders_;
 };
 
 #endif

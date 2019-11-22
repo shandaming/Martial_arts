@@ -12,8 +12,8 @@
 
 struct log_message
 {
-	log_message(Log_level level_, const std::string& type_, std::string&& text_);
-	log_message(Log_level level_, const std::string& type_, std::string&& text_, 
+	log_message(log_level level_, const std::string& type_, std::string&& text_);
+	log_message(log_level level_, const std::string& type_, std::string&& text_, 
 			std::string&& param1_);
 
 	log_message(const log_message&) = delete;
@@ -29,9 +29,9 @@ struct log_message
 	std::string param1;
 	time_t mtime;
 
-	uint32 size() const
+	uint32_t size() const
 	{
-		return static_cast<uint32>(prefix.size() + text.size());
+		return static_cast<uint32_t>(prefix.size() + text.size());
 	}
 };
 

@@ -5,8 +5,9 @@
 #ifndef APPENDER_FILE_H
 #define APPENDER_FILE_H
 
-#include  <type_traits>
+#include <type_traits>
 #include <atomic>
+#include <vector>
 
 #include "appender.h"
 
@@ -15,7 +16,7 @@ class appender_file : public appender
 public:
 	typedef std::integral_constant<appender_type, APPENDER_FILE>::type type_index;
 
-	appender_file(uint8 id, const std::string& name, log_level level, appender_flags flags, 
+	appender_file(uint8_t id, const std::string& name, log_level level, appender_flags flags, 
 			std::vector<const char*> extra_args);
 	~appender_file() { close_file(); }
 
@@ -30,8 +31,8 @@ private:
 	std::string log_dir_;
 	bool dynamic_name_;
 	bool backup_;
-	uint64 max_file_size_;
-	std::atomic<uint64> file_size_;
+	uint64_t max_file_size_;
+	std::atomic<uint64_t> file_size_;
 };
 
 #endif

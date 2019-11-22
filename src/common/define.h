@@ -8,7 +8,7 @@
 #include "compiler_defs.h"
 
 #if COMPILER == COMPILER_GNU
-	#if !DEFINED(__STDC_FORMAT_MACROS)
+	#if !defined(__STDC_FORMAT_MACROS)
 		#define __STDC_FORMAT_MACROS
 	#endif
 	#if !defined(__STDC_CONSTANT_MACROS)
@@ -51,7 +51,7 @@
 		#define DECLSPEC_DEPRECATED __declspec(deprecated)
 	#endif
 #else
-	#define PATH_MAX PATH_MAX
+	//#define PATH_MAX PATH_MAX linux GNU已经定义了
 	#define DECLSPEC_NORETURN
 	#define DECLSPEC_DEPRECATED
 #endif

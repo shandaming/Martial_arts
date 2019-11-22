@@ -4,9 +4,9 @@
 
 #include <sstream>
 #include "appender.h"
-#include "string_utils.h"
+#include "common/serialization/string_utils.h"
 
-appender::appender(uint8 id, const std::string& name, log_level level, appender_flags flags) : 
+appender::appender(uint8_t id, const std::string& name, log_level level, appender_flags flags) : 
 	id_(id), name_(name), level_(level), flags_(flags) { }
 
 void appender::write(log_message* message)
@@ -40,7 +40,7 @@ void appender::write(log_message* message)
 
 const char* appender::get_log_level_str(log_level level)
 {
-	switch (level_)
+	switch (level)
 	{
 		case LOG_LEVEL_FATAL:
 			return "FATAL";

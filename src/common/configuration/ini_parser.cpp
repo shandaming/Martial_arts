@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "ini_parser.h"
-#include "string_utils.h"
+#include "common/serialization/string_utils.h"
 
 bool ini_parser::has_section(const std::string& section)
 {
@@ -43,7 +43,7 @@ bool ini_parser::read_ini(const std::string& file, std::string& error)
 			error = ("Read error. Line: " + line_no);
 			return false;
 		}
-		utils::trim(line);
+		trim(line);
 		if(!line.empty())
 		{
 			if(line[0] == ';' || line[0] == '#')
@@ -63,7 +63,7 @@ bool ini_parser::read_ini(const std::string& file, std::string& error)
 					return false;
 				}
 				key = line.substr(1, pos - 1);
-				utils::trim(key);
+				trim(key);
 				
 				if(has_section(key))
 				{
@@ -72,7 +72,6 @@ bool ini_parser::read_ini(const std::string& file, std::string& error)
 				}
 
 				std::shared_ptr<ini_parser::section> s(new ini_parser::section);
-				assert(s);
 				section = s.get();
 				s->section = key;
 				sections_.push_back(s);
@@ -97,8 +96,8 @@ bool ini_parser::read_ini(const std::string& file, std::string& error)
 				}
 				key = line.substr(0, pos);
 				value = line.substr(pos + 1);
-				utils::trim(key);
-				utils::trim(value);
+				trim(key);
+				trim(value);
 
 				if(section->has_key(key))
 				{
@@ -164,4 +163,22 @@ std::string ini_parser::get_value(const std::string& section, const std::string&
 		}
 	}
 	return "";
+}
+
+std::vector<std::string> ini_parser::get_keys_by_string(const std::string& section, const std::string& name)
+{
+	std::vector<std::string> keys;
+
+	for(auto& i : sections_)
+	{
+		if(i->section == section)
+		{
+			for(auto& j : i->properties)
+			{
+				if(j.first.find(name) != std::string::npos)
+					keys.push_back(j.first);
+			}
+		}
+	}
+	return keys;
 }

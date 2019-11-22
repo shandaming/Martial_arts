@@ -23,6 +23,7 @@ public:
 	void print();
 
 	std::string get_value(const std::string& section, const std::string& key) const;
+	std::vector<std::string> get_keys_by_string(const std::string& section, const std::string& name);
 private:
 	bool has_section(const std::string& section);
 

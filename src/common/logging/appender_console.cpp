@@ -7,11 +7,11 @@
 
 #include "appender_console.h"
 
-appender_console::appender_console(uint8 id, const std::string& name, log_level level, 
+appender_console::appender_console(uint8_t id, const std::string& name, log_level level, 
 		appender_flags flags, std::vector<const char*> extra_args) :
 	appender(id, name, level, flags), colored_(false)
 {
-	for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
+	for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
 		colors_[i] = color_types(max_colors);
 
 	if (!extra_args.empty())
@@ -30,7 +30,7 @@ void appender_console::init_colors(const std::string& str)
 
 	std::istringstream ss(str);
 
-	for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
+	for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
 	{
 		ss >> color[i];
 
@@ -41,8 +41,8 @@ void appender_console::init_colors(const std::string& str)
 			return;
 	}
 
-	for (uint8 i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
-		colors_[i] = Color_types(color[i]);
+	for (uint8_t i = 0; i < NUM_ENABLED_LOG_LEVELS; ++i)
+		colors_[i] = color_types(color[i]);
 
 	colored_ = true;
 }
@@ -82,7 +82,7 @@ void appender_console::set_color(bool stdout_stream, color_types color)
 		BG_WHITE
 	};
 
-	static uint8 unix_colors[max_colors] =
+	static uint8_t unix_colors[max_colors] =
 	{
 		FG_BLACK,                                          // BLACK
 		FG_RED,                                            // RED
@@ -116,7 +116,7 @@ void appender_console::write_stream(const log_message* message)
 
 	if (colored_)
 	{
-		uint8 index;
+		uint8_t index;
 		switch (message->level)
 		{
 			case LOG_LEVEL_TRACE:
@@ -140,7 +140,7 @@ void appender_console::write_stream(const log_message* message)
 			   break;
 		}
 
-		set_color(stdout_stream, _colors[index]);
+		set_color(stdout_stream, colors_[index]);
 		fprintf(stdout_stream ? stdout : stderr, "%s%s\n", message->prefix.c_str(), 
 				message->text.c_str());
 		reset_color(stdout_stream);

@@ -33,10 +33,10 @@ void assert(const char* file, int line, const char* function, const char* messag
 void fatal(const char* file, int line, const char* function, const char* message, ...)
 {
 	va_list args;
-	va_start(args, format);
+	va_start(args, message);
 
 	fprintf(stderr, "\n%s:%d in %s ASSERTION ERROR:\n  ", file, line, function);
-	vfprintf(stderr, format, args);
+	vfprintf(stderr, message, args);
 	fprintf(stderr, "\n");
 	fflush(stderr);
 
@@ -67,5 +67,5 @@ void abort(const char* file, int line, const char* function)
 void abort_handler(int /*sigval*/)
 {
 	*((volatile int*)NULL) = 0;
-	eixt(1);
+	exit(1);
 }

@@ -6,10 +6,10 @@
 
 #include "log_message.h"
 
-log_message::log_message(Log_level level_, const std::string& type_, std::string&& text_) :
+log_message::log_message(log_level level_, const std::string& type_, std::string&& text_) :
 	level(level_), type(type_), text(std::forward<std::string>(text_)), mtime(time(nullptr)){}
 
-log_message::log_message(Log_level level_, const std::string& type_, std::string&& text_, 
+log_message::log_message(log_level level_, const std::string& type_, std::string&& text_, 
 		std::string&& param1_) : 
 	level(level_), type(type_), text(std::forward<std::string>(text_)), 
 	param1(std::forward<std::string>(param1)), mtime(time(nullptr)){}

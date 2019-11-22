@@ -5,7 +5,7 @@
 #ifndef DEBUGGING_ERRORS_H
 #define DEBUGGING_ERRORS_H
 
-#include "define.h"
+#include "common/define.h"
 
 void assert(const char* file, int line, const char* function, const char* message) ATTR_NORETURN;
 

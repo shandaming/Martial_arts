@@ -18,7 +18,7 @@ enum log_level
 	NUM_ENABLED_LOG_LEVELS = 6
 };
 
-enum appender_type : uint8
+enum appender_type : uint8_t
 {
 	APPENDER_NONE,
 	APPENDER_CONSOLE,

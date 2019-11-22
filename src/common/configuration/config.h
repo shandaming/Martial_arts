@@ -126,6 +126,11 @@ public:
 		return c(res);
 	}
 
+	std::vector<std::string> get_keys_by_string(const std::string& section, const std::string& name)
+	{
+		return ini_.get_keys_by_string(section, name);
+	}
+
 	void print() { ini_.print(); }
 private:
 	config_mgr() = default;

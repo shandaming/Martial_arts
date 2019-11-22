@@ -13,7 +13,7 @@ log_worker::log_worker() : is_working_(false), current_task_list_(new task_list)
 	tasks_list_.reserve(16);
 }
 
-~log_worker()
+log_worker::~log_worker()
 {
 	if (is_working_)
 		stop();
@@ -130,7 +130,7 @@ void log_worker::do_work()
 			assert(!tasks_list_to_write.empty());
 			new_task_list1 = std::move(tasks_list_to_write.back());
 			tasks_list_to_write.pop_back();
-			new_task_list1->reset();
+			//new_task_list1->reset();
 		}
 
 		if (!new_task_list2)
@@ -138,15 +138,9 @@ void log_worker::do_work()
 			assert(!tasks_list_to_write.empty());
 			new_task_list2 = std::move(tasks_list_to_write.back());
 			tasks_list_to_write.pop_back();
-			new_task_list2->reset();
+			//new_task_list2->reset();
 		}
 
 		tasks_list_to_write.clear();
 	}
-}
-
-log_worker* log_worker::instance()
-{
-	static log_worker instance;
-	return &instance;
 }
