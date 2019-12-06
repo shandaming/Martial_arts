@@ -5,6 +5,15 @@
 #ifndef DATABASE_MYSQL_CONNECTION_H
 #define DATABASE_MYSQL_CONNECTION_H
 
+#include <string>
+#include <map>
+#include <utility>
+
+#include "query_result.h"
+#include "transaction.h"
+#include "database_worker.h"
+#include "common/threading/producer_consumer_queue.h"
+
 enum connection_flags
 {
 	CONNECTION_ASYNC = 0x01,
@@ -23,15 +32,20 @@ struct mysql_connection_info
 	std::string port_or_socket;
 };
 
-typedef std::map<uint32_t /*index*/, std::pair<std::string /*query*/, connection_flags /*sync/async*/>> prepare_statement_map;
+typedef std::map<uint32_t /*index*/, std::pair<std::string /*query*/, connection_flags /*sync/async*/>> prepared_statement_map;
+
+class sql_operation;
+class prepared_statement_base;
+class mysql_prepared_statement;
 
 class mysql_connection
 {
+	template<typename T>
+	friend class database_worker_pool;
+	friend class ping_operation;
 public:
 	mysql_connection(mysql_connection_info& info); // 同步连接的构造函数。
 	mysql_connection(producer_consumer_queue<sql_operation*> queue, mysql_connection_info& conn_info); // 异步连接的构造函数。
-	port_or_socket.assign(tokens[i++]);
-	port_or_socket.assign(tokens[i++]);
 	virtual ~mysql_connection();
 
 	mysql_connection(const mysql_connection&) = delete;
@@ -43,18 +57,18 @@ public:
 	bool prepare_statements();
 
 	bool execute(const char* sql);
-	bool execute(prepared_statement* stmt);
+	bool execute(prepared_statement_base* stmt);
 
 	result_set* query(const char* sql);
-	prepare_result_set* query(prepared_statement* stmt);
+	prepared_result_set* query(prepared_statement_base* stmt);
 
 	bool query(const char* sql, MYSQL_RES** preult, MYSQL_FIELD** fields, uint64_t* row_count, uint32_t* field_count);
-	bool query(prepared_statement* stmt, MYSQL_RES** result, uint64_t* row_count, uint32_t* field_count);
+	bool query(prepared_statement_base* stmt, MYSQL_RES** result, uint64_t* row_count, uint32_t* field_count);
 
 	void begin_transaction();
 	void rollback_transaction();
 	void commit_transaction();
-	int execute_transaction(sql_transaction& transaction);
+	int execute_transaction(std::shared_ptr<transaction_base>& transaction);
 
 	void ping();
 
@@ -68,7 +82,7 @@ private:
 
 	MYSQL* get_handle() { return mysql_; }
 	mysql_prepared_statement* get_prepare_statement(uint32_t index);
-	void prepare_statement(uint32_t index, const char* sql, connection_flags flag);
+	void prepared_statement(uint32_t index, const char* sql, connection_flags flag);
 
 	virtual void do_prepare_statements() = 0;
 

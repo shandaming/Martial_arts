@@ -20,6 +20,7 @@ public:
 	void push(const T& v)
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
+
 		queue_.push(std::move(v));
 		cv_.notify_one();
 	}
@@ -27,32 +28,39 @@ public:
 	bool empty()
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
+
 		return queue_.empty();
 	}
 
 	bool pop(T& v)
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
+
 		if(queue_.empty() || shutdown_)
 		{
 			return false;
 		}
+
 		v = queue_.front();
 		queue_.pop();
+
 		return true;
 	}
 
 	void wait_and_pop(T& v)
 	{
 		std::unique_lock<std::mutex> lock(mutex_);
+
 		while(queue_.empty() || shutdown_)
 		{
 			cv_.wait(lock);
 		}
+
 		if(queue_.empty() || shutdown_)
 		{
 			return;
 		}
+
 		v = queue_.front();
 		queue_.pop();
 	}
@@ -60,6 +68,7 @@ public:
 	void cancel()
 	{
 		std::unique_lock<std::mutex> lock(mutex_);
+
 		while(!queue_.empty())
 		{
 			T& value = queue_.front();

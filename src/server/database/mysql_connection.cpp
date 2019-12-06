@@ -24,8 +24,11 @@ mysql_connection_info::mysql_connection_info(const std::string& info_string){
 
 mysql_connection::mysql_connection(mysql_connection_info& info) : reconnection_(false), prepare_error_(false), queue_(nullptr), mysql_(nullptr), connection_info_(info), connection_flags_(CONNECTION_SYNCH) {}
 
-mysql_connection::mysql_connection()
-{}
+mysql_connection::mysql_connection(producer_consumer_queue<sql_operation*>* queue, mysql_connection_info& conn_info) : 
+	reconnection_(false), prepare_error_(false), queue_(queue), mysql_(NULL), connection_info_(conn_info), connection_flags_(CONNECTION_ASYNC)
+{
+	worker_ = std::make_unique<database_worker>(queue_, this);
+}
 
 mysql_connection::~mysql_connection() { close(); }
 
@@ -128,7 +131,7 @@ bool mysql_connection::execute(const char* sql)
 	return true;
 }
 
-bool mysql_connection::execute(prepared_statement* stmt)
+bool mysql_connection::execute(prepared_statement_base* stmt)
 {
 	if(!mysql_)
 		return false;
@@ -169,7 +172,7 @@ bool mysql_connection::execute(prepared_statement* stmt)
 	return true;
 }
 
-bool mysql_connection::query(prepared_statement* stmt, MYSQL_RES** result, uint64_t* row_count, uint32_t* field_count)
+bool mysql_connection::query(prepared_statement_base* stmt, MYSQL_RES** result, uint64_t* row_count, uint32_t* field_count)
 {
 	if(!mysql_)
 		return false;
@@ -292,7 +295,7 @@ int mysql_connectin::execute_transaction(sql_transaction& transaction)
 		{
 			case SQL_ELEMENT_PREPARED:
 				{
-					prepared_statement* stmt = data.element.stmt;
+					prepared_statement_base* stmt = data.element.stmt;
 					assert(stmt);
 					if(!execute(stmt))
 					{
@@ -391,7 +394,7 @@ void mysql_connection::prepared_statement(uint32_t index, const char* sql, conne
 	}
 }
 
-prepared_result_set* mysql_connection::query(prepared_statement* stmt)
+prepared_result_set* mysql_connection::query(prepared_statement_base* stmt)
 {
 	MYSQL_RES* result = 0;
 	uint64_t row_count = 0;

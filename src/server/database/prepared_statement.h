@@ -5,6 +5,10 @@
 #ifndef PREPARED_STATEMENT_H
 #define PREPARED_STATEMENT_H
 
+#include <mysql/mysql.h>
+
+#include "sql_operation.h"
+
 // Union for data buffer（高级绑定 - >队列 - >低级绑定）
 union prepared_statement_data_union
 {
@@ -47,17 +51,20 @@ struct prepared_statement_data
 	std::vector<uint8_t> binary;
 };
 
-class prepared_statement
+class mysql_prepared_statement;
+
+// 代码中使用的上层类
+class prepared_statement_base
 {
 	friend class prepared_statement_task;
 	friend class mysql_prepared_statement;
 	friend class mysql_connection;
 public:
-	explicit prepared_statement(uint32_t index);
-	~prepared_statement();
+	explicit prepared_statement_base(uint32_t index);
+	~prepared_statement_base();
 
-	prepared_statement(const prepared_statement&) = delete;
-	prepared_statement& operator=(const prepared_statement&) = delete;
+	prepared_statement_base(const prepared_statement_base&) = delete;
+	prepared_statement_base& operator=(const prepared_statement_base&) = delete;
 
 	void set_bool(const uint8_t index, const bool value);
 	void set_uint8(const uint8_t index, const uint8_t value);
@@ -73,7 +80,7 @@ public:
 	void set_string(const uint8_t index, const std::string& value);
 	void set_binary(const uint8_t index, const std::vector<uint8_t>& value);
 	void set_null(const uint8_t index);
-private:
+protected:
 	void bind_parameters();
 
 	mysql_prepared_statement* stmt_;
@@ -81,50 +88,20 @@ private:
 	std::vector<prepared_statement_data> statement_data_; // 参数缓冲区，还没有以任何方式与MySQL绑定
 };
 
-
-// 每个MySQLConnection实例都是唯一的类
-//  - 仅在准备好的语句任务时才能访问这些类对象
-//  - 被执行。
-class mysql_prepared_statement
+template<typename T>
+class prepared_statement : public prepared_statement_base
 {
-	friend class prepared_statement;
-	friend class mysql_connection;
 public:
-	mysql_prepared_statement(MYSQL_STMT* stmt);
-	~mysql_prepared_statement();
+	prepared_statement(uint32_t index) : prepared_statement_base(index) {}
 
-	mysql_prepared_statement(const mysql_prepared_statement&) = delete;
-	mysql_prepared_statement& operator=(const mysql_prepared_statement&) = delete;
-
-	void set_null(const uint8_t index);
-	void set_bool(const uint8_t index, const bool value);
-	void set_uint8(const uint8_t index, const uint8_t value);
-	void set_uint16(const uint8_t index, const uint16_t value);
-	void set_uint32(const uint8_t index, const uint32_t value);
-	void set_uint64(const uint8_t index, const uint64_t value);
-	void set_int8(const uint8_t index, const int8_t value);
-	void set_int16(const uint8_t index, const int16_t value);
-	void set_int32(const uint8_t index, const int32_t value);
-	void set_int64(const uint8_t index, const int64_t value);
-	void set_float(const uint8_t index, const float value);
-	void set_double(const uint8_t index, const double value);
-	void set_binary(const uint8_t index, const std::vector<uint8_t>& value, bool is_string);
-private:
-	MYSQL_STMT* get_stmt() { return stmt_; }
-	MYSQL_BIND* get_bind() { return bind_; }
-
-	prepared_statement* prepared_stmt_;
-
-	void clear_parameters();
-	void check_valid_index(uint8_t index);
-	std::string get_query_string(const std::string& sql_pattern) const;
-
-	MYSQL_STMT* stmt_;
-	uint32_t param_count_;
-	std::vector<bool> params_set_;
-	MYSQL_BIND* bind_;
+	prepared_statement(const prepared_statement&) = delete;
+	prepared_statement& operator=(const prepared_statement&) = delete;
 };
 
+
+
+
+// 排队操作
 class prepared_statement_task : public sql_operation
 {
 public:

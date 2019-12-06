@@ -112,9 +112,7 @@ result_set::~result_set()
 bool result_set::next_row()
 {
 	if(!result_)
-	{
 		return false;
-	}
 
 	MYSQL_ROW row = mysql_fetch_row(result_);
 	if(!row)
@@ -159,9 +157,9 @@ const field& result_set::operator[](size_t index) const
 	return current_row_[index];
 }
 
-/* ---------------------------------------- prepare_result_set--------------------------- */
+/* ---------------------------------------- prepared_result_set--------------------------- */
 
-prepare_result_set::prepare_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, uint64_t row_count, uint32_t field_count) : row_count_(row_count), row_position_(0), field_count_(field_count), bind_(NULL), stmt_(stmt), metadata_result_(result)
+prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, uint64_t row_count, uint32_t field_count) : row_count_(row_count), row_position_(0), field_count_(field_count), bind_(NULL), stmt_(stmt), metadata_result_(result)
 {
 	if(!metadata_result_)
 	{
@@ -278,12 +276,12 @@ prepare_result_set::prepare_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, uint
 	mysql_stmt_free_result(stmt_);
 }
 
-prepare_result_set::~prepare_result_set()
+prepared_result_set::~prepared_result_set()
 {
 	clean_up();
 }
 
-bool prepare_result_set::next_row()
+bool prepared_result_set::next_row()
 {
 	// 只更新m_rowPosition，以便上层代码知道行向量的哪个元素要查看
 	if(++row_position_ >= row_count_)
@@ -293,20 +291,20 @@ bool prepare_result_set::next_row()
 	return true;
 }
 
-field* prepare_result_set::fetch() const
+field* prepared_result_set::fetch() const
 {
 	assert(row_position_ < row_count_);
 	return const_cast<field*>(&rows_[uint32_t(row_position_) * field_count_]);
 }
 
-const field* prepare_result_set::operator[](size_t index) const
+const field* prepared_result_set::operator[](size_t index) const
 {
 	assert(row_position_ < row_count_);
 	assert(index < field_count_);
 	return rows_[uint32_t(row_position_) * field_count + index];
 }
 
-void prepare_result_set::clean_up()
+void prepared_result_set::clean_up()
 {
 	if(metadata_result_)
 	{
@@ -320,7 +318,7 @@ void prepare_result_set::clean_up()
 	}
 }
 
-bool prepare_result_set::goto_next_row()
+bool prepared_result_set::goto_next_row()
 {
 	// 只在低级代码中调用，即构造函数将迭代每一行数据并缓冲它
 	if(row_position_ >= row_count_)

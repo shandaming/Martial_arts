@@ -8,6 +8,9 @@
 #include <atomic>
 #include <thread>
 
+#include "sql_operation.h"
+#include "common/threading/producer_consumer_queue.h"
+
 class database_worker
 {
 public:
@@ -15,7 +18,7 @@ public:
 	~database_worker();
 private:
 	database_worker(const database_worker&) = delete;
-	database_worker& operator=(const database&) = delete;
+	database_worker& operator=(const database_worker&) = delete;
 
 	void worker_thread();
 

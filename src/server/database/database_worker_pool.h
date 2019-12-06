@@ -5,15 +5,8 @@
 #ifndef DATABASE_WORKER_POOL_H
 #define DATABASE_WORKER_POOL_H
 
-class ping_operation : public sql_operation
-{
-	//
-	bool execute() override
-	{
-		conn_->ping();
-		return true;
-	}
-};
+#include "sql_operation.h"
+#include "mysql_connection.h"
 
 template<typename T>
 class database_worker_pool
@@ -67,20 +60,20 @@ public:
 	{
 		LOG_INFO << "sql.driver. Closing down database pool " << get_database_name();
 
-		//
+		// 关闭实际的MySQL连接。
 		connection_[IDX_ASYNC].clear();
 
 		LOG_INFO << "sql.driver. Asynchronous connections on database pool '" << get_database_name() << 
 			"' terminated. Proceeding with synchronous connections";
 
-		//
+		// 关闭同步连接！ 无需锁定连接，因为DatabaseWorkerPool <> :: Close！ 仅应在内核中的任何其他线程任务退出后才调用！ 表示此时无法进行并发访问。
 		connections_[IDX_SYNCH].clear();
 
 		LOG_INFO << "sql.driver. All connections on database pool '" << get_database_name() << "'";
 	}
 
 
-	//
+	// 准备所有准备好的语句
 	bool prepare_statements()
 	{
 		for(auto& connections : connections_)
@@ -103,17 +96,17 @@ public:
 	}
 
 
-	inline const* mysql_connection_info get_connection_info() const
+	inline mysql_connection_info const* get_connection_info() const
 	{
 		return connection_info_.get();
 	}
 
-	const char* database_worker_pool<T>::get_database_name() const
+	const char* get_database_name() const
 	{
 		return connection_info_->database.c_str();
 	}
 
-	//
+	// 以字符串格式排队将单向执行的SQL操作，该操作将异步执行。 ！ 此方法仅应用于仅执行一次（例如在启动期间）的查询。
 	void execute(const char* sql)
 	{
 		if(trinity::is_format_empty_or_null(sql))
@@ -124,7 +117,7 @@ public:
 		enqueue(task);
 	}
 
-	//
+	// ！ 使具有变量args的字符串格式的单向SQL操作入队，该操作将异步执行。 ！ 此方法仅应用于仅执行一次（例如在启动期间）的查询。
 	template<typename F, typename... Args>
 	void p_execute(F&& sql, Args&&... args)
 	{
@@ -135,14 +128,14 @@ public:
 		execute(trinity::string_format(std::forware<F>(sql, std::forward<Args>(args)...).c_str()));
 	}
 
-	//
+	// ！ 以准备好的语句格式排队单向SQL操作，该操作将异步执行。 ！ 语句必须带有CONNECTION_ASYNC标志。
 	void execute(prepared_statement<T>* stmt)
 	{
 		prepared_statement_task* task = new prepared_statement_task(stmt);
 		enqueue(task);
 	}
 
-	//
+	// 直接执行字符串格式的单向SQL操作，该操作将阻塞调用线程，直到完成。 ！ 此方法仅应用于仅执行一次（例如在启动期间）的查询。
 	void direct_execute(const char* sql)
 	{
 		if(trinity::is_format_empty_or_null(sql))
@@ -154,7 +147,7 @@ public:
 		connection->unlock();
 	}
 
-	//
+	// 使用变量args-直接以字符串格式执行单向SQL操作，该操作将阻塞调用线程，直到完成。 ！ 此方法仅应用于仅执行一次（例如在启动期间）的查询。
 	template<typename F, typename... Args>
 	void direct_execute(F&& sql, Args&&... args)
 	{
@@ -165,7 +158,7 @@ public:
 		direct_execute(trinity::string_format(std::forward<F>(sql), std::forward<Args>(args)...).c_str());
 	}
 
-	//
+	// 以准备好的语句格式直接执行单向SQL操作，该操作将阻塞调用线程，直到完成。 ！ 语句必须带有CONNECTION_SYNCH标志。
 	void direct_execute(prepared_statement<T>* stmt)
 	{
 		T* connection = get_free_connection();
@@ -175,7 +168,7 @@ public:
 		delete stmt;
 	}
 
-	//
+	// 直接执行字符串格式的SQL查询，该查询将阻塞调用线程，直到完成。 ！ 返回引用计数的自动指针，无需在上层代码中进行手动内存管理。
 	query_result query(const char* sql, T* connection = nullptr)
 	{
 		if(!connection)
@@ -192,7 +185,7 @@ public:
 		return query_result(result);
 	}
 
-	//
+	// 使用变量args直接以字符串格式执行SQL查询，该查询将阻塞调用线程，直到完成。 ！ 返回引用计数的自动指针，无需在上层代码中进行手动内存管理。
 	template<typename F, typename... Args>
 	query_result p_query(F&& sql, T* conn, Args&&... args)
 	{
@@ -203,7 +196,7 @@ public:
 		return query(trinity::string_format(std::forward<F>(sql), std::forward<Args>(args)...).c_str(), conn);
 	}
 
-	//
+	// 使用变量args直接以字符串格式执行SQL查询，该查询将阻塞调用线程，直到完成。 ！ 返回引用计数的自动指针，无需在上层代码中进行手动内存管理。
 	template<typename F, typename... Args>
 	query_result p_query(F&& sql, Args&& args)
 	{
@@ -214,7 +207,7 @@ public:
 		return query(trinity::string_format(std::forward<F>(sql), std::forward<Args>(args)...).c_str());
 	}
 
-	//
+	// 以准备好的格式直接执行SQL查询，该查询将阻塞调用线程，直到完成。 ！ 返回引用计数的自动指针，无需在上层代码中进行手动内存管理。 ！ 语句必须带有CONNECTION_SYNCH标志。
 	prepared_query_result query(prepared_statement<T>* stmt)
 	{
 		auto connection = get_fre_connection();
@@ -232,7 +225,7 @@ public:
 		return prepared_query_result(ret);
 	}
 
-	//
+	// 以字符串格式使查询排队，该查询将在执行查询后立即设置QueryResultFuture返回对象的值。 ！ 然后，在ProcessQueryCallback方法中处理返回值。
 	query_callback async_query(const char* sql)
 	{
 		basic_statement_task* task = new basic_statement_task(sql, true);
@@ -242,7 +235,7 @@ public:
 		return query_callback(std::move(result));
 	}
 
-	//
+	// 使查询以准备好的格式排队，该格式将在查询执行后立即设置PreparedQueryResultFuture返回对象的值。 ！ 然后，在ProcessQueryCallback方法中处理返回值。 ！ 语句必须带有CONNECTION_ASYNC标志。
 	query_callback async_query(prepared_statement<T>* stmt)
 	{
 		prepared_statement_task* task = new prepared_statement_task(stmt, true);
@@ -252,7 +245,7 @@ public:
 		return query_callback(std::move(result));
 	}
 
-	//
+	// 排队一个将设置QueryResultHolderFuture值的SQL操作向量（既可以是临时的也可以是已准备好的）！ 查询执行后立即返回对象。 ！ 然后，在ProcessQueryCallback方法中处理返回值。 ！ 添加到此持有人的任何准备好的语句都需要使用CONNECTION_ASYNC标志进行准备。
 	query_result_holder_future delay_query_holder(sql_query_holder<T>* holder)
 	{
 		sql_query_holder_task* task = new sql_query_holder_task(holder);
@@ -262,19 +255,19 @@ public:
 		return result;
 	}
 
-	//
+	// 开始一个自动管理的事务指针，如果未提交，它将自动回滚。 （自动提交= 0）
 	sql_transaction<T> begin_transaction()
 	{
 		return std::make_shared<transaction<T>>();
 	}
 
-	//
+	// 使单向SQL操作的集合入队（既可以即席又可以准备）。 这些操作的顺序！ 被附加到事务将在执行期间得到尊重。
 	void commit_transaction(sql_transaction<T> transaction)
 	{
 		enqueue(new transaction_task(transaction));
 	}
 
-	//
+	// 直接执行单向SQL操作的集合（既可以即席又可以准备）。 这些操作的顺序！ 被附加到事务将在执行期间得到尊重。
 	void direct_commit_transaction(sql_transaction<T>& transaction)
 	{
 		T* connection = get_free_connection();
@@ -302,7 +295,7 @@ public:
 		connection->unlock();
 	}
 
-	//
+	// 用于在不同上下文中执行即席语句的方法。 ！ 如果存在有效对象，将包装在事务中，否则独立执行。
 	void execute_or_append(sql_transaction<T>& trans, const char* sql)
 	{
 		if(!trans)
@@ -315,7 +308,7 @@ public:
 		}
 	}
 
-	//
+	// 用于在不同上下文中执行准备好的语句的方法。 ！ 如果存在有效对象，将包装在事务中，否则独立执行。
 	void execute_or_append(sql_transaction<T>& trans, prepared_statement<T>* stmt)
 	{
 		if(!trans)
@@ -331,13 +324,13 @@ public:
 	//
 	typedef typename T::statements prepared_statement_index;
 
-	//
+	// 自动管理（内部）指向准备好的语句对象的指针，以供在上层代码中使用。 ！ 在this-> DirectExecute（PreparedStatement *），this-> Query（PreparedStatement *）或PreparedStatementTask ::〜PreparedStatementTask中删除指针。 ！ 在执行之前，该对象尚未绑定到MySQL上下文上的prepared语句。
 	prepared_statement<T>* get_prepared_statement(prepared_statement_index index)
 	{
 		return new prepared_statement<T>(index);
 	}
 
-	//
+	// 为当前的排序规则应用转义字符串。 （utf8）
 	void escape_string(std::string& str)
 	{
 		if(str.empty())
@@ -351,7 +344,7 @@ public:
 		delete buf;
 	}
 
-	//
+	// 使我们所有的MySQL连接保持活动状态，防止服务器断开我们的连接。
 	void keep_alive()
 	{
 		//
@@ -430,7 +423,7 @@ private:
 		queue_->push(op);
 	}
 
-	//
+	// 在同步连接池中获取免费连接。 ！ 调用者在触摸MySQL上下文后必须调用t-> Unlock（）以防止死锁。
 	T* get_free_connection() const
 	{
 		uint8_t i = 0;
@@ -449,7 +442,7 @@ private:
 		return connection;
 	}
 
-	//
+	// 异步工作线程共享的队列。
 	std::unique_ptr<producer_consumer_queue<sql_operation*>> queue_;
 	std::array<std::vector<std::unique_ptr<T>>, IDX_SIZE> connections_;
 	std::unique_ptr<mysql_connection_info> connection_info_;

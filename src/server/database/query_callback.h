@@ -25,7 +25,7 @@ public:
 	query_callback&& with_chaining_callback(std::function<void(query_callback&, query_result)>&& callback);
 	query_callback&& with_chaining_prepared_callback(std::function<void(query_callback&, prepared_query_result)>&& callback);
 
-	//
+	// 将std :: future从该对象的旁边移动
 	void set_next_query(query_callback&& next);
 
 	enum status

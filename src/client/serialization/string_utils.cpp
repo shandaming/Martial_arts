@@ -58,7 +58,7 @@ bool wildcard_string_match(const std::string& str, const std::string& match)
 		// Now try to place the str into the solid space
 		std::string::size_type test_len = str.length() - current;
 
-		for(size_t i = 0; i != solid_len && matches; ++i)
+		for(auto i = 0; i != solid_len && matches; ++i)
 		{
 			char solid_c = match[solid_begin + i];
 			if(i > test_len || !(solid_c == '?' || 

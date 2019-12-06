@@ -6,10 +6,10 @@
 
 class ping_operation : public sql_operation
 {
-	//
+	// 空闲的Delithreads的操作
 	bool execute() override
 	{
-		conn_->ping();
+		conn->ping();
 		return true;
 	}
 };
@@ -62,12 +62,12 @@ void database_worker_pool<T>::close()
 {
 	LOG_INFO << "sql.driver. Closing down database pool " << get_database_name();
 
-	//
+	// 关闭实际的MySQL连接。
 	connection_[IDX_ASYNC].clear();
 
 	LOG_INFO << "sql.driver. Asynchronous connections on database pool '" << get_database_name() << "' terminated. Proceeding with synchronous connections";
 
-	//
+	// 关闭同步连接！ 无需锁定连接，因为DatabaseWorkerPool <> :: Close！ 仅应在内核中的任何其他线程任务退出后才调用！ 表示此时无法进行并发访问。
 	connections_[IDX_SYNCH].clear();
 
 	LOG_INFO << "sql.driver. All connections on database pool '" << get_database_name() << "'";
@@ -119,7 +119,7 @@ prepared_query_result database_worker_pool<T>::query(prepared_statement<T>* stmt
 	prepared_result_set* ret = connection->query(stmt);
 	connection->unlock();
 
-	//
+	// 删除代理类。 不再需要
 	delete stmt;
 
 	if(!ret || !ret->get_row_count())
@@ -134,7 +134,7 @@ template<typename T>
 query_callback database_worker_pool<T>:: async_query(const char* sql)
 {
 	basic_statement_task* task = new basic_statement_task(sql, true);
-	//
+	// 在排队之前存储将来的结果-从此方法返回之前，任务可能已被处理并删除
 	query_result_future result = task->get_future();
 	enqueue(task);
 	return query_callback(std::move(result));
@@ -144,7 +144,7 @@ template<typename T>
 query_callback database_worker_pool<T>::async_query(prepared_statement<T>* stmt)
 {
 	prepared_statement_task* task = new prepared_statement_task(stmt, true);
-	//
+	// 在排队之前存储将来的结果-从此方法返回之前，任务可能已被处理并删除
 	prepared_query_result_future result = task->get_future();
 	enqueue(task);
 	return query_callback(std::move(result));
@@ -154,7 +154,7 @@ template<typename T>
 query_result_holder_future database_worker_pool<T>::delay_query_holder(sql_query_holder<T>* holder)
 {
 	sql_query_holder_task* task = new sql_query_holder_task(holder);
-	//
+	// 在排队之前存储将来的结果-从此方法返回之前，任务可能已被处理并删除
 	query_result_holder_future result = task->get_future();
 	enqueue(task);
 	return result;
@@ -179,11 +179,12 @@ void database_worker_pool<T>::direct_commit_transaction(sql_transaction<T>& tran
 	int error_code = connection->execute_transaction(transaction);
 	if(!error_code)
 	{
-		connection->unlock(); //
+		connection->unlock(); // OK，操作成功
 		return;
 	}
 
-	//
+	// 处理MySQL错误1213而不将死锁扩展到内核本身
+	// @todo更优雅的方式
 	if(error_code == ER_LOCK_DEADLOCK)
 	{
 		uint8_t loop_breaker = 5;
@@ -195,7 +196,7 @@ void database_worker_pool<T>::direct_commit_transaction(sql_transaction<T>& tran
 			}
 		}
 	}
-	//
+	// 现在收拾
 	transaction->cleanup();
 	connection->unlock();
 }
@@ -223,7 +224,7 @@ void database_worker_pool<T>::escape_string(std:;string& str)
 template<typename T>
 void database_worker_pool<T>::keepalive()
 {
-	//
+	// Ping同步连接
 	for(auto& i : connections_[IDX_SYNCH])
 	{
 		if(i->lock_if_ready())
@@ -232,7 +233,7 @@ void database_worker_pool<T>::keepalive()
 			i->unlock();
 		}
 	}
-	//
+	// 假设所有工作线程都是空闲的，则每个工作线程将收到1个ping操作请求！ 如果一个或多个工作线程繁忙，则ping操作将不会平均分配，但这无关紧要！ 唯一的目的是防止连接空闲。
 	auto count = connections_[IDX_ASYNC].size();
 	for(uint8_t i = 0; i < count; ++i)
 	{
@@ -245,7 +246,7 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 {
 	for(uint8_t i = 0; i < num_connections; ++i)
 	{
-		//
+		// 创建连接
 		auto connection = [&]
 			{
 				switch(type)
@@ -261,7 +262,7 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 
 		if(uint32_t error = connection->open())
 		{
-			//
+			// 无法打开连接或无效版本，中止和清除
 			connections_[type].clear();
 			return error;
 		}
@@ -275,7 +276,7 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 			connections_[type].push_back(std::move(connection));
 		}
 	}
-	//
+	// 一切顺利
 	return 0;
 }
 
@@ -301,11 +302,11 @@ T* database_worker_pool<T>::get_free_connection()
 	uint8_t i = 0;
 	auto num_cons = connections_[IDX_SYNCH].size();
 	T* connection = NULL;
-	//
+	// 永久阻止，直到没有连接可用
 	while(true)
 	{
 		connection = connections_[IDX_SYNCH][i++ % num_cons].get();
-		//
+		// 必须与t-> Unlock（）匹配，否则会出现死锁
 		if(connection->lock_if_ready())
 		{
 			break;
@@ -356,7 +357,7 @@ void database_worker_pool<T>::direct_execute(prepared_statement<T>* stmt)
 	T* connection = get_free_connection();
 	connection->execute(stmt);
 	connection->unlock();
-	//
+	// 删除代理类。 不再需要
 	delete stmt;
 }
 

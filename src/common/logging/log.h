@@ -69,7 +69,7 @@ private:
 	log& operator=(log&&) = delete;
 
 	static std::string get_timestamp_str();
-	void write(std::unique_ptr<log_message>&& msg) const;
+	void write(std::unique_ptr<log_message>&& msg) /*const*/;
 
 	logger const* get_logger_by_type(std::string const& type) const;
 	appender* get_appender_by_name(std::string const& name);

@@ -5,9 +5,13 @@
 #ifndef DATABASE_SQL_OPERATION_H
 #define DATABASE_SQL_OPERATION_H
 
+#include "query_result.h"
+
+class prepared_statement_base;
+
 union sql_element_union
 {
-	prepared_statement* stmt;
+	prepared_statement_base* stmt;
 	const char* query;
 };
 
@@ -29,12 +33,12 @@ union sql_result_set_union
 	result_set* qresult;
 };
 
-//class mysql_connection;
+class mysql_connection;
 
 class sql_operation
 {
 public:
-	sql_operation() : conn_(NULL) {}
+	sql_operation() : conn(NULL) {}
 	virtual ~sql_operation() {}
 
 	virtual int call()
@@ -44,12 +48,12 @@ public:
 	}
 
 	virtual bool execute() = 0;
-	virtual void set_connection(mysql_connection* conn) { conn_ = conn; }
+	virtual void set_connection(mysql_connection* conn_) { conn = conn_; }
 
 	mysql_connection* conn;
 private:
 	sql_operation(const sql_operation&) = delete;
-	sql_operation& operator=(const operation&) = delete;
+	sql_operation& operator=(const sql_operation&) = delete;
 };
 
 #endif

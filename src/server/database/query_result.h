@@ -5,6 +5,7 @@
 #ifndef DATABASE_QUERY_RESULT_H
 #define DATABASE_QUERY_RESULT_H
 
+#include <future>
 #include <mysql/mysql.h>
 
 #include "field.h"
@@ -44,14 +45,14 @@ typedef std::promise<query_result> query_result_promise;
 
 
 
-class prepare_result_set
+class prepared_result_set
 {
 public:
-	prepare_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, uint64_t row_count, uint32_t field_count);
-	~prepare_result_set();
+	prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, uint64_t row_count, uint32_t field_count);
+	~prepared_result_set();
 
-	prepare_result_set(const prepare_result_set&) = delete;
-	prepare_result_set& operator=(const prepare_result_set&) = delete;
+	prepared_result_set(const prepared_result_set&) = delete;
+	prepared_result_set& operator=(const prepared_result_set&) = delete;
 
 	bool next_row();
 	uint64_t get_row_count() const { return row_count_; }
@@ -74,7 +75,7 @@ private:
 };
 
 typedef std::shared_ptr<prepared_result_set> prepared_query_result;
-typedef std::future<prepared_result_result> prepared_query_result_future;
-typedef std::promise<prepared_result_result> prepared_query_result_promise;
+typedef std::future<prepared_query_result> prepared_query_result_future;
+typedef std::promise<prepared_query_result> prepared_query_result_promise;
 
 #endif

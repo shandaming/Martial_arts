@@ -5,6 +5,8 @@
 #ifndef DATABASE_LOADER_H
 #define DATABASE_LOADER_H
 
+#include "database_worker_pool.h"
+
 /* 一个辅助类，用于启动所有数据库工作池，处理更新，延迟准备语句并清除故障。 */
 class database_loader
 {

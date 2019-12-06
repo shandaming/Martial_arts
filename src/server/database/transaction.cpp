@@ -6,7 +6,7 @@
 
 std::mutex transaction_task::dead_lock_lock;
 
-//
+// 将原始查询附加到事务
 void transaction_base::append(const char* sql)
 {
 	sql_element_data data;
@@ -26,11 +26,10 @@ void transaction_base::append_prepared_statement(prepared_statement_base* stmt)
 
 void transaction_base::cleanup()
 {
-	//
+	// 可以通过显式调用Cleanup或自动析构函数来调用
 	if(cleaned_up_)
-	{
 		return;
-	}
+
 	for(auto& i : queries_)
 	{
 		switch(i.type)
@@ -59,9 +58,9 @@ bool transaction_task::execute()
 
 	if(error_code == ER_LOCK_DEADLOCK)
 	{
-		//
+		// 确保只有1个异步线程重试一个事务，这样它们就不会彼此死锁
 		std::lock_guard<std::mutex> lock(dead_lock_lock_);
-		uint8_t loop_breaker = 5;//
+		uint8_t loop_breaker = 5;// 处理MySQL错误1213，而无需将死锁扩展到内核本身
 		for(uint8_t i = 0; i < loop_breaker; ++i)
 		{
 			if(conn_->execute_transaction(trans_))

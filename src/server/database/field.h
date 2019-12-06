@@ -27,9 +27,7 @@ enum class database_field_type : uint8_t
 class field
 {
 public:
-	field() : data_.length(0), data_.value(nullptr), data_.type(database_field_type::null), 
-		data_.raw(false) {}
-
+	field();
 	~field();
 
 	bool get_bool() const { return get_uint8() == 1 ? true : false; }

@@ -14,6 +14,8 @@ const char* get_source_directory();
 const char* get_full_database();
 
 const char* get_hotfixes_database();
+
+const char* get_full_version();
 }
 
 #endif

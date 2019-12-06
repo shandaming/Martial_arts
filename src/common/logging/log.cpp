@@ -120,8 +120,8 @@ void log::create_logger_from_config(std::string const& appender_name)
 		return;
 	}
 
-	std::unique_ptr<logger>& logger = loggers_[name];
-	if (logger)
+	std::unique_ptr<logger>& logger_ref = loggers_[name];
+	if (logger_ref)
 	{
 		fprintf(stderr, "Error while configuring logger %s. Already defined\n", name.c_str());
 		return;
@@ -137,7 +137,7 @@ void log::create_logger_from_config(std::string const& appender_name)
 	if (level < lowest_log_level_)
 		lowest_log_level_ = level;
 
-	logger = std::make_unique<logger>(name, level);
+	logger_ref = std::make_unique<logger>(name, level);
 
 	std::istringstream ss(*iter);
 	std::string str;
@@ -146,7 +146,7 @@ void log::create_logger_from_config(std::string const& appender_name)
 	while (ss)
 	{
 		if (appender* appender = get_appender_by_name(str))
-			logger->add_appender(appender->get_id(), appender);
+			logger_ref->add_appender(appender->get_id(), appender);
 		else
 			fprintf(stderr, "Error while configuring appender %s in logger %s. appender does not exist", str.c_str(), name.c_str());
 		ss >> str;
@@ -206,14 +206,14 @@ void log::out_command(std::string&& message, std::string&& param1)
 	write(std::make_unique<log_message>(LOG_LEVEL_INFO, "commands.gm", std::move(message), std::move(param1)));
 }
 
-void log::write(std::unique_ptr<log_message>&& msg) const
+void log::write(std::unique_ptr<log_message>&& msg) /*const*/
 {
 	logger const* logger = get_logger_by_type(msg->type);
 
 	if (async_)
 	{
-		std::shared_ptr<log_operation> log_operation = std::make_shared<log_operation>(logger, std::move(msg));
-		log_task task(std::bind(&log_operation::call(), log_operation));
+		std::shared_ptr<log_operation> new_log_operation = std::make_shared<log_operation>(logger, std::move(msg));
+		log_task task(std::bind(&log_operation::call, new_log_operation));
 		log_worker_.add_task(task);
 	}
 	else
@@ -261,6 +261,7 @@ std::string log::get_timestamp_str()
 		fflush(stderr);
 		ABORT();
 	}
+	return "";
 }
 
 bool log::set_log_level(std::string const& name, const char* new_levelc, bool is_logger /* = true */)

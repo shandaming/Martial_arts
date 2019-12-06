@@ -108,7 +108,7 @@ private:
 	bool is_prepared_;
 };
 
-//
+// 使用不带预编译头的clang进行编译时，不使用初始化列表来解决分段错误
 query_callback::query_callback(std::future<query_result>&& result) : is_prepared_(false)
 {
 	construct(string, std::move(result));

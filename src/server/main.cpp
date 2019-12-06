@@ -4,9 +4,12 @@
 
 #include <iostream>
 
+#include "common/configuration/revision.h"
 #include "common/cmdline/option_description.h"
 #include "common/cmdline/cmdline.h"
 #include "common/cmdline/variables_map.h"
+#include "database/mysql_threading.h"
+#include "database/database_loader.h"
 
 variables_map get_console_arguments(int argc, char** argv)
 {
@@ -24,7 +27,7 @@ variables_map get_console_arguments(int argc, char** argv)
 	}
 	else if(vm.count("version"))
 	{
-		std::cout << get_full_version() << std::endl;
+		std::cout << revision::get_full_version() << std::endl;
 	}
 	return vm;
 }
