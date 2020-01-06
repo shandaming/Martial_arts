@@ -4,7 +4,7 @@
 
 #include <sstream>
 #include "appender.h"
-#include "common/serialization/string_utils.h"
+#include "common/utility/string_format.h"
 
 appender::appender(uint8_t id, const std::string& name, log_level level, appender_flags flags) : 
 	id_(id), name_(name), level_(level), flags_(flags) { }

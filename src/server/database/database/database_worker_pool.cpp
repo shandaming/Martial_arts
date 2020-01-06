@@ -2,6 +2,7 @@
  * Copyright (C) 2019
  */
 
+
 #include "database_worker_pool.h"
 
 class ping_operation : public sql_operation
@@ -45,9 +46,7 @@ uint32_t database_worker_pool<T>::open()
 
 	uint32_t error = open_connections(IDX_ASYNC, async_threads_);
 	if(error)
-	{
 		return error;
-	}
 
 	error = open_connections(IDX_SYNCH, synch_threads_);
 	if(!error)
@@ -88,9 +87,7 @@ bool database_worker_pool<T>::prepare_statements()
 				return false;
 			}
 			else
-			{
 				i->unlock();
-			}
 		}
 	}
 }
@@ -99,9 +96,8 @@ template<typename T>
 query_result database_worker_pool<T>::query(const char* sql, T* connection)
 {
 	if(!connection)
-	{
 		connection = get_free_connection();
-	}
+
 	result_set* result = connection->query(sql);
 	connection->unlock();
 	if(!result || !result->get_row_count() || !result->next_row())
@@ -191,9 +187,7 @@ void database_worker_pool<T>::direct_commit_transaction(sql_transaction<T>& tran
 		for(uint8_t i = 0; i < loop_breaker; ++i)
 		{
 			if(!connection->execute_transaction(transaction))
-			{
 				break;
-			}
 		}
 	}
 	// 现在收拾
@@ -211,9 +205,7 @@ template<typename T>
 void database_worker_pool<T>::escape_string(std:;string& str)
 {
 	if(str.empty())
-	{
 		return;
-	}
 
 	char* buf = new char[str.size() * 2 + 1];
 	escape_string(buf, str.c_str(), uint32_t(str.size()));
@@ -272,9 +264,7 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 			return 1;
 		}
 		else
-		{
 			connections_[type].push_back(std::move(connection));
-		}
 	}
 	// 一切顺利
 	return 0;
@@ -284,9 +274,8 @@ template<typename T>
 unsigned long database_worker_pool<T>::escape_string(char* to, const char* from, unsigned long length)
 {
 	if(!to || !from || !length)
-	{
 		return 0;
-	}
+
 	return mysql_real_escape_string(connections_[IDX_SYNCH].front()->get_handle(), to, from, length);
 }
 
@@ -308,9 +297,7 @@ T* database_worker_pool<T>::get_free_connection()
 		connection = connections_[IDX_SYNCH][i++ % num_cons].get();
 		// 必须与t-> Unlock（）匹配，否则会出现死锁
 		if(connection->lock_if_ready())
-		{
 			break;
-		}
 	}
 	return connection;
 }
@@ -325,9 +312,8 @@ template<typename T>
 void database_worker_pool<T>::execute(const char* sql)
 {
 	if(trinity::is_format_empty_or_null(sql))
-	{
 		return;
-	}
+
 	basic_statement_task* task = new basic_statement_task(sql);
 	enqueue(task);
 }
@@ -365,24 +351,21 @@ template<typename T>
 void database_worker_pool<T>::execute_or_append(sql_transaction<T>& trans, const char* sql)
 {
 	if(!trans)
-	{
 		execute(sql);
-	}
 	else
-	{
 		trans->append(sql);
-	}
 }
 
 template<typename T>
 void database_worker_pool<T>::execute_or_append(sql_transaction<T>& trans, prepared_statement<T>* stmt)
 {
 	if(!trans)
-	{
 		execute(stmt);
-	}
 	else
-	{
 		trans->append(stmt);
-	}
 }
+
+database_worker_pool<world_database_connection> world_database;
+database_worker_pool<character_database_connection> character_database;
+database_worker_pool<login_database_connection> login_database;
+database_worker_pool<hotfix_database_connection> hotfix_database;

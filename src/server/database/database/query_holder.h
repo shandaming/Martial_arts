@@ -13,7 +13,7 @@ class sql_query_holder_base
 public:
 	sql_query_holder_base() {}
 
-	virtual ~sql_query_holer_base();
+	virtual ~sql_query_holder_base();
 
 	void set_size(size_t size);
 

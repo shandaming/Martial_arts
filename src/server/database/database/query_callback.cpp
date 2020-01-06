@@ -57,7 +57,7 @@ inline void move_from(T* to, T&& from)
 	}
 }
 
-struct query_callback : query_callback_data
+struct query_callback::query_callback_data
 {
 	friend class query_callback;
 

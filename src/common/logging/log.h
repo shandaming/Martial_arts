@@ -8,7 +8,7 @@
 //#include "appender.h"
 #include "logger.h"
 #include "log_worker.h"
-#include "common/serialization/string_utils.h"
+#include "common/utility/string_format.h"
 
 #define LOGGER_ROOT "root"
 

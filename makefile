@@ -9,7 +9,8 @@ ccsrc = $(wildcard src/*.cpp) \
 		$(wildcard src/common/serialization/*.cpp) \
 		$(wildcard src/common/utility/*.cpp) \
 		$(wildcard src/server/*.cpp) \
-		$(wildcard src/server/database/*.cpp) \
+		$(wildcard src/server/database/database/*.cpp) \
+		$(wildcard src/server/database/database/implementation/*.cpp) \
 		$(wildcard src/server/database/update/*.cpp) \
 		$(wildcard src/server/database/logging/*.cpp) \
 		$(wildcard src/server/net/*.cpp) \

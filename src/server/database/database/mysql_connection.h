@@ -73,7 +73,7 @@ public:
 	void ping();
 
 	uint32_t get_last_error();
-private:
+protected:
 	// 试图获得锁定。 如果另一个线程获取了锁，则调用父级将尝试另一个连接
 	bool lock_if_ready();
 
@@ -90,7 +90,7 @@ private:
 	prepared_statement_map queries_; // 查询存储
 	bool reconnection_; // 我们重新连接了吗？
 	bool prepare_error_; // 在准备陈述时是否有任何错误？
-
+private:
 	bool handle_mysql_errno(uint32_t errno, uint8_t attempts = 5);
 
 	producer_consumer_queue<sql_operation*> queue_; // 队列与其他异步连接共享。

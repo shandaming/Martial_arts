@@ -5,6 +5,8 @@
 #ifndef QUERY_CALLBACK_H
 #define QUERY_CALLBACK_H
 
+#include <list>
+
 class query_callback
 {
 public:
@@ -54,6 +56,7 @@ private:
 
 	bool is_prepared_;
 
+	struct query_callback_data;
 	std::unique_ptr<query_callback_data, std::list<query_callback_data>> callbacks_;
 };
 

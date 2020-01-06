@@ -7,9 +7,6 @@
 
 #include <string>
 #include <vector>
-#include <cstdio>
-
-#include "common/define.h"
 
 enum 
 {
@@ -28,16 +25,5 @@ std::vector<std::string> split(const std::string& val, char c = ',',
  * '?' as any one character.
  */
 bool wildcard_string_match(const std::string& str, const std::string& match);
-
-template<typename... Args>
-std::string string_format(const std::string& fmt, Args&&... args)
-{
-	int size = snprintf(nullptr, 0, fmt.c_str(), std::forward<Args>(args)...);
-	std::string buffer;
-	buffer.reserve(size + 1);
-	buffer.resize(size);
-	snprintf(&buffer[0], size + 1, fmt.c_str(), std::forward<Args>(args)...);
-	return buffer;
-};
 
 #endif

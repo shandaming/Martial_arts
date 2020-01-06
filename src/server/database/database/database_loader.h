@@ -5,6 +5,8 @@
 #ifndef DATABASE_LOADER_H
 #define DATABASE_LOADER_H
 
+#include <stack>
+
 #include "database_worker_pool.h"
 
 /* 一个辅助类，用于启动所有数据库工作池，处理更新，延迟准备语句并清除故障。 */
@@ -27,7 +29,7 @@ public:
 		DATABASE_CHARACTER = 2,
 		DATABASE_WORLD = 4,
 		DATABASE_HOTFIX = 8,
-		DATABASE_MASK_ALL = DATABASE_LOGIN | DATABASE_CHARACTER | DATABASW_WORLD | DATABASE_HOTFIX
+		DATABASE_MASK_ALL = DATABASE_LOGIN | DATABASE_CHARACTER | DATABASE_WORLD | DATABASE_HOTFIX
 	};
 private:
 	// 打开数据库
@@ -55,10 +57,5 @@ private:
 	std::queue<predicate_func> prepare_;
 	std::stack<close_func> close_;
 };
-
-database_worker_pool<world_database_connection> world_database;
-database_worker_pool<character_database_connection> character_database;
-database_worker_pool<login_database_connection> login_database;
-database_worker_pool<hotfix_database_connection> hotfix_database;
 
 #endif

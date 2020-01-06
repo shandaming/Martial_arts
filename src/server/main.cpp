@@ -8,8 +8,8 @@
 #include "common/cmdline/option_description.h"
 #include "common/cmdline/cmdline.h"
 #include "common/cmdline/variables_map.h"
-#include "database/mysql_threading.h"
-#include "database/database_loader.h"
+#include "database/database/mysql_threading.h"
+#include "database/database/database_loader.h"
 
 variables_map get_console_arguments(int argc, char** argv)
 {
