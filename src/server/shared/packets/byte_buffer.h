@@ -551,7 +551,7 @@ protected:
 	std::vector<uint8_t> storage_;
 };
 
-//
+// @todo创建一个ByteBuffer.cpp并将所有内联的内容移动到它。
 template<>
 inline std::string byte_buffer::read<std::string>()
 {
