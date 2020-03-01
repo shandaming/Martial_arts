@@ -5,43 +5,100 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
-#include "inet_address.h"
+#include "ip/endpoint.h"
 
-namespace net
+struct socket_option
 {
-class Socket
+	option(int level_, int optname_, int optval_, const std::string& desc) :
+		level(level_), optname(optname_), optval(optval_), description(desc) {}
+
+	int level;
+	int optname;
+	int optval;
+	std::string ;description;
+};
+
+struct option
+{
+	static socket_option tcp_no_delay() 
+	{
+		return socket_option(IPPROTO_TCP, TCP_NODELAY, 1, "tcp no delay");
+	}
+
+	static socket_option reuse_addr() 
+	{
+		return socket_option(SOL_SOCKET, SO_REUSEADDR, 1, "socket reuse address");
+	}
+
+	static socket_option reuse_port() 
+	{
+		return socket_option(SOL_SOCKET, SO_REUSEPORT, 1, "socket reuse port");
+	}
+
+	static socket_option keep_alive() 
+	{
+		return socket_option(SOL_SOCKET, SO_KEEPALIVE, 1, "socket keep alive");
+	}
+
+	static socket_option send_buffer_size(int size) 
+	{
+		return socket_option(SOL_SOCKET, SO_SNDBUF, size, "socket send buffer");
+	}
+};
+
+class socket
 {
 public:
-	explicit Socket(int sockfd) : fd_(sockfd) {}
+	socket() : fd_(-1), is_open_(false) {}
+	explicit socket(int sockfd) : fd_(-1), is_open_(false) { open(sockfd); }
 
-	Socket(const Socket&) = delete;
-	Socket& operator=(const Socket&) = delete;
+	socket(const socket& right) : fd_(right.fd_), is_open_(right.is_open_) {}
+	socket& operator=(const socket& right) 
+	{
+		fd_ = right.fd_;
+		is_open_ = right.is_open_;
+	}
 
-	~Socket();
+	socket(socket&& right) : fd_(std::move(right.fd_)), is_open_(std::move(right.is_open_))
+	{
+		right.fd_ = -1;
+		right.is_open_ = false;
+	}
 
-	bool bind(const Inet_address& addr);
-	bool listen();
-	int accept(Inet_address& addr);
+	socket& operator=(socket&& right)
+	{
+		fd_ = std::move(right.fd_);
+		is_open_ = std::move(right.is_open_);
+		right.fd_ = -1;
+		right.is_open_ = false;
+	}
 
-	bool connect(Inet_address& addr);
+	~socket();
 
+	void open(int sockfd);
 	void shutdown_write();
+	void close();
 
-	void set_reuse_addr();
-	void set_reuse_port();
+	bool set_reuse_addr();
+	bool set_reuse_port();
 
-	void set_tcp_no_delay();
-	void set_keep_alive();
+	bool set_tcp_no_delay();
+	bool set_keep_alive();
+	bool set_send_buffer_size();
 
-	int get_socketfd() const { return fd_; }
+	bool set_option(const socket_option& option);
 
-			//Inet_address get_netaddr() const { return addr_; }	
-			//std::string get_ip() const { return addr_.get_ip(); }
-			//int get_port() const { return addr_.get_port(); }
+	endpoint local_endpoint(std::error_code& ec);
+	endpoint remote_endpoint(std::error_code& ec);
+
+	//int get_socketfd() const { return fd_; }
+
 	operator int() { return fd_; }
+
+	bool is_open() const { return is_open_; }
 private:
 	const int fd_;
+	bool is_open_;
 };
-}
 
 #endif

@@ -61,7 +61,7 @@ void Tcp_server::start()
   }
 }
 
-void Tcp_server::new_connection(int sockfd, const Inet_address& peer_addr)
+void Tcp_server::new_connection(socket& sockfd, const Inet_address& peer_addr, int thread_index)
 {
 	loop_->assert_in_loop_thread();
 	Event_loop* io_loop = thread_pool_->get_next_loop();

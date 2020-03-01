@@ -36,7 +36,7 @@ bool start_db()
 {
 	mysql::library_init();
 
-	database_loader loader("worldserver", databaseloacer::database_none);
+	database_loader loader("worldserver", database_loader::DATABASE_NONE);
 	loader.add_database(login_database, "login");
 	loader.add_database(character_database, "character");
 	loader.add_database(world_database, "world");

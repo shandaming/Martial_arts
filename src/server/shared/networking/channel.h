@@ -10,37 +10,38 @@
 
 #include "common/timestamp.h"
 
-namespace net
-{
-class Event_loop;
+#include "socket.h"
 
-class Channel
+class event_loop;
+
+class channel
 {
 public:
-	typedef std::function<void()> Event_callback;
-	typedef std::function<void(Timestamp)> Read_event_callback;
+	typedef std::function<void()> event_callback;
+	typedef std::function<void(Timestamp)> read_event_callback;
 
-	Channel(Event_loop* loop, int fd);
-	~Channel();
+	//channel(event_loop* loop, int fd);
+	channel(event_loop* loop, const std::shared_ptr<socket>& sockfd);
+	~channel();
 
 	// ---------------Setting callback---------------
 
-	void set_read_callback(Read_event_callback&& cb)
+	void set_read_callback(read_event_callback&& cb)
 	{ 
 		read_callback_ = std::move(cb); 
 	}
 
-	void set_write_callback(Event_callback&& cb)
+	void set_write_callback(event_callback&& cb)
 	{
 		write_callback_ = std::move(cb); 
 	}
 
-	void set_close_callback(Event_callback&& cb)
+	void set_close_callback(event_callback&& cb)
 	{
 		close_callback_ = std::move(cb); 
 	}
 
-	void set_error_callback(Event_callback&& cb)
+	void set_error_callback(event_callback&& cb)
 	{
 		error_callback_ = std::move(cb); 
 	}
@@ -49,17 +50,44 @@ public:
 	// 中销毁所有者对象。
 	void tie(const std::shared_ptr<void>&);
 
-	int fd() const { return fd_; }
+	int get_file_descriptor() const { return socket_; }
 	int events() const { return events_; }
 	void set_revents(int revt) { revents_ = revt; } // used by pollers
   
 	bool is_none_event() const { return events_ == none_event_; }
 
-	void enable_read() { events_ |= read_event_; update(); }
-	void disable_read() { events_ &= ~read_event_; update(); }
-	void enable_write() { events_ |= write_event_; update(); }
-	void disable_write() { events_ &= ~write_event_; update(); }
-	void disable_all() { events_ = none_event_; update(); }
+	// 读写事件注册
+	
+	void enable_read() 
+	{
+		events_ |= read_event_; 
+		update(); 
+	}
+
+	void disable_read() 
+	{
+		events_ &= ~read_event_; 
+		update(); 
+	}
+
+	void enable_write() 
+	{
+		events_ |= write_event_; 
+		update(); 
+	}
+
+	void disable_write() 
+	{
+		events_ &= ~write_event_; 
+		update(); 
+	}
+
+	void disable_all() 
+	{
+		events_ = none_event_; 
+		update(); 
+	}
+
 	bool is_write() const { return events_ & write_event_; }
 	bool is_read() const { return events_ & read_event_; }
 
@@ -75,7 +103,7 @@ public:
 
 	void do_not_log_hup() { log_hup_ = false; }
 
-	Event_loop* owner_loop() { return loop_; }
+	event_loop* owner_loop() { return loop_; }
 	void remove();
 private:
 	static std::string events_to_string(int fd, int ev);
@@ -88,8 +116,9 @@ private:
 	static const int read_event_;
 	static const int write_event_;
 
-	Event_loop* loop_;
-	const int  fd_;
+	event_loop* loop_;
+	//const int  fd_;
+	std::weak_ptr<socket> socket_;
 	int events_;
 	int revents_; // it's the received event types of epoll or poll
 	int index_; // used by Poller.
@@ -100,11 +129,10 @@ private:
 	bool event_handling_;
 	bool added_to_loop_;
 
-	Read_event_callback read_callback_;
-	Event_callback write_callback_;
-	Event_callback close_callback_;
-	Event_callback error_callback_;
+	read_event_callback read_callback_;
+	event_callback write_callback_;
+	event_callback close_callback_;
+	event_callback error_callback_;
 };
-}
 
 #endif
