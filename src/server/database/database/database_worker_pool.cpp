@@ -4,6 +4,10 @@
 
 
 #include "database_worker_pool.h"
+#include "implementation/login_database.h"
+#include "implementation/character_database.h"
+#include "implementation/world_database.h"
+#include "implementation/hotfix_database.h"
 
 class ping_operation : public sql_operation
 {

@@ -7,7 +7,7 @@
 
 #include "database/mysql_connection.h"
 
-enum character_database_statements : uint32
+enum character_database_statements : uint32_t
 {
 
 	MAX_CHARACTERDATABASE_STATEMENTS
