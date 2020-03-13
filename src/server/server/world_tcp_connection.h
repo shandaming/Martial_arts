@@ -13,10 +13,11 @@ struct packet_header
 	uint32_t size;
 	uint8_t* tag[12];
 
-	bool is_valid_size() { return size < 0x10000; }
+	bool is_valid_size() const { return size < 0x10000; }
 };
 #pragma pack(pop)
 
+class encryptable_packet;
 typedef struct z_stream_s z_stream;
 
 class world_tcp_connection : public tcp_connection<world_tcp_connection>
@@ -65,15 +66,15 @@ protected:
 
 	read_data_handler_result read_data_handler();
 private:
-void set_read_handler_internal_callback()
-{
-set_read_handler_callback(std::bind(&WorldSocket::read_handler_internal, _1, _2, this);
-}
+	void set_read_handler_internal_callback()
+	{
+		set_read_handler_callback(std::bind(&WorldSocket::read_handler_internal, _1, _2, this);
+	}
 
-void set_initializeHandler_callback()
-{
-set_read_handler_callback(std::bind(&WorldSocket::InitializeHandler, _1, _2, this);
-}
+	void set_initializeHandler_callback()
+	{
+		set_read_handler_callback(std::bind(&WorldSocket::InitializeHandler, _1, _2, this);
+	}
 
 	void check_ip_callback(prepare_query_result result);
 	void initialize_handler(std::error_code& ec, size_t transferred_bytes);
