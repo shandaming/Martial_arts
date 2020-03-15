@@ -71,7 +71,7 @@ private:
 		set_read_handler_callback(std::bind(&WorldSocket::read_handler_internal, _1, _2, this);
 	}
 
-	void set_initializeHandler_callback()
+	void set_initialize_handler_callback()
 	{
 		set_read_handler_callback(std::bind(&WorldSocket::InitializeHandler, _1, _2, this);
 	}
