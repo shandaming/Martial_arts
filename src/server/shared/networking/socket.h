@@ -49,28 +49,24 @@ struct option
 class socket
 {
 public:
-	socket() : fd_(-1), is_open_(false) {}
-	explicit socket(int sockfd) : fd_(-1), is_open_(false) { open(sockfd); }
+	socket() : fd_(-1) {}
+	explicit socket(int sockfd) : fd_(-1) { open(sockfd); }
 
-	socket(const socket& right) : fd_(right.fd_), is_open_(right.is_open_) {}
+	socket(const socket& right) : fd_(right.fd_) {}
 	socket& operator=(const socket& right) 
 	{
 		fd_ = right.fd_;
-		is_open_ = right.is_open_;
 	}
 
-	socket(socket&& right) : fd_(std::move(right.fd_)), is_open_(std::move(right.is_open_))
+	socket(socket&& right) : fd_(right.fd_)
 	{
 		right.fd_ = -1;
-		right.is_open_ = false;
 	}
 
 	socket& operator=(socket&& right)
 	{
-		fd_ = std::move(right.fd_);
-		is_open_ = std::move(right.is_open_);
+		fd_ = right.fd_;
 		right.fd_ = -1;
-		right.is_open_ = false;
 	}
 
 	~socket();
@@ -95,10 +91,9 @@ public:
 
 	operator int() { return fd_; }
 
-	bool is_open() const { return is_open_; }
+	bool is_open() const;
 private:
 	const int fd_;
-	bool is_open_;
 };
 
 #endif

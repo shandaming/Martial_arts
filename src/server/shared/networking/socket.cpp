@@ -16,16 +16,15 @@ socket::~socket()
 
 void socket::open(int sockfd)
 {
-	if(is_open_)
+	if(is_open())
 		close();
 
 	fd_ = sockfd;
-	is_open_ = true;
 }
 
 void socket::shutdown_write()
 {
-	if(fd_ == invalid_socket)
+	if(!is_open())
 		return;
 
 	std::error_code ec;
@@ -36,14 +35,14 @@ void socket::shutdown_write()
 
 void socket::close()
 {
-	if(fd_ == invalid_socket)
+	if(!is_open())
 		return;
 
 	std::error_code ec;
 	close(fd_, ec);
 	if(ec)
 		LOG_ERROR("Networking", "close() failed. code[%d], message:%s", ec.code(), ec.message().c_str());
-	is_open_ = false;
+
 	fd_ = -1;
 }
 
@@ -150,3 +149,5 @@ endpoint socket::remote_endpoint(std::error_code& ec)
 	e.resize(addrlen);
 	return e;
 }
+
+bool socket::is_open() const { return fd_ != invalid_socket; }

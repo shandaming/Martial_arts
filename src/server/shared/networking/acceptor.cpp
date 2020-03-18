@@ -92,7 +92,7 @@ void acceptor::handle_read()
 	socket new_conn_socket;
 
 	accept(new_conn_socket, peer_endpoint, ec);
-	if(!ec && new_conn_socket->is_open())
+	if(!ec && new_conn_socket.is_open())
 	{
 		if(new_connection_callback_)
 		{

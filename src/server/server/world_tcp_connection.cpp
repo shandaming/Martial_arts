@@ -20,7 +20,8 @@ struct compressed_world_packet
 class encryptable_packet : public world_packet
 {
 public:
-	encryptable_packet(const world_packet& packet, bool encrypt) : world_packet(packet), encrypt_(encrypt) { }
+	encryptable_packet(const world_packet& packet, bool encrypt) : 
+		world_packet(packet), encrypt_(encrypt) { }
 
 	bool needs_encryption() const { return encrypt_; }
 private:
@@ -28,14 +29,20 @@ private:
 };
 
 
-const std::string world_tcp_connection::server_connection_initialize("WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2");
-const std::string world_tcp_connection::client_connection_initialize("WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2");
+const std::string world_tcp_connection::server_connection_initialize(
+		"WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2");
+const std::string world_tcp_connection::client_connection_initialize(
+		"WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2");
 constexpr uint32_t world_tcp_connection::min_size_for_compression = 0x400;
 
-constexpr uint8_t world_tcp_connection::auth_check_seed[16] = { 0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
-constexpr uint8_t world_tcp_connection::session_key_seed[16] = { 0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
-constexpr uint8_t world_tcp_connection::continue_session_seed[16] = { 0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
-constexpr uint8_t world_tcp_connection::encryption_key_seed[16] = { 0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
+constexpr uint8_t world_tcp_connection::auth_check_seed[16] = {
+	0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
+constexpr uint8_t world_tcp_connection::session_key_seed[16] = { 
+	0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
+constexpr uint8_t world_tcp_connection::continue_session_seed[16] = { 
+	0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
+constexpr uint8_t world_tcp_connection::encryption_key_seed[16] = { 
+	0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
 world_tcp_connection::world_tcp_connection(event_loop* loop, socket&& socket) : 
 	tcp_connection(loop, socket) 
@@ -64,7 +71,8 @@ void world_tcp_connection::start()
 	std::string ip_address = get_remote_ip_address().to_string();
 	login_database_prepared_statement* stmt = login_database.get_prepared_statement(LOGIN_SEL_IP_INFO);
 	stmt->set_string(0, ip_address);
- query_processor_.add_query(login_database.async_query(stmt).with_prepared_callback(std::bind(&world_tcp_connection::check_ip_callback, this, std::placeholders::_1)));
+	query_processor_.add_query(login_database.async_query(stmt).with_prepared_callback(
+				std::bind(&world_tcp_connection::check_ip_callback, this, std::placeholders::_1)));
 }
 
 void world_tcp_connection::check_ip_callback(prepared_query_result result)
@@ -82,7 +90,9 @@ void world_tcp_connection::check_ip_callback(prepared_query_result result)
 
 		if(banned)
 		{
-			LOG_ERROR("network", "world_tcp_connection::check_ip_callback: Sent Auth Response (IP %s banned).", get_remote_ip_address().to_string().c_str());
+			LOG_ERROR("network", "world_tcp_connection::check_ip_callback: Sent Auth Response "
+					"(IP %s banned).",
+					get_remote_ip_address().to_string().c_str());
 			delayed_close_socket();
 			return;
 		}
@@ -101,7 +111,7 @@ void world_tcp_connection::check_ip_callback(prepared_query_result result)
 	queue_packet(std::move(initializer));
 }
 
-void world_tcp_connection::initialize_handler(std::error_code error, std::size_t transfered_bytes)
+void world_tcp_connection::initialize_handler(std::error_code error, size_t transfered_bytes)
 {
 	if(error)
 	{
@@ -117,7 +127,8 @@ void world_tcp_connection::initialize_handler(std::error_code error, std::size_t
 		if (packet_buffer_.get_remaining_space() > 0)
 		{
 			// need to receive the header
-			size_t read_header_size = std::min(packet.get_active_size(), packet_buffer_.get_remaining_space());
+			size_t read_header_size = std::min(packet.get_active_size(), 
+					packet_buffer_.get_remaining_space());
 			packet_buffer_.write(packet.get_read_pointer(), read_header_size);
 			packet.read_completed(read_header_size);
 
@@ -152,11 +163,13 @@ void world_tcp_connection::initialize_handler(std::error_code error, std::size_t
 			compression_stream_->opaque = (voidpf)NULL;
 			compression_stream_->avail_in = 0;
 			compression_stream_->next_in = NULL;
-			int32_t z_res = deflateInit2(compression_stream_, sWorld->getIntConfig(CONFIG_COMPRESSION), Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
+			int32_t z_res = deflateInit2(compression_stream_, sWorld->getIntConfig(CONFIG_COMPRESSION), 
+					Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
 			if (z_res != Z_OK)
 			{
 				close_socket();
-				TC_LOG_ERROR("network", "Can't initialize packet compression (zlib: deflateInit) error code: %i (%s)", z_res, zError(z_res));
+				LOG_ERROR("network", "Can't initialize packet compression (zlib: deflateInit) "
+						"error code: %i (%s)", z_res, zError(z_res));
 				return;
 			}
 
@@ -174,8 +187,9 @@ void world_tcp_connection::initialize_handler(std::error_code error, std::size_t
 
 bool world_tcp_connection::update()
 {
-    encryptable_packet* queued;
+	encryptable_packet* queued;
     message_buffer buffer(send_buffer_size_);
+
     while (buffer_queue_.dequeue(queued))
     {
         uint32_t packet_size = queued->size();
@@ -217,8 +231,8 @@ void world_tcp_connection::handle_send_auth_session()
 	dos_challenge.set_rand(32 * 8);
 
 	world_packets::Auth::AuthChallenge challenge;
-	memcpy(challenge.Challenge.data(), server_challenge_.AsByteArray(16).get(), 16);
-	memcpy(challenge.DosChallenge.data(), dos_challenge.AsByteArray(32).get(), 32);
+	memcpy(challenge.Challenge.data(), server_challenge_.as_byte_array(16).get(), 16);
+	memcpy(challenge.DosChallenge.data(), dos_challenge.as_byte_array(32).get(), 32);
 	challenge.DosZeroBits = 1;
 
 	send_packet_and_log_opcode(*challenge.write());
@@ -243,7 +257,8 @@ void world_tcp_connection::read_handler()
         if (header_buffer_.get_remaining_space() > 0)
         {
             // need to receive the header
-            std::size_t read_header_size = std::min(packet.get_active_size(), header_buffer_.get_remaining_space());
+            size_t read_header_size = std::min(packet.get_active_size(), 
+					header_buffer_.get_remaining_space());
             header_buffer_.write(packet.get_read_pointer(), read_header_size);
             packet.read_completed(read_header_size);
 
@@ -266,7 +281,8 @@ void world_tcp_connection::read_handler()
         if (packet_buffer_.get_remaining_space() > 0)
         {
             // need more data in the payload
-            std::size_t read_data_size = std::min(packet.get_active_size(), packet_buffer_.get_remaining_space());
+            size_t read_data_size = std::min(packet.get_active_size(), 
+					packet_buffer_.get_remaining_space());
             packet_buffer_.write(packet.get_read_pointer(), read_data_size);
             packet.read_completed(read_data_size);
 
@@ -296,20 +312,23 @@ void world_tcp_connection::read_handler()
 
 void world_tcp_connection::set_world_session(world_session* session)
 {
-    std::lock_guard<std::mutex> lock(world_session_lock_);
-    world_session_ = session;
-    authed_ = true;
+	std::lock_guard<std::mutex> lock(world_session_lock_);
+	world_session_ = session;
+	authed_ = true;
 }
 
 bool world_tcp_connection::read_header_handler()
 {
-    ASSERT(header_buffer_.get_active_size() == sizeof(packet_header), "Header size " SZFMTD " different than expected " SZFMTD, header_buffer_.get_active_size(), sizeof(packet_header));
+	ASSERT(header_buffer_.get_active_size() == sizeof(packet_header), 
+			"Header size " SZFMTD " different than expected " SZFMTD, header_buffer_.get_active_size(), 
+			sizeof(packet_header));
 
     packet_header* header = reinterpret_cast<packet_header*>(header_buffer_.get_read_pointer());
 
     if (!header->is_valid_size())
     {
-        TC_LOG_ERROR("network", "world_tcp_connection::read_header_handler(): client %s sent malformed packet (size: %u)",
+		LOG_ERROR("network", "world_tcp_connection::read_header_handler(): "
+				"client %s sent malformed packet (size: %u)",
             get_remote_ip_address().to_string().c_str(), header->Size);
         return false;
     }
@@ -320,11 +339,12 @@ bool world_tcp_connection::read_header_handler()
 
 world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_handler()
 {
-    packet_header* header = reinterpret_cast<packet_header*>(header_buffer_.get_read_pointer());
+	packet_header* header = reinterpret_cast<packet_header*>(header_buffer_.get_read_pointer());
 
     if (!auth_crypt_.DecryptRecv(packet_buffer_.get_read_pointer(), header->Size, header->Tag))
     {
-        TC_LOG_ERROR("network", "world_tcp_connection::read_header_handler(): client %s failed to decrypt packet (size: %u)",
+        LOG_ERROR("network", "world_tcp_connection::read_header_handler(): "
+				"client %s failed to decrypt packet (size: %u)",
             get_remote_ip_address().to_string().c_str(), header->Size);
         return read_data_handler_result::error;
     }
@@ -333,7 +353,8 @@ world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_h
     OpcodeClient opcode = packet.read<OpcodeClient>();
     if (uint32_t(opcode) >= uint32_t(NUM_OPCODE_HANDLERS))
     {
-        TC_LOG_ERROR("network", "world_tcp_connection::read_header_handler(): client %s sent wrong opcode (opcode: %u)",
+        LOG_ERROR("network", "world_tcp_connection::read_header_handler(): "
+				"client %s sent wrong opcode (opcode: %u)",
             get_remote_ip_address().to_string().c_str(), uint32_t(opcode));
         return read_data_handler_result::error;
     }
@@ -341,7 +362,8 @@ world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_h
     packet.SetOpcode(opcode);
 
     if (sPacketLog->can_log_packet())
-        sPacketLog->log_packet(packet, CLIENT_TO_SERVER, get_remote_ip_address(), get_remote_port(), GetConnectionType());
+        sPacketLog->log_packet(packet, CLIENT_TO_SERVER, get_remote_ip_address(), get_remote_port(), 
+				GetConnectionType());
 
     std::unique_lock<std::mutex> lock(world_session_lock_, std::defer_lock);
 
@@ -353,7 +375,8 @@ world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_h
             world_packets::Auth::Ping ping(std::move(packet));
             if (!ping.ReadNoThrow())
             {
-                TC_LOG_ERROR("network", "world_tcp_connection::read_data_handler(): client %s sent malformed CMSG_PING", get_remote_ip_address().to_string().c_str());
+                LOG_ERROR("network", "world_tcp_connection::read_data_handler(): "
+						"client %s sent malformed CMSG_PING", get_remote_ip_address().to_string().c_str());
                 return read_data_handler_result::error;
             }
             if (!handle_ping(ping))
@@ -367,14 +390,15 @@ world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_h
             {
                 // locking just to safely log offending user is probably overkill but we are disconnecting him anyway
                 if (lock.try_lock())
-                    TC_LOG_ERROR("network", "world_tcp_connection::ProcessIncoming: received duplicate CMSG_AUTH_SESSION from %s", world_session_->GetPlayerInfo().c_str());
+                    LOG_ERROR("network", "world_tcp_connection::ProcessIncoming: "
+							"received duplicate CMSG_AUTH_SESSION from %s", world_session_->GetPlayerInfo().c_str());
                 return read_data_handler_result::error;
             }
 
             std::shared_ptr<world_packets::Auth::AuthSession> authSession = std::make_shared<world_packets::Auth::AuthSession>(std::move(packet));
             if (!authSession->ReadNoThrow())
             {
-                TC_LOG_ERROR("network", "world_tcp_connection::read_data_handler(): client %s sent malformed CMSG_AUTH_SESSION", get_remote_ip_address().to_string().c_str());
+                LOG_ERROR("network", "world_tcp_connection::read_data_handler(): client %s sent malformed CMSG_AUTH_SESSION", get_remote_ip_address().to_string().c_str());
                 return read_data_handler_result::error;
             }
             HandleAuthSession(authSession);
@@ -387,14 +411,14 @@ world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_h
             {
                 // locking just to safely log offending user is probably overkill but we are disconnecting him anyway
                 if (lock.try_lock())
-                    TC_LOG_ERROR("network", "world_tcp_connection::ProcessIncoming: received duplicate CMSG_AUTH_CONTINUED_SESSION from %s", world_session_->GetPlayerInfo().c_str());
+                    LOG_ERROR("network", "world_tcp_connection::ProcessIncoming: received duplicate CMSG_AUTH_CONTINUED_SESSION from %s", world_session_->GetPlayerInfo().c_str());
                 return read_data_handler_result::error;
             }
 
             std::shared_ptr<world_packets::Auth::AuthContinuedSession> authSession = std::make_shared<world_packets::Auth::AuthContinuedSession>(std::move(packet));
             if (!authSession->ReadNoThrow())
             {
-                TC_LOG_ERROR("network", "world_tcp_connection::read_data_handler(): client %s sent malformed CMSG_AUTH_CONTINUED_SESSION", get_remote_ip_address().to_string().c_str());
+                LOG_ERROR("network", "world_tcp_connection::read_data_handler(): client %s sent malformed CMSG_AUTH_CONTINUED_SESSION", get_remote_ip_address().to_string().c_str());
                 return read_data_handler_result::error;
             }
             HandleAuthContinuedSession(authSession);
@@ -419,7 +443,7 @@ world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_h
             world_packets::Auth::ConnectToFailed connectToFailed(std::move(packet));
             if (!connectToFailed.ReadNoThrow())
             {
-                TC_LOG_ERROR("network", "world_tcp_connection::read_data_handler(): client %s sent malformed CMSG_CONNECT_TO_FAILED", get_remote_ip_address().to_string().c_str());
+                LOG_ERROR("network", "world_tcp_connection::read_data_handler(): client %s sent malformed CMSG_CONNECT_TO_FAILED", get_remote_ip_address().to_string().c_str());
                 return read_data_handler_result::error;
             }
             HandleConnectToFailed(connectToFailed);
@@ -437,14 +461,14 @@ world_tcp_connection::read_data_handler_result world_tcp_connection::read_data_h
 
             if (!world_session_)
             {
-                TC_LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32_t(opcode));
+                LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32_t(opcode));
                 return read_data_handler_result::error;
             }
 
             OpcodeHandler const* handler = opcodeTable[opcode];
             if (!handler)
             {
-                TC_LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", get_opcode_name_for_logging(static_cast<OpcodeClient>(packet.get_opcode())).c_str(), world_session_->GetPlayerInfo().c_str());
+                LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", get_opcode_name_for_logging(static_cast<OpcodeClient>(packet.get_opcode())).c_str(), world_session_->GetPlayerInfo().c_str());
                 break;
             }
 
@@ -548,7 +572,7 @@ uint32_t world_tcp_connection::CompressPacket(uint8_t* buffer, world_packet cons
     int32 z_res = deflate(compression_stream_, Z_NO_FLUSH);
     if (z_res != Z_OK)
     {
-        TC_LOG_ERROR("network", "Can't compress packet opcode (zlib: deflate) error code: %i (%s, msg: %s)", z_res, zError(z_res), compression_stream_->msg);
+        LOG_ERROR("network", "Can't compress packet opcode (zlib: deflate) error code: %i (%s, msg: %s)", z_res, zError(z_res), compression_stream_->msg);
         return 0;
     }
 
@@ -558,7 +582,7 @@ uint32_t world_tcp_connection::CompressPacket(uint8_t* buffer, world_packet cons
     z_res = deflate(compression_stream_, Z_SYNC_FLUSH);
     if (z_res != Z_OK)
     {
-        TC_LOG_ERROR("network", "Can't compress packet data (zlib: deflate) error code: %i (%s, msg: %s)", z_res, zError(z_res), compression_stream_->msg);
+        LOG_ERROR("network", "Can't compress packet data (zlib: deflate) error code: %i (%s, msg: %s)", z_res, zError(z_res), compression_stream_->msg);
         return 0;
     }
 
@@ -639,7 +663,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
     if (!result)
     {
         // We can not log here, as we do not know the account. Thus, no accountId.
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Sent Auth Response (unknown account).");
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Sent Auth Response (unknown account).");
         delayed_close_socket();
         return;
     }
@@ -648,7 +672,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
     if (!buildInfo)
     {
         SendAuthResponseError(ERROR_BAD_VERSION);
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Missing auth seed for realm build %u (%s).", realm.Build, get_remote_ip_address().to_string().c_str());
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Missing auth seed for realm build %u (%s).", realm.Build, get_remote_ip_address().to_string().c_str());
         delayed_close_socket();
         return;
     }
@@ -669,14 +693,14 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
 
     HmacSha256 hmac(digestKeyHash.GetLength(), digestKeyHash.GetDigest());
     hmac.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
-    hmac.UpdateData(server_challenge_.AsByteArray(16).get(), 16);
+    hmac.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
     hmac.UpdateData(auth_check_seed, 16);
     hmac.Finalize();
 
     // Check that Key and account name are the same on client and server
     if (memcmp(hmac.GetDigest(), authSession->Digest.data(), authSession->Digest.size()) != 0)
     {
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", account.Game.Id, authSession->RealmJoinTicket.c_str(), address.c_str());
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", account.Game.Id, authSession->RealmJoinTicket.c_str(), address.c_str());
         delayed_close_socket();
         return;
     }
@@ -686,7 +710,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
     keyData.Finalize();
 
     HmacSha256 sessionKeyHmac(keyData.GetLength(), keyData.GetDigest());
-    sessionKeyHmac.UpdateData(server_challenge_.AsByteArray(16).get(), 16);
+    sessionKeyHmac.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
     sessionKeyHmac.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
     sessionKeyHmac.UpdateData(session_key_seed, 16);
     sessionKeyHmac.Finalize();
@@ -699,7 +723,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
 
     HmacSha256 encryptKeyGen(40, sessionKey);
     encryptKeyGen.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
-    encryptKeyGen.UpdateData(server_challenge_.AsByteArray(16).get(), 16);
+    encryptKeyGen.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
     encryptKeyGen.UpdateData(encryption_key_seed, 16);
     encryptKeyGen.Finalize();
 
@@ -722,7 +746,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
     if (sWorld->IsClosed())
     {
         SendAuthResponseError(ERROR_DENIED);
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: World closed, denying client (%s).", get_remote_ip_address().to_string().c_str());
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: World closed, denying client (%s).", get_remote_ip_address().to_string().c_str());
         delayed_close_socket();
         return;
     }
@@ -730,7 +754,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
     if (authSession->RealmID != realm.Id.Realm)
     {
         SendAuthResponseError(ERROR_DENIED);
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Client %s requested connecting with realm id %u but this realm has id %u set in config.",
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Client %s requested connecting with realm id %u but this realm has id %u set in config.",
             get_remote_ip_address().to_string().c_str(), authSession->RealmID, realm.Id.Realm);
         delayed_close_socket();
         return;
@@ -741,7 +765,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
     if (wardenActive && account.Game.OS != "Win" && account.Game.OS != "Wn64" && account.Game.OS != "Mc64")
     {
         SendAuthResponseError(ERROR_DENIED);
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", address.c_str(), account.Game.OS.c_str());
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", address.c_str(), account.Game.OS.c_str());
         delayed_close_socket();
         return;
     }
@@ -790,7 +814,7 @@ void world_tcp_connection::HandleAuthSessionCallback(std::shared_ptr<world_packe
     if (account.IsBanned())
     {
         SendAuthResponseError(ERROR_GAME_ACCOUNT_BANNED);
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Sent Auth Response (Account banned).");
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthSession: Sent Auth Response (Account banned).");
         sScriptMgr->OnFailedAccountLogin(account.Game.Id);
         delayed_close_socket();
         return;
@@ -878,23 +902,23 @@ void world_tcp_connection::HandleAuthContinuedSessionCallback(std::shared_ptr<wo
     std::string login = fields[0].GetString();
     _sessionKey.SetHexStr(fields[1].GetCString());
 
-    HmacSha256 hmac(40, _sessionKey.AsByteArray(40).get());
+    HmacSha256 hmac(40, _sessionKey.as_byte_array(40).get());
     hmac.UpdateData(reinterpret_cast<uint8_t const*>(&authSession->Key), sizeof(authSession->Key));
     hmac.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
-    hmac.UpdateData(server_challenge_.AsByteArray(16).get(), 16);
+    hmac.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
     hmac.UpdateData(continue_session_seed, 16);
     hmac.Finalize();
 
     if (memcmp(hmac.GetDigest(), authSession->Digest.data(), authSession->Digest.size()))
     {
-        TC_LOG_ERROR("network", "world_tcp_connection::HandleAuthContinuedSession: Authentication failed for account: %u ('%s') address: %s", accountId, login.c_str(), get_remote_ip_address().to_string().c_str());
+        LOG_ERROR("network", "world_tcp_connection::HandleAuthContinuedSession: Authentication failed for account: %u ('%s') address: %s", accountId, login.c_str(), get_remote_ip_address().to_string().c_str());
         delayed_close_socket();
         return;
     }
 
-    HmacSha256 encryptKeyGen(40, _sessionKey.AsByteArray(40).get());
+    HmacSha256 encryptKeyGen(40, _sessionKey.as_byte_array(40).get());
     encryptKeyGen.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
-    encryptKeyGen.UpdateData(server_challenge_.AsByteArray(16).get(), 16);
+    encryptKeyGen.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
     encryptKeyGen.UpdateData(encryption_key_seed, 16);
     encryptKeyGen.Finalize();
 
@@ -927,7 +951,7 @@ void world_tcp_connection::HandleConnectToFailed(world_packets::Auth::ConnectToF
                     break;
                 case world_packets::Auth::ConnectToSerial::WorldAttempt5:
                 {
-                    TC_LOG_ERROR("network", "%s failed to connect 5 times to world socket, aborting login", world_session_->GetPlayerInfo().c_str());
+                    LOG_ERROR("network", "%s failed to connect 5 times to world socket, aborting login", world_session_->GetPlayerInfo().c_str());
                     world_session_->AbortLogin(world_packets::Character::LoginFailureReason::NoWorld);
                     break;
                 }
@@ -985,7 +1009,7 @@ bool world_tcp_connection::handle_ping(world_packets::Auth::Ping& ping)
 
                 if (world_session_ && !world_session_->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_OVERSPEED_PING))
                 {
-                    TC_LOG_ERROR("network", "world_tcp_connection::handle_ping: %s kicked for over-speed pings (address: %s)",
+                    LOG_ERROR("network", "world_tcp_connection::handle_ping: %s kicked for over-speed pings (address: %s)",
                         world_session_->GetPlayerInfo().c_str(), get_remote_ip_address().to_string().c_str());
 
                     return false;
@@ -1006,7 +1030,7 @@ bool world_tcp_connection::handle_ping(world_packets::Auth::Ping& ping)
         }
         else
         {
-            TC_LOG_ERROR("network", "world_tcp_connection::handle_ping: peer sent CMSG_PING, but is not authenticated or got recently kicked, address = %s", get_remote_ip_address().to_string().c_str());
+            LOG_ERROR("network", "world_tcp_connection::handle_ping: peer sent CMSG_PING, but is not authenticated or got recently kicked, address = %s", get_remote_ip_address().to_string().c_str());
             return false;
         }
     }
