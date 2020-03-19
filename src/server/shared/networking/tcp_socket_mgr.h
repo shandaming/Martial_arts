@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef TCP_CONNECTION_MGR_H
-#define TCP_CONNECTION_MGR_H
+#ifndef TCP_SOCKET_MGR_H
+#define TCP_SOCKET_MGR_H
 
 #include "acceptor.h"
 #include "logging/log.h"

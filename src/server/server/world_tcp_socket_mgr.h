@@ -2,15 +2,15 @@
  * Copyright (C) 2020
  */
 
-#ifndef WORLD_TCP_CONNECTION_MGR_H
-#define WORLD_TCP_CONNECTION_MGR_H
+#ifndef WORLD_TCP_SOCKET_MGR_H
+#define WORLD_TCP_SOCKET_MGR_H
 
-class world_tcp_connection_mgr
+class world_tcp_socket_mgr
 {
 public:
-	~world_tcp_connection_mgr();
+	~world_tcp_socket_mgr();
 
-	static world_tcp_connection_mgr& instance();
+	static world_tcp_socket_mgr& instance();
 
 	bool start_world_network(event_loop* loop, const std::string& bind_ip, uint16_t port, uint16_t instance_port, int netowrk_threads);
 
@@ -34,5 +34,7 @@ private:
 	int32_t socket_application_send_buffer_size_;
 	bool tcp_no_delay_;
 };
+
+#define WORLD_TCP_SOCKET_MGR world_tcp_socket_mgr::instance();
 
 #endif

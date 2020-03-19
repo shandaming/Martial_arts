@@ -32,7 +32,7 @@ private:
 	void bind(std::error_code& ec);
 	void listen(std::error_code& ec);
 	void handle_read();
-std::error_code accept(std::shared_ptr<socket>& peer, endpoint& peer_endpoint, std::error_code& ec);
+	std::error_code accept(socket& peer, endpoint& peer_endpoint, std::error_code& ec);
 
 	event_loop* loop_;
 	socket accept_socket_;

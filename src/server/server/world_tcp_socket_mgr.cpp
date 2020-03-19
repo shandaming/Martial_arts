@@ -21,7 +21,7 @@ world_socket_mgr& world_socket_mgr::instance()
 	return instance;
 }
 
-bool world_tcp_connection_mgr::start_world_network(const std::string& bind_ip, uint16_t port, uint16_t instance_port, int thread_count)
+bool world_tcp_socket_mgr::start_world_network(const std::string& bind_ip, uint16_t port, uint16_t instance_port, int thread_count)
 {
 	const int max_connection = MAX_LISTEN_CONNECTIONS;
 	LOG_DEBUG("misc", "Max allowed socket connection %d", max_connection);

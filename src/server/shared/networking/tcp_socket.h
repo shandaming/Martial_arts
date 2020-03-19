@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef NET_TCP_CONNECTION_H
-#define NET_TCP_CONNECTION_H
+#ifndef NET_TCP_SOCKET_H
+#define NET_TCP_SOCKET_H
 
 #include <any>
 
@@ -18,24 +18,16 @@
 
 class event_loop;
 
-class tcp_connection : public std::enable_shared_from_this<tcp_connection>
+class tcp_socket : public std::enable_shared_from_this<tcp_socket>
 {
 public:
-	tcp_connection(event_loop* loop,
-                const std::string& name,
-                int sockfd,
-                const Inet_address& local_addr,
-                const Inet_address& peer_addr);
-	tcp_connection(event_loop* loop, const std::string& name, socket&& sockfd);
-	virtual ~tcp_connection();
+	tcp_socket(event_loop* loop, socket&& sockfd);
+	virtual ~tcp_socket();
 
-	tcp_connection(const tcp_connection&) = delete;
-	tcp_connection& operator=(const tcp_connection&) = delete;
+	tcp_socket(const tcp_socket&) = delete;
+	tcp_socket& operator=(const tcp_socket&) = delete;
 
 	event_loop* get_loop() const { return loop_; }
-	const std::string& name() const { return name_; }
-	const Inet_address& local_address() const { return local_addr_; }
-	const Inet_address& peer_address() const { return peer_addr_; }
 	bool connected() const { return state_ == kConnected; }
 	bool disconnected() const { return state_ == kDisconnected; }
 	// return true if success.
@@ -159,14 +151,11 @@ private:
 	void stop_read_in_loop();
 
 	event_loop* loop_;
-	const std::string name_;
 	StateE state_;  // FIXME: use atomic variable
 	bool reading_;
 	// we don't expose those classes to client.
 	socket socket_;
-	std::shared_ptr<Channel> channel_;
-	const Inet_address local_addr_;
-	const Inet_address peer_addr_;
+	channel channel_;
 
 	Connection_callback connection_callback_;
 	Message_callback message_callback_;
@@ -191,6 +180,6 @@ private:
 	bool iswriting_sync_;
 };
 
-typedef std::shared_ptr<tcp_connection> Tcp_connection_ptr;
+typedef std::shared_ptr<tcp_socket> Tcp_connection_ptr;
 
 #endif

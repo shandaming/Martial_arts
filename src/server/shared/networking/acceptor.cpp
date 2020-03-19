@@ -14,13 +14,10 @@
 acceptor::acceptor(Event_loop* loop, const std::string& bind_ip, uint16_t port, bool reuseport) : 
 	loop_(loop),
 	endpoint_(make_address(bind_ip), port),
-	//accept_socket_(socket(listen_addr.family())),
-	//accept_channel_(loop, accept_socket_),
 	is_open_(false),
 	idle_fd_(open("/dev/null", O_RDONLY | O_CLOEXEC))
 {
 	assert(idle_fd_ >= 0);
-	//accept_channel_.set_read_callback(std::bind(&acceptor::handle_read, this));
 }
 
 acceptor::~acceptor()
@@ -45,7 +42,7 @@ bool bind()
 	if(ec)
 	{
 		is_open_ = false;
-		LOG_ERROR("Networking", "open() failed. error %d: %s", ec.value(), ec.message().c_str());
+		LOG_ERROR("Networking", "open socket failed. error %d: %s", ec.value(), ec.message().c_str());
 		return false;
 	}
 
@@ -64,7 +61,7 @@ bool bind()
 		accept_socket_.close();
 		is_open_ = false;
 
-		LOG_ERROR("Networking", "bind() failed. error %d: %s", ec.value(), ec.message().c_str());
+		LOG_ERROR("Networking", "bind socket failed. error %d: %s", ec.value(), ec.message().c_str());
 		return false;
 	}
 
@@ -74,7 +71,7 @@ bool bind()
 		accept_socket_.close();
 		is_open_ = false;
 
-		LOG_ERROR("Networking", "listen() failed. error %d: %s", ec.value(), ec.message().c_str());
+		LOG_ERROR("Networking", "listen socket failed. error %d: %s", ec.value(), ec.message().c_str());
 		return false;
 	}
 
