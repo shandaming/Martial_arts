@@ -84,10 +84,10 @@ public:
 		high_water_mark_ = high_water_mark; 
 	}
 
-void set_read_handler_callback(std::function<void(std::error_code&, size_t)> cb)
-{
-read_handler_callback_ = cb;
-}
+	void set_read_handler_callback(std::function<void(std::error_code&, size_t)> cb)
+	{
+		read_handler_callback_ = cb;
+	}
 
 	/// Advanced interface
 	Buffer* input_buffer() { return &input_buffer_; }
@@ -131,10 +131,10 @@ protected:
 	socket& underlying_stream() { return *socket_; }
 private:
 	void read_handler_internal(std::error_code& ec, size_t transferred_bytes)
-{
-if(!ec)
-read_handler();
-}
+	{
+		if(!ec)
+			read_handler();
+	}
 
 	void write_handler_wrapper(std::error_code& ec, size_t);
 
@@ -182,7 +182,7 @@ read_handler();
 	address remote_address_;
 	uint16_t remote_port_;
 
-std::function<void(std::error_code&, size_t)> read_handler_callback_;
+	std::function<void(std::error_code&, size_t)> read_handler_callback_;
 	message_buffer read_buffer_;
 	std::queue<message_buffer> write_queue_;
 
