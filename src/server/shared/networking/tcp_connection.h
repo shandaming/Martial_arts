@@ -26,7 +26,7 @@ public:
                 int sockfd,
                 const Inet_address& local_addr,
                 const Inet_address& peer_addr);
-	tcp_connection(event_loop* loop, const std::string& name, socket& sockfd, const endpoint& peer_endpoint);
+	tcp_connection(event_loop* loop, const std::string& name, socket&& sockfd);
 	virtual ~tcp_connection();
 
 	tcp_connection(const tcp_connection&) = delete;
@@ -163,7 +163,7 @@ private:
 	StateE state_;  // FIXME: use atomic variable
 	bool reading_;
 	// we don't expose those classes to client.
-	std::shared_ptr<socket> socket_;
+	socket socket_;
 	std::shared_ptr<Channel> channel_;
 	const Inet_address local_addr_;
 	const Inet_address peer_addr_;
