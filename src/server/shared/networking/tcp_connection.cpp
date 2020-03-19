@@ -44,18 +44,18 @@ tcp_connection::tcp_connection(event_loop* loop, const std::string& name,
 	socket_->set_keep_alive();
 }
 
-tcp_connection::tcp_connection(event_loop* loop, const std::string& name, std::shared_ptr<socket>& sockfd, const endpoint& peer_endpoint) :
+tcp_connection::tcp_connection(event_loop* loop, const std::string& name, socket&& sockfd) :
 	loop_(loop),
     name_(name),
     state_(kConnecting),
     reading_(true),
-    socket_(sockfd),
+    socket_(std::move(sockfd)),
     channel_(std::make_unique<channel>(loop, sockfd)),
     local_addr_(local_addr),
     peer_addr_(peer_addr),
     high_water_mark_(64*1024*1024),
-	rempte_address_(peer_endpoint.address()),
-	remote_port_(peer_endpoint.port),
+	rempte_address_(socket_.remote_endpoint().address()),
+	remote_port_(socket_.remote_endpoint().port()),
 	read_buffer(),
 	closed_(false),
 	closing_(false),
