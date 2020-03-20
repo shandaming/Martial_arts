@@ -97,8 +97,6 @@ public:
 	std::string revents_to_string() const;
 	std::string events_to_string() const;
 
-	void do_not_log_hup() { log_hup_ = false; }
-
 	event_loop* owner_loop() { return loop_; }
 	void remove();
 private:
@@ -118,7 +116,6 @@ private:
 	int events_;
 	int revents_; // it's the received event types of epoll or poll
 	int index_; // used by Poller.
-	bool log_hup_;
 
 	bool event_handling_;
 	bool added_to_loop_;
