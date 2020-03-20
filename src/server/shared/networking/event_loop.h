@@ -17,8 +17,6 @@
 #include "common/timestamp.h"
 #include "common/scoped_ptr.h"
 
-namespace net
-{
 class Event_loop
 {
 public:
@@ -34,9 +32,6 @@ public:
   	void loop();
 
 	void quit();
-
-	///轮询返回的时间通常意味着数据到达。
-	Timestamp poll_return_time() const { return poll_return_time_; }
 
 	int64_t iteration() const { return iteration_; }
 
@@ -94,7 +89,6 @@ private:
   	bool calling_pending_functors_; /* atomic */
   	int64_t iteration_;
   	const pid_t thread_id_;
-  	Timestamp poll_return_time_;
   	Scoped_ptr<Poller> poller_;
   	Scoped_ptr<Timer_queue> timer_queue_;
   	int wakeup_fd_;
@@ -109,6 +103,5 @@ private:
   	std::mutex mutex_;
 	std::vector<Functor> pending_functors_; // @GuardedBy mutex_
 };
-}
 
 #endif
