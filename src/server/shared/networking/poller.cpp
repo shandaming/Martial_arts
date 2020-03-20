@@ -21,11 +21,13 @@ const int kDeleted = 2;
 Poller::Poller(Event_loop* loop) : 
 	owner_loop_(loop), 
 	epollfd_(epoll_create1(EPOLL_CLOEXEC)),
-    events_(kInit_event_list_size)
+	events_(kInit_event_list_size)
 {
 	if(epollfd_ < 0)
 	{
-		LOG_SYSFATAL << "Poller::Poller";
+		std::error_code ec(errno, std::system_category());
+		networking_exception ex(ec);
+		throw ex;
 	}
 }
 
@@ -36,26 +38,23 @@ Poller::~Poller()
 
 void Poller::poll(int timeoutMs, Channel_list* active_channels)
 {
-	LOG_TRACE << "fd total count " << channels_.size();
+	//LOG_TRACE << "fd total count " << channels_.size();
+	LOG_TRACE("networking", "Total number of events %u", channels_size());
 
 	int num_events = epoll_wait(epollfd_, &*events_.begin(),
 			static_cast<int>(events_.size()), timeoutMs);
 	int saved_errno = errno;
 
-	if (num_events > 0)
+	if(num_events > 0)
 	{
-		LOG_TRACE << num_events << " events happened";
+		LOG_TRACE("networking", "%d events happened", num_events);
 
 		fill_active_channels(num_events, active_channels);
 		if(static_cast<size_t>(num_events) == events_.size())
-		{
 			events_.resize(events_.size() * 2);
-		}
 	}
 	else if(num_events == 0)
-	{
-		LOG_TRACE << "nothing happened";
-	}
+		LOG_TRACE("networking", "nothing happened");
 	else
 	{
 		// error happens, log uncommon ones
