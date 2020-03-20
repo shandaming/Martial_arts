@@ -41,13 +41,10 @@ Event_loop::Event_loop() : looping_(false), quit_(false),
 {
 	LOG_DEBUG("networking", "create event_loop in thread id %d", get_current_thread_id());
 
-	if (loop_in_this_thread)
-	{
-		LOG_FATAL << "Another Event_loop " << loop_in_this_thread
-				 << " exists in this thread " << get_current_thread_id();
-	}
-	else
-		loop_in_this_thread = this;
+	FATAL(loop_in_this_thread == nullptr, "Another event_loop %p exists in this thread %d", 
+	      loop_in_this_thread, get_current_thread_id());
+
+	loop_in_this_thread = this;
 
 	wakeup_channel_->set_read_callback(
 		std::bind(&Event_loop::handle_read, this));
