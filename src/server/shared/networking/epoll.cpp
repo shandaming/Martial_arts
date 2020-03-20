@@ -5,36 +5,30 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-#include "poller.h"
-#include "net/event_loop.h"
+#include "epoll.h"
+#include "channel.h"
+#include "event_loop.h"
 #include "log/logging.h"
 
-namespace
-{
-const int kNew = -1;
-const int kAdded = 1;
-const int kDeleted = 2;
-}
-
-Poller::Poller(Event_loop* loop) : 
+epoll::epoll(event_loop* loop) : 
 	owner_loop_(loop), 
 	epollfd_(epoll_create1(EPOLL_CLOEXEC)),
-	events_(kInit_event_list_size)
+	events_(event_list_size)
 {
 	ASSERT(epollfd_ != -1, "create epoll fd failed. Error %d: %s", errno, std::strerror(errno));
 }
 
-Poller::~Poller()
+epoll::~epoll()
 {
 	close(epollfd_);
 }
 
-void Poller::poll(int timeoutMs, Channel_list* active_channels)
+void epoll::poll(int timeout_ms, channel_list* active_channels)
 {
 	LOG_TRACE("networking", "Total number of events %u", channels_size());
 
 	int num_events = epoll_wait(epollfd_, &*events_.begin(),
-			static_cast<int>(events_.size()), timeoutMs);
+			static_cast<int>(events_.size()), timeout_ms);
 	int saved_errno = errno;
 
 	if(num_events > 0)
@@ -53,19 +47,19 @@ void Poller::poll(int timeoutMs, Channel_list* active_channels)
 		if(saved_errno != EINTR)
 		{
 			errno = saved_errno;
-			LOG_SYSERR << "Poller::poll()";
+			LOG_SYSERR << "epoll::poll()";
 		}
 	}
 }
 
-void Poller::fill_active_channels(int num_events,
-		Channel_list* active_channels) const
+void epoll::fill_active_channels(int num_events,
+		channel_list* active_channels) const
 {
 	ASSERT(static_cast<size_t>(num_events) <= events_.size());
 
 	for (int i = 0; i < num_events; ++i)
 	{
-		Channel* channel = static_cast<Channel*>(events_[i].data.ptr);
+		channel* channel = static_cast<channel*>(events_[i].data.ptr);
 #ifndef NDEBUG
 		const int fd = channel->get_descriptor();
 		
@@ -77,31 +71,31 @@ void Poller::fill_active_channels(int num_events,
 	}
 }
 
-void Poller::update_channel(Channel* channel)
+void epoll::update_channel(channel* channel)
 {
 	assert_in_loop_thread();
 
-	const int index = channel->index();
+	channel::state current_state = channel->get_state();
 	const int fd = channel->get_descriptor();
 
 	LOG_TRACE("networking", "channel: %d events: %d index: %d", fd, channel->events(), index);
 
-	if(index == kNew || index == kDeleted)
+	if(current_state == channel::NEW || current_state == channel::DELETED)
 	{
 		// a new one, add with EPOLL_CTL_ADD
-		if(index == kNew)
+		if(current_state == channel::NEW)
 		{
 			ASSERT(channels_.count(fd));
 			
 			channels_[fd] = channel;
 		}
-		else // index == kDeleted
+		else // index == channel::DELETED
 		{
 			ASSERT(channels_.count(fd));
 			ASSERT(channels_[fd] == channel);
 		}
 
-		channel->set_index(kAdded);
+		channel->set_state(channel::ADDED);
 		update(EPOLL_CTL_ADD, channel);
 	}
 	else
@@ -109,12 +103,12 @@ void Poller::update_channel(Channel* channel)
 		// update existing one with EPOLL_CTL_MOD/DEL
 		ASSERT(channels_.count(fd));
 		ASSERT(channels_[fd] == channel);
-		ASSERT(index == kAdded);
+		ASSERT(current_state == channel::ADDED);
 
 		if(channel->is_none_event())
 		{
 			update(EPOLL_CTL_DEL, channel);
-			channel->set_index(kDeleted);
+			channel->set_state(channel::DELETED);
 		}
 		else
 		{
@@ -123,7 +117,7 @@ void Poller::update_channel(Channel* channel)
 	}
 }
 
-void Poller::remove_channel(Channel* channel)
+void epoll::remove_channel(channel* channel)
 {
 	assert_in_loop_thread();
 	const int fd = channel->get_descriptor();
@@ -134,18 +128,18 @@ void Poller::remove_channel(Channel* channel)
 	ASSERT(channels_[fd] == channel);
 	ASSERT(channel->is_none_event());
 
-	const int index = channel->index();
-	assert(index == kAdded || index == kDeleted);
+	channel::state current_state = channel->get_state();
+	assert(current_state == channel::ADDED || current_state == channel::DELETED);
 	size_t n = channels_.erase(fd);
 	ASSERT(n == 1);
 
-	if(index == kAdded)
+	if(current_state == channel::ADDED)
 		update(EPOLL_CTL_DEL, channel);
 
-	channel->set_index(kNew);
+	channel->set_state(channel::NEW);
 }
 
-void Poller::update(int operation, Channel* channel)
+void epoll::update(int operation, channel* channel)
 {
 	struct epoll_event event;
 	bzero(&event, sizeof event);
@@ -165,7 +159,7 @@ void Poller::update(int operation, Channel* channel)
 	}
 }
 
-const char* Poller::operation_to_string(int op)
+const char* epoll::operation_to_string(int op)
 {
 	switch (op)
 	{
@@ -181,7 +175,7 @@ const char* Poller::operation_to_string(int op)
 	}
 }
 
-bool Poller::has_channel(Channel* channel) const
+bool epoll::has_channel(channel* channel) const
 {
 	assert_in_loop_thread();
 	
@@ -189,7 +183,7 @@ bool Poller::has_channel(Channel* channel) const
 	return (channels_.count(fd) && channels_[fd] == channel);
 }
 
-void Poller::assert_in_loop_thread() const
+void epoll::assert_in_loop_thread() const
 {
 	owner_loop_->assert_in_loop_thread();
 }

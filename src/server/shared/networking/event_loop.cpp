@@ -12,7 +12,7 @@
 
 namespace
 {
-thread_local net::Event_loop* loop_in_this_thread = nullptr;
+thread_local net::event_loop* loop_in_this_thread = nullptr;
 
 constexpr int poll_time_ms = 10000;
 
@@ -24,19 +24,19 @@ int create_event_fd()
 }
 }
 
-Event_loop* Event_loop::get_event_loop_of_current_thread()
+event_loop* event_loop::get_event_loop_of_current_thread()
 {
 	return loop_in_this_thread;
 }
 
-Event_loop::Event_loop() : looping_(false), quit_(false), 
+event_loop::event_loop() : looping_(false), quit_(false), 
 	event_handling_(false),
 	calling_pending_functors_(false),
     thread_id_(get_current_thread_id()),
     poller_(new Poller(this)),
     timer_queue_(new Timer_queue(this)),
     wakeup_fd_(create_event_fd()),
-    wakeup_channel_(new Channel(this, wakeup_fd_)),
+    wakeup_channel_(new channel(this, wakeup_fd_)),
     current_active_channel_(NULL)
 {
 	LOG_DEBUG("networking", "create event_loop in thread id %d", get_current_thread_id());
@@ -47,14 +47,14 @@ Event_loop::Event_loop() : looping_(false), quit_(false),
 	loop_in_this_thread = this;
 
 	wakeup_channel_->set_read_callback(
-		std::bind(&Event_loop::handle_read, this));
+		std::bind(&event_loop::handle_read, this));
 	// we are always reading the wakeupfd
 	wakeup_channel_->enable_read();
 }
 
-Event_loop::~Event_loop()
+event_loop::~event_loop()
 {
-	LOG_DEBUG << "Event_loop " << this << " of thread " << thread_id_
+	LOG_DEBUG << "event_loop " << this << " of thread " << thread_id_
 				<< " destructs in thread " << get_current_thread_id();
 	wakeup_channel_->disable_all();
 	wakeup_channel_->remove();
@@ -62,7 +62,7 @@ Event_loop::~Event_loop()
 	loop_in_this_thread = NULL;
 }
 
-void Event_loop::loop()
+void event_loop::loop()
 {
 	ASSERT(!looping_);
 	assert_in_loop_thread();
@@ -98,7 +98,7 @@ void Event_loop::loop()
 	looping_ = false;
 }
 
-void Event_loop::quit()
+void event_loop::quit()
 {
 	quit_ = true;
 	// loop（）有可能在（！quit_）执行时退出，
@@ -110,14 +110,14 @@ void Event_loop::quit()
 	}
 }
 
-size_t Event_loop::queue_size()
+size_t event_loop::queue_size()
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	return pending_functors_.size();
 }
 
 // FIXME: remove duplication
-void Event_loop::run_in_loop(Functor&& cb)
+void event_loop::run_in_loop(functor&& cb)
 {
 	if (is_in_loop_thread())
 		cb();
@@ -125,7 +125,7 @@ void Event_loop::run_in_loop(Functor&& cb)
 		queue_in_loop(std::move(cb));
 }
 
-void Event_loop::queue_in_loop(Functor&& cb)
+void event_loop::queue_in_loop(functor&& cb)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	pending_functors_.push_back(std::move(cb));  // emplace_back
@@ -136,36 +136,36 @@ void Event_loop::queue_in_loop(Functor&& cb)
 	}
 }
 
-Timer_id Event_loop::run_at(const Timestamp& time, Timer_callback&& cb)
+Timer_id event_loop::run_at(const Timestamp& time, Timer_callback&& cb)
 {
 	return timer_queue_->add_timer(std::move(cb), time, 0.0);
 }
 
-Timer_id Event_loop::run_after(double delay, Timer_callback&& cb)
+Timer_id event_loop::run_after(double delay, Timer_callback&& cb)
 {
 	Timestamp time(add_time(Timestamp::now(), delay));
 	return run_at(time, std::move(cb));
 }
 
-Timer_id Event_loop::run_every(double interval, Timer_callback&& cb)
+Timer_id event_loop::run_every(double interval, Timer_callback&& cb)
 {
 	Timestamp time(add_time(Timestamp::now(), interval));
 	return timer_queue_->add_timer(std::move(cb), time, interval);
 }
 
-void Event_loop::cancel(Timer_id timerId)
+void event_loop::cancel(Timer_id timerId)
 {
 	return timer_queue_->cancel(timerId);
 }
 
-void Event_loop::update_channel(Channel* channel)
+void event_loop::update_channel(channel* channel)
 {
 	ASSERT(channel->owner_loop() == this);
 	assert_in_loop_thread();
 	poller_->update_channel(channel);
 }
 
-void Event_loop::remove_channel(Channel* channel)
+void event_loop::remove_channel(channel* channel)
 {
 	ASSERT(channel->owner_loop() == this);
 	assert_in_loop_thread();
@@ -177,39 +177,32 @@ void Event_loop::remove_channel(Channel* channel)
 	poller_->remove_channel(channel);
 }
 
-bool Event_loop::has_channel(Channel* channel)
+bool event_loop::has_channel(channel* channel)
 {
 	ASSERT(channel->owner_loop() == this);
 	assert_in_loop_thread();
 	return poller_->has_channel(channel);
 }
 
-void Event_loop::abort_not_in_loop_thread()
-{
-	LOG_FATAL << "Event_loop::abortNotInLoopThread - Event_loop " << this
-            << " was created in threadId_ = " << thread_id_
-            << ", current thread id = " <<  get_current_thread_id();
-}
-
-void Event_loop::wakeup()
+void event_loop::wakeup()
 {
 	uint64_t one = 1;
 	ssize_t n = write(wakeup_fd_, &one, sizeof one);
 	if (n != sizeof one)
-		LOG_ERROR << "Event_loop::wakeup() writes " << n << " bytes instead of 8";
+		LOG_ERROR << "event_loop::wakeup() writes " << n << " bytes instead of 8";
 }
 
-void Event_loop::handle_read()
+void event_loop::handle_read()
 {
 	uint64_t one = 1;
 	ssize_t n = read(wakeup_fd_, &one, sizeof one);
 	if (n != sizeof one)
-		LOG_ERROR << "Event_loop::handleRead() reads " << n << " bytes instead of 8";
+		LOG_ERROR << "event_loop::handleRead() reads " << n << " bytes instead of 8";
 }
 
-void Event_loop::do_pending_functors()
+void event_loop::do_pending_functors()
 {
-	std::vector<Functor> functors;
+	std::vector<functor> functors;
 	calling_pending_functors_ = true;
 
 	{
@@ -224,11 +217,17 @@ void Event_loop::do_pending_functors()
 	calling_pending_functors_ = false;
 }
 
-void Event_loop::print_active_channels() const
+void event_loop::print_active_channels() const
 {
 	for(auto& it : active_channels_)
 	{
-		const Channel* ch = it;
+		const channel* ch = it;
 		LOG_TRACE << "{" << ch->revents_to_string() << "} ";
 	}
+}
+
+void event_loop::assert_in_loop_thread()
+{
+	FATAL(is_in_loop_thread(), "event_loop:%p was created in thread id:%d"
+			", current thread id:%d", this, thread_id_, get_current_thread_id());
 }

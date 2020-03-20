@@ -8,10 +8,6 @@
 #include <functional>
 #include <memory>
 
-#include "common/timestamp.h"
-
-#include "socket.h"
-
 class event_loop;
 
 class channel
@@ -87,8 +83,15 @@ public:
 	bool is_read() const { return events_ & read_event_; }
 
 	// for Poller
-	int index() { return index_; }
-	void set_index(int idx) { index_ = idx; }
+	enum state : int8_t
+	{
+		NEW = -1,
+		ADDED = 1,
+		DELETED
+	};
+
+	int get_state() const { return state_; }
+	void set_state(state state) { state_ = state; }
 
 	void handle_event();
 
@@ -114,7 +117,7 @@ private:
 	int sockfd_;
 	int events_;
 	int revents_; // it's the received event types of epoll or poll
-	int index_; // used by Poller.
+	state state_; // used by Poller.
 
 	bool event_handling_;
 	bool added_to_loop_;

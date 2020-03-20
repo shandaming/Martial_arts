@@ -17,16 +17,16 @@
 #include "common/timestamp.h"
 #include "common/scoped_ptr.h"
 
-class Event_loop
+class event_loop
 {
 public:
-	typedef std::function<void()> Functor;
+	typedef std::function<void()> functor;
 
-  	Event_loop();
-  	~Event_loop();  // force out-line dtor, for scoped_ptr members.
+  	event_loop();
+  	~event_loop();  // force out-line dtor, for scoped_ptr members.
 
-	Event_loop(const Event_loop&) = delete;
-	Event_loop& operator=(const Event_loop&) = delete;
+	event_loop(const event_loop&) = delete;
+	event_loop& operator=(const event_loop&) = delete;
 
 	//永远循环。必须在与创建对象相同的线程中调用。
   	void loop();
@@ -37,8 +37,8 @@ public:
 
 	size_t queue_size();
 
-	void run_in_loop(Functor&& cb);
-	void queue_in_loop(Functor&& cb);
+	void run_in_loop(functor&& cb);
+	void queue_in_loop(functor&& cb);
 
 	void cancel(Timer_id timerId);
 
@@ -48,17 +48,11 @@ public:
 
 	// 内部使用
 	void wakeup();
-	void update_channel(Channel* channel);
-	void remove_channel(Channel* channel);
-	bool has_channel(Channel* channel);
+	void update_channel(channel* channel);
+	void remove_channel(channel* channel);
+	bool has_channel(channel* channel);
 
-	void assert_in_loop_thread()
-	{
-		if (!is_in_loop_thread())
-		{
-			abort_not_in_loop_thread();
-		}
-	}
+	void assert_in_loop_thread();
 
   	bool is_in_loop_thread() const 
 	{
@@ -73,15 +67,14 @@ public:
 
 	std::any* get_mutable_context() { return &context_; }
 
-	static Event_loop* get_event_loop_of_current_thread();
+	static event_loop* get_event_loop_of_current_thread();
 private:
-	void abort_not_in_loop_thread();
 	void handle_read();  // waked up
 	void do_pending_functors();
 
   	void print_active_channels() const; // DEBUG
 
-  	typedef std::vector<Channel*> Channel_list;
+  	typedef std::vector<channel*> channel_list;
 
   	bool looping_; /* atomic */
   	bool quit_; /* atomic and shared between threads, okay on x86, I guess. */
@@ -92,15 +85,15 @@ private:
   	Scoped_ptr<Timer_queue> timer_queue_;
   	int wakeup_fd_;
 
-  	Scoped_ptr<Channel> wakeup_channel_;
+  	Scoped_ptr<channel> wakeup_channel_;
   	std::any context_;
 
   	// scratch variables
-  	Channel_list active_channels_;
-  	Channel* current_active_channel_;
+  	channel_list active_channels_;
+  	channel* current_active_channel_;
 
   	std::mutex mutex_;
-	std::vector<Functor> pending_functors_; // @GuardedBy mutex_
+	std::vector<functor> pending_functors_; // @GuardedBy mutex_
 };
 
 #endif
