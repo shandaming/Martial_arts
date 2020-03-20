@@ -18,8 +18,6 @@ const int kAdded = 1;
 const int kDeleted = 2;
 }
 
-namespace net
-{
 Poller::Poller(Event_loop* loop) : 
 	owner_loop_(loop), 
 	epollfd_(epoll_create1(EPOLL_CLOEXEC)),
@@ -36,14 +34,14 @@ Poller::~Poller()
 	close(epollfd_);
 }
 
-Timestamp Poller::poll(int timeoutMs, Channel_list* active_channels)
+void Poller::poll(int timeoutMs, Channel_list* active_channels)
 {
 	LOG_TRACE << "fd total count " << channels_.size();
 
 	int num_events = epoll_wait(epollfd_, &*events_.begin(),
 			static_cast<int>(events_.size()), timeoutMs);
 	int saved_errno = errno;
-	Timestamp now(Timestamp::now());
+
 	if (num_events > 0)
 	{
 		LOG_TRACE << num_events << " events happened";
@@ -67,7 +65,6 @@ Timestamp Poller::poll(int timeoutMs, Channel_list* active_channels)
 			LOG_SYSERR << "Poller::poll()";
 		}
 	}
-	return now;
 }
 
 void Poller::fill_active_channels(int num_events,
@@ -213,5 +210,4 @@ bool Poller::has_channel(Channel* channel) const
 void Poller::assert_in_loop_thread() const
 {
 	owner_loop_->assert_in_loop_thread();
-}
 }
