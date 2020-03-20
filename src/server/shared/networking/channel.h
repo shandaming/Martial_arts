@@ -46,7 +46,7 @@ public:
 		error_callback_ = std::move(cb); 
 	}
 
-	int get_file_descriptor() const { return socket_; }
+	int get_descriptor() const { return sockfd_; }
 	int events() const { return events_; }
 	void set_revents(int revt) { revents_ = revt; } // used by pollers
   
@@ -111,7 +111,7 @@ private:
 	static const int write_event_;
 
 	event_loop* loop_;
-	//const int  fd_;
+
 	int sockfd_;
 	int events_;
 	int revents_; // it's the received event types of epoll or poll
