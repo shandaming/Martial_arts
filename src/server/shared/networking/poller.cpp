@@ -23,12 +23,7 @@ Poller::Poller(Event_loop* loop) :
 	epollfd_(epoll_create1(EPOLL_CLOEXEC)),
 	events_(kInit_event_list_size)
 {
-	if(epollfd_ < 0)
-	{
-		std::error_code ec(errno, std::system_category());
-		networking_exception ex(ec);
-		throw ex;
-	}
+	ASSERT(epollfd_ != -1, "create epoll fd failed. Error %d: %s", errno, std::strerror(errno));
 }
 
 Poller::~Poller()
