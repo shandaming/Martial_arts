@@ -38,7 +38,6 @@ Event_loop* Event_loop::get_event_loop_of_current_thread()
 Event_loop::Event_loop() : looping_(false), quit_(false), 
 	event_handling_(false),
     calling_pending_functors_(false),
-    iteration_(0),
     thread_id_(get_current_thread_id()),
     poller_(new Poller(this)),
     timer_queue_(new Timer_queue(this)),
@@ -86,7 +85,6 @@ void Event_loop::loop()
 	{
 		active_channels_.clear();
 		poller_->poll(poll_time_ms, &active_channels_);
-		//++iteration_;
 		#ifdef DEBUG
 		{
 		print_active_channels();
