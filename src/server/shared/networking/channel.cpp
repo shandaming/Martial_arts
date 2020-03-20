@@ -15,9 +15,9 @@ const int channel::none_event_ = 0;
 const int channel::read_event_ = POLLIN | POLLPRI; // ???EPOLLIN...
 const int channel::write_event_ = POLLOUT;
 
-channel::channel(event_loop* loop, const std::shared_ptr<socket>& sockfd) : 
+channel::channel(event_loop* loop, int sockfd) : 
 	loop_(loop), 
-	socket_(sockfd), 
+	sockfd_(sockfd), 
 	events_(0), 
 	revents_(0), 
 	index_(-1),
