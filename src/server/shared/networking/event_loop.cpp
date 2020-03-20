@@ -19,17 +19,11 @@ constexpr int poll_time_ms = 10000;
 int create_event_fd()
 {
 	int event_fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-	if (event_fd < 0)
-	{
-		LOG_SYSERR << "create_event_fd failed! thread id=" << get_current_thread_id();
-		abort();
-	}
+	FATAL(event_fd != -1, "create event fd failed. Error %d", errno);
 	return event_fd;
 }
 }
 
-namespace net
-{
 Event_loop* Event_loop::get_event_loop_of_current_thread()
 {
 	return loop_in_this_thread;
@@ -249,4 +243,3 @@ void Event_loop::print_active_channels() const
 		LOG_TRACE << "{" << ch->revents_to_string() << "} ";
 	}
 }
-} // namespace net
