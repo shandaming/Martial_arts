@@ -85,19 +85,20 @@ void Event_loop::loop()
 	while (!quit_)
 	{
 		active_channels_.clear();
-		poll_return_time_ = poller_->poll(poll_time_ms, &active_channels_);
-		++iteration_;
-		if (lg::Logger::log_level() <= lg::Logger::TRACE)
+		poller_->poll(poll_time_ms, &active_channels_);
+		//++iteration_;
+		#ifdef DEBUG
 		{
 		print_active_channels();
 		}
+		#endif
 		// TODO sort channel by priority
 		event_handling_ = true;
 
 		for(auto& it : active_channels_)
 		{
 			current_active_channel_ = it;
-			current_active_channel_->handle_event(std::move(poll_return_time_));
+			current_active_channel_->handle_event();
 		}
 		current_active_channel_ = NULL;
 		event_handling_ = false;
