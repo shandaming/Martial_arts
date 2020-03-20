@@ -15,13 +15,6 @@ void default_connection_callback(const Tcp_connection_ptr& conn)
   // do not call conn->forceClose(), because some users want to register message callback only.
 }
 
-void default_message_callback(const Tcp_connection_ptr&,
-                                        Buffer* buf,
-                                        Timestamp)
-{
-  buf->retrieve_all();
-}
-
 tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
 	loop_(loop),
 	state_(kConnecting),
@@ -291,7 +284,7 @@ void tcp_socket::connect_destroyed()
 	channel_.remove();
 }
 
-void tcp_socket::handle_read(Timestamp receive_time)
+void tcp_socket::handle_read()
 {
 	loop_->assert_in_loop_thread();
 
@@ -328,7 +321,6 @@ void tcp_socket::handle_read(Timestamp receive_time)
 		else if(bytes_read < remaining_space)
 		{
 			read_buffer_.write_complate(bytes_read);
-			message_callback_(shared_from_this(), &input_buffer_, receive_time);
 			break;
 		}
 		else
