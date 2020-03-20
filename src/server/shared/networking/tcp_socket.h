@@ -135,7 +135,7 @@ private:
 
 
 	enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
-	void handle_read(Timestamp receive_time);
+	void handle_read();
 	void handle_write();
 	void handle_close();
 	void handle_error();
