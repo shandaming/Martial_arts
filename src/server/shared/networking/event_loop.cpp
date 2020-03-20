@@ -19,7 +19,7 @@ constexpr int poll_time_ms = 10000;
 int create_event_fd()
 {
 	int event_fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-	ASSERT(event_fd != -1, "create event fd failed. Error %d", errno);
+	ASSERT(event_fd != -1, "create event fd failed. Error %d: %s", errno, std::strerror(errno));
 	return event_fd;
 }
 }
