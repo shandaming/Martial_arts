@@ -46,10 +46,6 @@ public:
 		error_callback_ = std::move(cb); 
 	}
 
-	// 将此通道绑定到shared_ptr管理的所有者对象，防止在handle_event
-	// 中销毁所有者对象。
-	void tie(const std::shared_ptr<void>&);
-
 	int get_file_descriptor() const { return socket_; }
 	int events() const { return events_; }
 	void set_revents(int revt) { revents_ = revt; } // used by pollers
@@ -95,7 +91,7 @@ public:
 	int index() { return index_; }
 	void set_index(int idx) { index_ = idx; }
 
-	void handle_event(Timestamp&& receive_time);
+	void handle_event();
 
 	// for debug
 	std::string revents_to_string() const;
@@ -110,7 +106,7 @@ private:
 
 	void update();
 			
-	void handle_event_with_guard(Timestamp&& receive_time);
+	void handle_event_with_guard();
 
 	static const int none_event_;
 	static const int read_event_;
@@ -124,8 +120,6 @@ private:
 	int index_; // used by Poller.
 	bool log_hup_;
 
-	std::weak_ptr<void> tie_;
-	bool tied_;
 	bool event_handling_;
 	bool added_to_loop_;
 
