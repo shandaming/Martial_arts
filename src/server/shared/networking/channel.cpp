@@ -21,7 +21,6 @@ channel::channel(event_loop* loop, int sockfd) :
 	events_(0), 
 	revents_(0), 
 	index_(-1),
-	log_hup_(true), 
 	event_handling_(false), 
 	added_to_loop_(false) {}
 
@@ -61,8 +60,7 @@ void channel::handle_event_with_guard()
 	
 	if ((revents_ & POLLHUP) && !(revents_ & POLLIN))
 	{
-		if (log_hup_)
-			LOG_WARN("networking", "channel:%d handle event: POLLHUP", sockfd_);
+		LOG_WARN("networking", "channel:%d handle event: POLLHUP", sockfd_);
 		if (close_callback_) 
 			close_callback_();
 	}
