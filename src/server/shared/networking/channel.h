@@ -20,7 +20,6 @@ public:
 	typedef std::function<void()> event_callback;
 	typedef std::function<void(Timestamp)> read_event_callback;
 
-	//channel(event_loop* loop, int fd);
 	channel(event_loop* loop, int sockfd);
 	~channel();
 
