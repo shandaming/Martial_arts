@@ -118,7 +118,7 @@ private:
 
 	event_loop* loop_;
 	//const int  fd_;
-	std::weak_ptr<socket> socket_;
+	int socket_;
 	int events_;
 	int revents_; // it's the received event types of epoll or poll
 	int index_; // used by Poller.
