@@ -90,7 +90,7 @@ public:
 		DELETED
 	};
 
-	int get_state() const { return state_; }
+	state get_state() const { return state_; }
 	void set_state(state state) { state_ = state; }
 
 	void handle_event();
