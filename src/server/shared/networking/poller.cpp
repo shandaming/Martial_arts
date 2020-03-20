@@ -75,7 +75,7 @@ void Poller::fill_active_channels(int num_events,
 	{
 		Channel* channel = static_cast<Channel*>(events_[i].data.ptr);
 #ifndef NDEBUG
-		int fd = channel->fd();
+		const int fd = channel->get_descriptor();
 		Channel_map::const_iterator it = channels_.find(fd);
 		assert(it != channels_.end());
 		assert(it->second == channel);
@@ -90,6 +90,7 @@ void Poller::update_channel(Channel* channel)
 	assert_in_loop_thread();
 
 	const int index = channel->index();
+	const int fd = channel->get_descriptor();
 
 	LOG_TRACE << "fd = " << channel->fd() << 
 		" events = " << channel->events() << " index = " << index;
@@ -97,7 +98,6 @@ void Poller::update_channel(Channel* channel)
 	if(index == kNew || index == kDeleted)
 	{
 		// a new one, add with EPOLL_CTL_ADD
-		int fd = channel->fd();
 		if(index == kNew)
 		{
 			assert(channels_.find(fd) == channels_.end());
@@ -115,7 +115,6 @@ void Poller::update_channel(Channel* channel)
 	else
 	{
 		// update existing one with EPOLL_CTL_MOD/DEL
-		int fd = channel->fd();
 		assert(channels_.find(fd) != channels_.end());
 		assert(channels_[fd] == channel);
 		assert(index == kAdded);
@@ -135,7 +134,7 @@ void Poller::update_channel(Channel* channel)
 void Poller::remove_channel(Channel* channel)
 {
 	assert_in_loop_thread();
-	int fd = channel->fd();
+	const int fd = channel->get_descriptor();
 
 	LOG_TRACE << "fd = " << fd;
 
@@ -161,7 +160,7 @@ void Poller::update(int operation, Channel* channel)
 	bzero(&event, sizeof event);
 	event.events = channel->events();
 	event.data.ptr = channel;
-	int fd = channel->fd();
+	const int fd = channel->get_descriptor();
 
 	LOG_TRACE << "epoll_ctl op = " << operation_to_string(operation) << 
 		" fd = " << fd << " event = { " << channel->events_to_string() << 
