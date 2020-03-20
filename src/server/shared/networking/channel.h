@@ -21,7 +21,7 @@ public:
 	typedef std::function<void(Timestamp)> read_event_callback;
 
 	//channel(event_loop* loop, int fd);
-	channel(event_loop* loop, const std::shared_ptr<socket>& sockfd);
+	channel(event_loop* loop, int sockfd);
 	~channel();
 
 	// ---------------Setting callback---------------
@@ -118,7 +118,7 @@ private:
 
 	event_loop* loop_;
 	//const int  fd_;
-	int socket_;
+	int sockfd_;
 	int events_;
 	int revents_; // it's the received event types of epoll or poll
 	int index_; // used by Poller.
