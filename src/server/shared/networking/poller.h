@@ -9,8 +9,6 @@
 
 #include "channel.h"
 
-namespace net
-{
 class Event_loop;
 
 class Poller
@@ -23,7 +21,7 @@ public:
 
 	/// Polls the I/O events.
 	/// Must be called in the loop thread.
-	Timestamp poll(int timeoutMs, Channel_list* activeChannels);
+	void poll(int timeoutMs, Channel_list* activeChannels);
 
 	/// Changes the interested I/O events.
 	/// Must be called in the loop thread.
@@ -57,6 +55,5 @@ private:
 	int epollfd_;
 	Event_list events_;
 };
-}
 
 #endif
