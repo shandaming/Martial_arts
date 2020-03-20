@@ -22,7 +22,6 @@ channel::channel(event_loop* loop, int sockfd) :
 	revents_(0), 
 	index_(-1),
 	log_hup_(true), 
-	tied_(false), 
 	event_handling_(false), 
 	added_to_loop_(false) {}
 
