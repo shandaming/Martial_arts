@@ -87,7 +87,6 @@ private:
   	bool quit_; /* atomic and shared between threads, okay on x86, I guess. */
   	bool event_handling_; /* atomic */
   	bool calling_pending_functors_; /* atomic */
-  	int64_t iteration_;
   	const pid_t thread_id_;
   	Scoped_ptr<Poller> poller_;
   	Scoped_ptr<Timer_queue> timer_queue_;
