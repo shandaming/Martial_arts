@@ -77,26 +77,17 @@ void channel::handle_event_with_guard(Timestamp&& receive_time)
 {
 	event_handling_ = true;
 	LOG_TRACE << revents_to_string();
-int sockfd = -1;
-std::shared_ptr<socket> socket = socket_.lock();
-//if(socket)
-sockfd = *socket;
+	
 	if ((revents_ & POLLHUP) && !(revents_ & POLLIN))
 	{
 		if (log_hup_)
-		{
-			LOG_WARN << "fd = " << sockfd << " channel::handle_event() POLLHUP";
-		}
+			LOG_WARN("networking", "channel:%d handle event: POLLHUP", sockfd_);
 		if (close_callback_) 
-		{
 			close_callback_();
-		}
 	}
 
 	if (revents_ & POLLNVAL)
-	{
-		LOG_WARN << "fd = " << sockfd << " channel::handle_event() POLLNVAL";
-	}
+		LOG_WARN("networking", "channel:%d handle event: POLLNVAL", sockfd_);
 
 	if (revents_ & (POLLERR | POLLNVAL))
 	{
@@ -128,11 +119,6 @@ std::string channel::events_to_string() const
 
 std::string channel::events_to_string(int fd, int ev)
 {
-int sockfd = -1;
-std::shared_ptr<socket> socket = socket_.lock();
-//if(socket)
-sockfd = *socket;
-
 	std::ostringstream oss;
 	oss << fd << ": ";
 	if (ev & POLLIN)
