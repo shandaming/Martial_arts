@@ -36,12 +36,6 @@ channel::~channel()
 	}
 }
 
-void channel::tie(const std::shared_ptr<void>& obj)
-{
-	tie_ = obj;
-	tied_ = true;
-}
-
 void channel::update()
 {
 	added_to_loop_ = true;
@@ -56,24 +50,12 @@ void channel::remove()
 	loop_->remove_channel(this);
 }
 
-void channel::handle_event(Timestamp&& receive_time)
+void channel::handle_event()
 {
-	std::shared_ptr<void> guard;
-	if (tied_)
-	{
-		guard = tie_.lock();
-		if (guard)
-		{
-			handle_event_with_guard(std::move(receive_time));
-		}
-	}
-	else
-	{
-		handle_event_with_guard(std::move(receive_time));
-	}
+	handle_event_with_guard();
 }
 
-void channel::handle_event_with_guard(Timestamp&& receive_time)
+void channel::handle_event_with_guard()
 {
 	event_handling_ = true;
 	LOG_TRACE << revents_to_string();
