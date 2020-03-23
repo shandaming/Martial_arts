@@ -6,16 +6,12 @@
 #define NET_EVENT_LOOP_H
 
 #include <functional>
-#include <any>
 #include <mutex>
 
 #include "poller.h"
 #include "timer.h"
 #include "channel.h"
 #include "timer_queue.h"
-#include "common/thread.h"
-#include "common/timestamp.h"
-#include "common/scoped_ptr.h"
 
 class event_loop
 {
@@ -61,12 +57,6 @@ public:
 
 	bool event_handling() const { return event_handling_; }
 
-	void set_context(const std::any& context) { context_ = context; }
-
-	const std::any& get_context() const { return context_; }
-
-	std::any* get_mutable_context() { return &context_; }
-
 	static event_loop* get_event_loop_of_current_thread();
 private:
 	void handle_read();  // waked up
@@ -80,13 +70,12 @@ private:
   	bool quit_; /* atomic and shared between threads, okay on x86, I guess. */
   	bool event_handling_; /* atomic */
   	bool calling_pending_functors_; /* atomic */
-  	const pid_t thread_id_;
-  	Scoped_ptr<Poller> poller_;
-  	Scoped_ptr<Timer_queue> timer_queue_;
+  	const int thread_id_;
+  	std::unique_ptr<epoll> epoll_;
+  	std::unique_ptr<timer_queue> timer_queue_;
   	int wakeup_fd_;
 
-  	Scoped_ptr<channel> wakeup_channel_;
-  	std::any context_;
+  	std::unique_ptr<channel> wakeup_channel_;
 
   	// scratch variables
   	channel_list active_channels_;

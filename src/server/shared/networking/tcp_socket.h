@@ -8,11 +8,8 @@
 #include <any>
 
 #include "buffer.h"
-#include "net/inet_address.h"
-#include "net/net_utils.h"
-#include "net/socket.h"
-#include "net/channel.h"
-#include "common/scoped_ptr.h"
+#include "socket.h"
+#include "channel.h"
 
 #define READ_BLOCK_SIZE 4096
 
@@ -48,12 +45,6 @@ public:
 	void start_read();
 	void stop_read();
 	bool is_reading() const { return reading_; }; // NOT thread safe, may race with start/stopReadInLoop
-
-	void set_context(const std::any& context) { context_ = context; }
-
-	const std::any& get_context() const { return context_; }
-
-	std::any* get_mutable_context() { return &context_; }
 
 	void set_connection_callback(const Connection_callback& cb)
 	{
@@ -166,7 +157,6 @@ private:
 	size_t high_water_mark_;
 	Buffer input_buffer_;
 	Buffer output_buffer_; // FIXME: use list<Buffer> as output buffer.
-	std::any context_;
 
 	address remote_address_;
 	uint16_t remote_port_;
@@ -180,6 +170,6 @@ private:
 	bool iswriting_sync_;
 };
 
-typedef std::shared_ptr<tcp_socket> Tcp_connection_ptr;
+typedef std::shared_ptr<tcp_socket> tcp_socket_ptr;
 
 #endif

@@ -12,7 +12,7 @@
 
 namespace
 {
-thread_local net::event_loop* loop_in_this_thread = nullptr;
+thread_local event_loop* loop_in_this_thread = nullptr;
 
 constexpr int poll_time_ms = 10000;
 
@@ -32,17 +32,17 @@ event_loop* event_loop::get_event_loop_of_current_thread()
 event_loop::event_loop() : looping_(false), quit_(false), 
 	event_handling_(false),
 	calling_pending_functors_(false),
-    thread_id_(get_current_thread_id()),
-    poller_(new Poller(this)),
-    timer_queue_(new Timer_queue(this)),
-    wakeup_fd_(create_event_fd()),
-    wakeup_channel_(new channel(this, wakeup_fd_)),
-    current_active_channel_(NULL)
+	thread_id_(this_thread_id()),
+	epoll_(std::make_unique<epoll>(this)),
+	timer_queue_(std::make_unique<timer_queue>(this)),
+	wakeup_fd_(create_event_fd()),
+	wakeup_channel_(std::make_unique<channel>(this, wakeup_fd_)),
+	current_active_channel_(NULL)
 {
-	LOG_DEBUG("networking", "create event_loop in thread id %d", get_current_thread_id());
+	LOG_DEBUG("networking", "create event_loop in thread id %d", this_thread_id());
 
 	FATAL(loop_in_this_thread == nullptr, "Another event_loop %p exists in this thread %d", 
-	      loop_in_this_thread, get_current_thread_id());
+	      loop_in_this_thread, this_thread_id());
 
 	loop_in_this_thread = this;
 
@@ -55,7 +55,7 @@ event_loop::event_loop() : looping_(false), quit_(false),
 event_loop::~event_loop()
 {
 	LOG_DEBUG << "event_loop " << this << " of thread " << thread_id_
-				<< " destructs in thread " << get_current_thread_id();
+				<< " destructs in thread " << this_thread_id();
 	wakeup_channel_->disable_all();
 	wakeup_channel_->remove();
 	close(wakeup_fd_);
@@ -66,15 +66,16 @@ void event_loop::loop()
 {
 	ASSERT(!looping_);
 	assert_in_loop_thread();
+
 	looping_ = true;
 	quit_ = false;  // FIXME: what if someone calls quit() before loop() ?
 	
-	LOG_TRACE("networking", "event_loop:%p stats loop in thread id %d", this, get_current_thread_id());
+	LOG_TRACE("networking", "event_loop:%p stats loop in thread id %d", this, this_thread_id());
 
 	while (!quit_)
 	{
 		active_channels_.clear();
-		poller_->poll(poll_time_ms, &active_channels_);
+		epoll_->poll(poll_time_ms, &active_channels_);
 		#ifdef DEBUG
 		{
 		print_active_channels();
@@ -93,7 +94,7 @@ void event_loop::loop()
 		do_pending_functors();
 	}
 
-	LOG_TRACE("networking", "event_loop:%p stop loop in thread id %d", this, get_current_thread_id());
+	LOG_TRACE("networking", "event_loop:%p stop loop in thread id %d", this, this_thread_id());
 	
 	looping_ = false;
 }
@@ -162,7 +163,7 @@ void event_loop::update_channel(channel* channel)
 {
 	ASSERT(channel->owner_loop() == this);
 	assert_in_loop_thread();
-	poller_->update_channel(channel);
+	epoll_->update_channel(channel);
 }
 
 void event_loop::remove_channel(channel* channel)
@@ -174,14 +175,14 @@ void event_loop::remove_channel(channel* channel)
 		ASSERT(current_active_channel_ == channel ||
 			std::find(active_channels_.begin(), active_channels_.end(), channel) == active_channels_.end());
 	}
-	poller_->remove_channel(channel);
+	epoll_->remove_channel(channel);
 }
 
 bool event_loop::has_channel(channel* channel)
 {
 	ASSERT(channel->owner_loop() == this);
 	assert_in_loop_thread();
-	return poller_->has_channel(channel);
+	return epoll_->has_channel(channel);
 }
 
 void event_loop::wakeup()
@@ -229,5 +230,5 @@ void event_loop::print_active_channels() const
 void event_loop::assert_in_loop_thread()
 {
 	FATAL(is_in_loop_thread(), "event_loop:%p was created in thread id:%d"
-			", current thread id:%d", this, thread_id_, get_current_thread_id());
+			", current thread id:%d", this, thread_id_, this_thread_id());
 }

@@ -19,7 +19,7 @@ struct networking_exception : std::exception
 
 	const char* what() noexcept
 	{
-		return ("Networking exception. " + message).c_str();
+		return ("networking exception. " + message).c_str();
 	}
 
 	std::string message;
