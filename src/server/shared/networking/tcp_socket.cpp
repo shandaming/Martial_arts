@@ -21,7 +21,6 @@ tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
 	reading_(true),
 	socket_(std::move(sockfd)),
 	channel_(loop, socket_),
-	high_water_mark_(64*1024*1024),
 	remote_address_(socket_.remote_endpoint().address()),
 	remote_port_(socket_.remote_endpoint().port()),
 	read_buffer(),
@@ -49,108 +48,6 @@ tcp_socket::~tcp_socket()
 
 	closed_ = true;
 	socket_->close();
-}
-
-void tcp_socket::send(const void* data, int len)
-{
-	send(std::string(static_cast<const char*>(data), len));
-}
-
-void tcp_socket::send(const std::string& message)
-{
-  if (state_ == kConnected)
-  {
-    if (loop_->is_in_loop_thread())
-    {
-      send_in_loop(message);
-    }
-	else
-    {
-	void (tcp_socket::*fp)(const std::string& message) = &tcp_socket::send_in_loop;
-      loop_->run_in_loop(
-          std::bind(fp, this, 
-                      message));
-                    //std::forward<string>(message)));
-    }
-  }
-}
-
-// FIXME efficiency!!!
-void tcp_socket::send(Buffer* buf)
-{
-  if (state_ == kConnected)
-  {
-    if (loop_->is_in_loop_thread())
-    {
-      send_in_loop(buf->peek(), buf->readable_bytes());
-      buf->retrieve_all();
-    }
-    else
-    {
-void (tcp_socket::*fp)(const std::string& message) = &tcp_socket::send_in_loop;
-      loop_->run_in_loop(
-          std::bind(fp,
-                      this,     // FIXME
-                      buf->retrieve_all_as_string()));
-                    //std::forward<string>(message)));
-    }
-  }
-}
-
-void tcp_socket::send_in_loop(const std::string& message)
-{
-	send_in_loop(message.data(), message.size());
-}
-
-void tcp_socket::send_in_loop(const void* data, size_t len)
-{
-	loop_->assert_in_loop_thread();
-
-	ssize_t nwrote = 0;
-	size_t remaining = len;
-	bool faultError = false;
-	if (state_ == kDisconnected)
-	{
-		LOG_WARN << "disconnected, give up writing";
-		return;
-	}
-	// if no thing in output queue, try writing directly
-	if (!channel_.is_write() && output_buffer_.readable_bytes() == 0)
-	{
-		nwrote = net::write(channel_.fd(), data, len);
-		if (nwrote >= 0)
-		{
-			remaining = len - nwrote;
-			if (remaining == 0 && write_complete_callback_)
-				loop_->queue_in_loop(std::bind(write_complete_callback_, shared_from_this()));
-		}
-		else // nwrote < 0
-		{
-			nwrote = 0;
-			if (errno != EWOULDBLOCK)
-			{
-				LOG_SYSERR << "tcp_socket::sendInLoop";
-				if (errno == EPIPE || errno == ECONNRESET) // FIXME: any others?
-					faultError = true;
-			}
-		}
-	}
-
-	assert(remaining <= len);
-
-	if (!faultError && remaining > 0)
-	{
-		size_t oldLen = output_buffer_.readable_bytes();
-		if (oldLen + remaining >= high_water_mark_
-			&& oldLen < high_water_mark_
-			&& high_water_mark_callback_)
-			loop_->queue_in_loop(std::bind(high_water_mark_callback_, shared_from_this(), oldLen + remaining));
-
-		output_buffer_.append(static_cast<const char*>(data)+nwrote, remaining);
-
-		if (!channel_.is_write())
-			channel_.enable_write();
-	}
 }
 
 void tcp_socket::shutdown()
@@ -239,22 +136,6 @@ void tcp_socket::start_read_in_loop()
 	{
 		channel_.enable_read();
 		reading_ = true;
-	}
-}
-
-void tcp_socket::stop_read()
-{
-	loop_->run_in_loop(std::bind(&tcp_socket::stop_read_in_loop, this));
-}
-
-void tcp_socket::stop_read_in_loop()
-{
-	loop_->assert_in_loop_thread();
-
-	if (reading_ || channel_.is_read())
-	{
-		channel_.disable_read();
-		reading_ = false;
 	}
 }
 

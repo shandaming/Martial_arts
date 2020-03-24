@@ -27,15 +27,7 @@ public:
 	event_loop* get_loop() const { return loop_; }
 	bool connected() const { return state_ == kConnected; }
 	bool disconnected() const { return state_ == kDisconnected; }
-	// return true if success.
-	bool getTcpInfo(struct tcp_info*) const;
-	std::string getTcpInfoString() const;
 
-	// void send(string&& message); // C++11
-	void send(const void* message, int len);
-	void send(const std::string& message);
-	// void send(Buffer&& message); // C++11
-	void send(Buffer* message);  // this one will swap data
 	void shutdown(); // NOT thread safe, no simultaneous calling
 	// void shutdownAndForceCloseAfter(double seconds); // NOT thread safe, no simultaneous calling
 	void force_close();
@@ -43,7 +35,7 @@ public:
 	void set_tcp_no_delay(bool on);
 	// reading or not
 	void start_read();
-	void stop_read();
+
 	bool is_reading() const { return reading_; }; // NOT thread safe, may race with start/stopReadInLoop
 
 	void set_connection_callback(const Connection_callback& cb)
@@ -51,31 +43,10 @@ public:
 		connection_callback_ = cb; 
 	}
 
-	void set_message_callback(const Message_callback& cb)
-	{
-		message_callback_ = cb; 
-	}
-
-	void set_write_complete_callback(const Write_complete_callback& cb)
-	{ 
-		write_complete_callback_ = cb; 
-	}
-
-	void set_high_water_mark_callback(const High_water_mark_callback& cb, size_t high_water_mark)
-	{ 
-		high_water_mark_callback_ = cb; 
-		high_water_mark_ = high_water_mark; 
-	}
-
 	void set_read_handler_callback(std::function<void(std::error_code&, size_t)> cb)
 	{
 		read_handler_callback_ = cb;
 	}
-
-	/// Advanced interface
-	Buffer* input_buffer() { return &input_buffer_; }
-
-	Buffer* output_buffer() { return &output_buffer_; }
 
 	/// Internal use only.
 	void set_close_callback(const Close_callback& cb) 
@@ -124,22 +95,18 @@ private:
 	bool handle_queue();
 
 
-
 	enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
 	void handle_read();
 	void handle_write();
 	void handle_close();
 	void handle_error();
-	// void sendInLoop(string&& message);
-	void send_in_loop(const std::string& message);
-	void send_in_loop(const void* message, size_t len);
+
 	void shutdown_in_loop();
 	// void shutdownAndForceCloseInLoop(double seconds);
 	void force_close_in_loop();
 	void set_state(StateE s) { state_ = s; }
 	const char* state_to_string() const;
 	void start_read_in_loop();
-	void stop_read_in_loop();
 
 	event_loop* loop_;
 	StateE state_;  // FIXME: use atomic variable
@@ -149,14 +116,7 @@ private:
 	channel channel_;
 
 	Connection_callback connection_callback_;
-	Message_callback message_callback_;
-	Write_complete_callback write_complete_callback_;
-	High_water_mark_callback high_water_mark_callback_;
 	Close_callback close_callback_;
-
-	size_t high_water_mark_;
-	Buffer input_buffer_;
-	Buffer output_buffer_; // FIXME: use list<Buffer> as output buffer.
 
 	address remote_address_;
 	uint16_t remote_port_;
