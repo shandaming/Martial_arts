@@ -99,9 +99,9 @@ public:
 
 	bool is_open() const { return !closed_ && !closing_; }
 
-	void close_tcp_connection();
+	void close_tcp_socket();
 
-	void delayed_close_tcp_connection() { closing_ = true; }
+	void delayed_close_tcp_socket() { closing_ = true; }
 
 	message_buffer& get_read_buffer() { return read_buffer_; }
 protected:
