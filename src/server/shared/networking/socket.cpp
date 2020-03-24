@@ -33,6 +33,11 @@ void socket::shutdown_write()
 		LOG_ERROR("Networking", "shutdown_write() failed. code[%d], message:%s", ec.code(), ec.message().c_str());
 }
 
+void socket::shutdown(shutdown_type type, std::error_code& ec)
+{
+	shutdown(fd_, type, ec);	
+}
+
 void socket::close()
 {
 	if(!is_open())
