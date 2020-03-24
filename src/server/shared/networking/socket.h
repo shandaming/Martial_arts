@@ -70,9 +70,17 @@ public:
 	}
 
 	~socket();
+	
+	enum shutdown_type
+	{
+		shutdown_receive = SHUT_RD,
+		shutdown_send = SHUT_WR,
+		shutdown_both = SHUT_RDWR
+	};
 
 	void open(int sockfd);
-	void shutdown_write();
+	//void shutdown_write();
+	void shutdown(shutdown_type type, std::error_code& ec);
 	void close();
 
 	bool set_reuse_addr();
