@@ -333,47 +333,9 @@ void tcp_socket::handle_read()
 void tcp_socket::handle_write()
 {
 	loop_->assert_in_loop_thread();
-#if 0
-
-	if (channel_.is_write())
-  {
-    ssize_t n = net::write(channel_.fd(),
-                               output_buffer_.peek(),
-                               output_buffer_.readable_bytes());
-    if (n > 0)
-    {
-      output_buffer_.retrieve(n);
-      if (output_buffer_.readable_bytes() == 0)
-      {
-        channel_.disable_write();
-        if (write_complete_callback_)
-        {
-          loop_->queue_in_loop(std::bind(write_complete_callback_, shared_from_this()));
-        }
-        if (state_ == kDisconnecting)
-        {
-          shutdown_in_loop();
-        }
-      }
-    }
-    else
-    {
-      LOG_SYSERR << "tcp_socket::handle_write";
-      // if (state_ == kDisconnecting)
-      // {
-      //   shutdown_in_loop();
-      // }
-    }
-  }
-  else
-  {
-    LOG_TRACE << "Connection fd = " << channel_.fd()
-              << " is down, no more writing";
-  }
-#else
-  iswriting_sync_ = false;
-  handle_queue();
-#endif
+	
+	iswriting_sync_ = false;
+	handle_queue();
 }
 
 void tcp_socket::handle_close()
@@ -390,6 +352,19 @@ void tcp_socket::handle_close()
 	connection_callback_(guard_this);
 	// must be the last line
 	close_callback_(guard_this);
+}
+
+void tcp_socket::close_tcp_socket()
+{
+	if(closed_.exchange(true))
+		return;
+	
+	std::error_code ec;
+	socket_.shutdown(shutdown_send, ec);
+	if(ec)
+		LOG_ERROR("networking", "Close tcp socket %s error: %d %s", 
+			get_remote_ip_address().to_string().c_str(), ec.value(), ec.message().c_str());
+	on_close();
 }
 
 void tcp_socket::handle_error()
