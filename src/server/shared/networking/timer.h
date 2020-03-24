@@ -8,10 +8,7 @@
 #include <atomic>
 
 #include "common/timestamp.h"
-#include "net_utils.h"
 
-namespace net
-{
 class Timer
 {
 public:
@@ -58,6 +55,5 @@ private:
 	Timer* timer_;
 	int64_t sequence_;
 };
-} // end namespace
 
 #endif
