@@ -79,7 +79,7 @@ public:
 	};
 
 	void open(int sockfd);
-	//void shutdown_write();
+	void shutdown_write();
 	void shutdown(shutdown_type type, std::error_code& ec);
 	void close();
 
