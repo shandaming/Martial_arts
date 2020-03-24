@@ -4,8 +4,6 @@
 
 #include "timer.h"
 
-namespace net
-{
 std::atomic<int64_t> Timer::num_created_ = 0;
 
 void Timer::restart(Timestamp now)
@@ -18,5 +16,4 @@ void Timer::restart(Timestamp now)
 	{
 		expiration_ = Timestamp::invalid();
 	}
-}
 }
