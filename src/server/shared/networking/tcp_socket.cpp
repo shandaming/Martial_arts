@@ -7,14 +7,6 @@
 #include "common/weak.h"
 #include "logging/log.h"
 
-void default_connection_callback(const Tcp_connection_ptr& conn)
-{
-  LOG_TRACE << conn->local_address().to_ip_port() << " -> "
-            << conn->peer_address().to_ip_port() << " is "
-            << (conn->connected() ? "UP" : "DOWN");
-  // do not call conn->forceClose(), because some users want to register message callback only.
-}
-
 tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
 	loop_(loop),
 	state_(kConnecting),
@@ -30,10 +22,10 @@ tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
 {
 	channel_.set_read_callback(std::bind(&tcp_socket::handle_read, this, std::placeholders::_1));
 	channel_.set_write_callback(std::bind(&tcp_socket::handle_write, this));
-	channel_.set_close_callback(std::bind(&tcp_socket::handle_close, this));
+	channel_.set_close_callback(std::bind(&tcp_socket::close_tcp_socket/*handle_close*/, this));
 	channel_.set_error_callback(std::bind(&tcp_socket::handle_error, this));
 
-	LOG_DEBUG("network", "New tcp socket [%s:%u]", remote_address_.to_string().c_str(), remote_port_);
+	LOG_DEBUG("network", "New tcp socket [%d:%s:%u]", socket_,  remote_address_.to_string().c_str(), remote_port_);
 
 	socket_->set_keep_alive();
 
@@ -42,7 +34,7 @@ tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
 
 tcp_socket::~tcp_socket()
 {
-	LOG_DEBUG("network", "Delete tcp socket [%s:%u]", remote_address_.to_string().c_str(), remote_port_);
+	LOG_DEBUG("network", "Delete tcp socket [%d:%s:%u]", socket_,  remote_address_.to_string().c_str(), remote_port_);
 
 	assert(state_ == kDisconnected);
 
@@ -148,7 +140,7 @@ void tcp_socket::connect_established()
 	channel_.tie(shared_from_this());
 	channel_.enable_read();
 
-	connection_callback_(shared_from_this());
+	//connection_callback_(shared_from_this());
 }
 
 void tcp_socket::connect_destroyed()
@@ -160,7 +152,7 @@ void tcp_socket::connect_destroyed()
 		set_state(kDisconnected);
 		channel_.disable_all();
 
-		connection_callback_(shared_from_this());
+		//connection_callback_(shared_from_this());
 	}
 	channel_.remove();
 }
@@ -173,7 +165,7 @@ void tcp_socket::handle_read()
 	std::error_code ec;
 	size_t bytes_read = 0;
 	size_t remaing_space = 0;
-	int sockfd = *socket;
+	int sockfd = socket_;
 
 	while(1)
 	{
@@ -189,14 +181,14 @@ void tcp_socket::handle_read()
 				transferred_bytes += bytes_read;
 		if(ec)
 		{
-			LOG_ERROR("Networking", "socket[%d]-ip[%s] read failed. error %d: %s", 
-					sockfd, remote_address_.to_string().c_str(), ec.value(), ec.message().c_str());
+			LOG_ERROR("networking", "tcp socket [%d:%s:%u] read failed. error %d: %s", 
+					sockfd, remote_address_.to_string().c_str(), get_remote_port(), ec.value(), ec.message().c_str());
 			handle_error();
 			break;
 		}
 		else if(bytes_read == 0)
 		{
-			handle_close();
+			close_tcp_socket();//handle_close();
 			break;
 		}
 		else if(bytes_read < remaining_space)
@@ -224,15 +216,16 @@ void tcp_socket::handle_close()
 	loop_->assert_in_loop_thread();
 
 	LOG_TRACE << "fd = " << channel_.fd() << " state = " << state_to_string();
-	assert(state_ == kConnected || state_ == kDisconnecting);
+	ASSERT(state_ == kConnected || state_ == kDisconnecting);
 	// we don't close fd, leave it to dtor, so we can find leaks easily.
 	set_state(kDisconnected);
 	channel_.disable_all();
 
-	Tcp_connection_ptr guard_this(shared_from_this());
-	connection_callback_(guard_this);
+	//Tcp_connection_ptr guard_this(shared_from_this());
+	//connection_callback_(guard_this);
 	// must be the last line
-	close_callback_(guard_this);
+	//close_callback_(guard_this);
+connect_destroyed();
 }
 
 void tcp_socket::close_tcp_socket()
@@ -246,6 +239,7 @@ void tcp_socket::close_tcp_socket()
 		LOG_ERROR("networking", "Close tcp socket %s error: %d %s", 
 			get_remote_ip_address().to_string().c_str(), ec.value(), ec.message().c_str());
 	on_close();
+handle_close();
 }
 
 void tcp_socket::handle_error()
@@ -255,7 +249,7 @@ void tcp_socket::handle_error()
 	int optvel;
 	int result = getsockopt(sockfd), SOL_SOCKET, SO_ERROR, &optvel, sizeof(optvel, ec);
 	if(ec)
-		LOG_ERROR("networking", "tcp socket[%s:%u] error %d: %s", 
+		LOG_ERROR("networking", "tcp socket[%d:%s:%u] error %d: %s", sockfd, 
 				remote_address_.to_string().c_str(), remote_port_, 
 				ec.value(), ec.message().c_str());
 }
@@ -299,14 +293,14 @@ bool tcp_socket::handle_queue()
 
 		write_queue_.pop();
 		if(close && write_queue_.empty())
-			close_socket();
+			close_tcp_socket();
 		return false;
 	}
 	else if(bytes_sent == 0)
 	{
 		write_queue_.pop();
 		if(close && write_queue_.empty())
-			close_socket();
+			close_tcp_socket();
 		return false;
 	}
 	else if(bytes_sent < bytes_to_send)
@@ -317,6 +311,6 @@ bool tcp_socket::handle_queue()
 
 	write_queue_.pop();
 	if(close && write_queue_.empty())
-		close_socket();
+		close_tcp_socket();
 	return write_queue.empty();
 }
