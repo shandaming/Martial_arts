@@ -8,11 +8,11 @@
 #include "acceptor.h"
 #include "logging/log.h"
 
-template<typename ConnectionType>
-class tcp_connection_mgr
+template<typename SocketType>
+class tcp_socket_mgr
 {
 public:
-	virtual ~tcp_connection_mgr()
+	virtual ~tcp_socket_mgr()
 	{
 		ASSERT(!threads_ && !acceptor_ && !thread_count_, "StopNetwork must be called prior to tcp_connection_mgr destruction.");
 	}
@@ -51,8 +51,10 @@ public:
 		acceptor_->close();
 
 		if(thread_count_ != 0)
+		{
 			for(int i = 0; i < thread_count_; ++i)
 				threads[i].stop();
+		}
 
 		wait();
 
@@ -70,10 +72,10 @@ public:
 				threads[i].wait();
 	}
 
-	virtual void on_connection_open(socket&& socket, uint32_t thread_index)
+	virtual void on_socket_open(socket&& socket, uint32_t thread_index)
 	{
-		std::shared_ptr<ConnectionType> new_connection = std::make_shared<ConnectionType>(std::move(sock));
-		new_connection->start();
+		std::shared_ptr<SocketType> new_socket = std::make_shared<SocketType>(std::move(sock));
+		new_socket->start();
 
 std::shared_ptr<SocketType> newSocket = std::make_shared<SocketType>(std::move(sock));
 
@@ -91,7 +93,7 @@ _threads[threadIndex].AddSocket(newSocket);
 
 
 
-		threads_[thread_index].add_connection(new_connection);
+		threads_[thread_index].add_socket(new_socket);
 	}
 
 	int32_t get_network_thread_count() const { return thread_count_; }
@@ -111,10 +113,10 @@ _threads[threadIndex].AddSocket(newSocket);
 		return std::pai(threads_[thread_index], get_socket_for_acceptor(), thread_index);
 	}
 private:
-	tcp_connection_mgr() : acceptor_(nullptr), threads_(nullptr), thread_count_(0) {}
+	tcp_socket_mgr() : acceptor_(nullptr), threads_(nullptr), thread_count_(0) {}
 
 	acceptor* acceptor_;
-	network_thread<ConnectionType> threads_;
+	network_thread<SocketType> threads_;
 	int32_t thread_count_;
 };
 
