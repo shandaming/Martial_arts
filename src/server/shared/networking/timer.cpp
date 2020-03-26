@@ -4,9 +4,9 @@
 
 #include "timer.h"
 
-std::atomic<int64_t> Timer::num_created_ = 0;
+std::atomic<int64_t> timer::num_created_ = 0;
 
-void Timer::restart(Timestamp now)
+void timer::restart(Timestamp now)
 {
 	if (repeat_)
 	{

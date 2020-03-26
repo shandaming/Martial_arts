@@ -12,28 +12,28 @@
 
 namespace net
 {
-class Event_loop;
+class event_loop;
 
-class Timer_queue
+class timer_queue
 {
 public:
-	explicit Timer_queue(Event_loop* loop);
-	~Timer_queue();
+	explicit timer_queue(event_loop* loop);
+	~timer_queue();
 
-	Timer_queue(const Timer_queue&) = delete;
-	Timer_queue& operator=(const Timer_queue&) = delete;
+	timer_queue(const timer_queue&) = delete;
+	timer_queue& operator=(const timer_queue&) = delete;
 
 	Timer_id add_timer(Timer_callback&& cb, Timestamp when, 
 			double interval);
 
 	void cancel(const Timer_id& timerId);
 private:
-	typedef std::pair<Timestamp, Timer*> Entry;
+	typedef std::pair<Timestamp, timer*> Entry;
 	typedef std::set<Entry> Timer_list;
-	typedef std::pair<Timer*, int64_t> Active_timer;
+	typedef std::pair<timer*, int64_t> Active_timer;
 	typedef std::set<Active_timer> Active_timer_set;
 
-	void add_timer_in_loop(Timer* timer);
+	void add_timer_in_loop(timer* timer);
 	void cancel_in_loop(const Timer_id& timerId);
 	// called when timerfd alarms
 	void handleRead();
@@ -41,12 +41,12 @@ private:
 	std::vector<Entry> get_expired(Timestamp now);
 	void reset(const std::vector<Entry>& expired, Timestamp now);
 
-	bool insert(Timer* timer);
+	bool insert(timer* timer);
 
-	Event_loop* loop_;
+	event_loop* loop_;
 	const int timerfd_;
-	Channel timerfd_channel_;
-	// Timer list sorted by expiration
+	channel timerfd_channel_;
+	// timer list sorted by expiration
 	Timer_list timers_;
 
 	// for cancel()

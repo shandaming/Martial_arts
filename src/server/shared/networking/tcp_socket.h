@@ -28,15 +28,7 @@ public:
 	bool connected() const { return state_ == kConnected; }
 	bool disconnected() const { return state_ == kDisconnected; }
 
-	void shutdown(); // NOT thread safe, no simultaneous calling
-	// void shutdownAndForceCloseAfter(double seconds); // NOT thread safe, no simultaneous calling
-	void force_close();
-	void force_close_with_delay(double seconds);
 	void set_tcp_no_delay(bool on);
-	// reading or not
-	void start_read();
-
-	bool is_reading() const { return reading_; }; // NOT thread safe, may race with start/stopReadInLoop
 
 	void set_connection_callback(const Connection_callback& cb)
 	{
@@ -46,12 +38,6 @@ public:
 	void set_read_handler_callback(std::function<void(std::error_code&, size_t)> cb)
 	{
 		read_handler_callback_ = cb;
-	}
-
-	/// Internal use only.
-	void set_close_callback(const Close_callback& cb) 
-	{
-		close_callback_ = cb; 
 	}
 
 	// called when TcpServer accepts a new connection
@@ -70,7 +56,7 @@ public:
 
 	bool is_open() const { return !closed_ && !closing_; }
 
-	void close_tcp_socket();
+	void close_socket();
 
 	void delayed_close_tcp_socket() { closing_ = true; }
 
@@ -82,7 +68,7 @@ protected:
 
 	bool sync_process_queue();
 
-	socket& underlying_stream() { return *socket_; }
+	socket& underlying_stream() { return socket_; }
 private:
 	void read_handler_internal(std::error_code& ec, size_t transferred_bytes)
 	{
@@ -90,33 +76,24 @@ private:
 			read_handler();
 	}
 
-	void write_handler_wrapper(std::error_code& ec, size_t);
+	void write_handler_wrapper();
 
 	bool handle_queue();
 
 
 	enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
 	void handle_read();
-	void handle_write();
 	void handle_close();
 	void handle_error();
 
-	void shutdown_in_loop();
-	// void shutdownAndForceCloseInLoop(double seconds);
-	void force_close_in_loop();
 	void set_state(StateE s) { state_ = s; }
 	const char* state_to_string() const;
-	void start_read_in_loop();
 
 	event_loop* loop_;
 	StateE state_;  // FIXME: use atomic variable
-	bool reading_;
 	// we don't expose those classes to client.
 	socket socket_;
 	channel channel_;
-
-	Connection_callback connection_callback_;
-	Close_callback close_callback_;
 
 	address remote_address_;
 	uint16_t remote_port_;

@@ -4,9 +4,9 @@
 
 #include "world_tcp_connection.h"
 
-static void on_socket_accept(socket, uint32_t thread_index)
+static void on_socket_accept(socket&& socket)
 {
-	WORLD_SOCKET_MGR.on_socket_open(std::forward<socket>(socket), thread_index);
+	WORLD_SOCKET_MGR.on_socket_open(std::forward<socket>(socket));
 }
 
 world_socket_mgr::world_socket_mgr() : base_socket_mgr(), socket_system_send_buffer_size(-1), socket_application_send_buffer_size_(65536) {}
@@ -38,10 +38,10 @@ bool world_tcp_socket_mgr::start_world_network(const std::string& bind_ip, uint1
 	if(!base_socket_mgr::start_network(bind_ip, port, thread_count))
 		return false;
 
-	acceptor->set_new_connection_callback(std::bind(on_connection_open, this, _1, _2))
+	acceptor->set_new_connection_callback(std::bind(on_socket_accept, this, _1)
 }
 
-void world_socket_mgr::on_connection_open(socket&& sock, uint32_t thrad_count)
+void world_socket_mgr::on_socket_open(socket&& sock)
 {;
 	if(socket_system_send_buffer_size_ >= 0)
 	{
@@ -55,5 +55,5 @@ void world_socket_mgr::on_connection_open(socket&& sock, uint32_t thrad_count)
 			return;
 	}
 
-	base_socket_mgr::on_socket_open(std::forward<socket>(sock), thread_index);
+	base_socket_mgr::on_socket_open(std::forward<socket>(sock));
 }

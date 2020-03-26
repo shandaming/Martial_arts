@@ -30,11 +30,6 @@ void acceptor::set_new_connection_callback(const min_connection_thread_callback&
 	new_connection_callback_ = cb; 
 }
 
-void acceptor::set_min_connection_thread_callback(const new_connection_callback& cb) 
-{
-	min_connection_thread_callback_ = cb; 
-}
-
 bool bind()
 {
 	std::error_code ec;
@@ -92,10 +87,7 @@ void acceptor::handle_read()
 	if(!ec)
 	{
 		if(new_connection_callback_)
-		{
-			int thread_index = min_connection_thread_callback_();
-			new_connection_callback(std::forward<socket>(new_conn_socket), thread_index);
-		}
+			new_connection_callback(std::forward<socket>(new_conn_socket));
 		else
 			new_conn_socket.close();
 	}

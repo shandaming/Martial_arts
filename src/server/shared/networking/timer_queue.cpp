@@ -44,12 +44,12 @@ void read_timerfd(int timerfd, Timestamp now)
 	uint64_t howmany;
 	ssize_t n = read(timerfd, &howmany, sizeof howmany);
 
-	LOG_TRACE << "Timer_queue::handleRead() " << howmany << " at " << 
+	LOG_TRACE << "timer_queue::handleRead() " << howmany << " at " << 
 		now.to_string();
 
 	if (n != sizeof howmany)
 	{
-		LOG_ERROR << "Timer_queue::handleRead() reads " << n << 
+		LOG_ERROR << "timer_queue::handleRead() reads " << n << 
 			" bytes instead of 8";
 	}
 }
@@ -71,52 +71,52 @@ void reset_timerfd(int timerfd, Timestamp expiration)
 
 namespace net
 {
-Timer_queue::Timer_queue(Event_loop* loop) :
+timer_queue::timer_queue(event_loop* loop) :
 	loop_(loop),
     timerfd_(detail::create_timerfd()),
     timerfd_channel_(loop, timerfd_),
     timers_(),
     calling_expired_timers_(false)
 {
-	timerfd_channel_.set_read_callback(std::bind(&Timer_queue::handleRead, 
+	timerfd_channel_.set_read_callback(std::bind(&timer_queue::handleRead, 
 			  this));
 	// we are always reading the timerfd, we disarm it with timerfd_settime.
 	timerfd_channel_.enable_read();
 }
 
-Timer_queue::~Timer_queue()
+timer_queue::~timer_queue()
 {
 	timerfd_channel_.disable_all();
 	timerfd_channel_.remove();
 	close(timerfd_);
-	// do not remove channel, since we're in Event_loop::dtor();
+	// do not remove channel, since we're in event_loop::dtor();
 	for(auto& it : timers_)
 	{
 		delete it.second;
 	}
 }
 
-Timer_id Timer_queue::add_timer(Timer_callback&& cb, Timestamp when,
+Timer_id timer_queue::add_timer(Timer_callback&& cb, Timestamp when,
 		double interval)
 {
-	Timer* timer = new Timer(std::move(cb), when, interval);
+	timer* timer = new timer(std::move(cb), when, interval);
 	if(timer == nullptr)
 	{
 		return Timer_id();
 	}
 
-	loop_->run_in_loop(std::bind(&Timer_queue::add_timer_in_loop, this, 
+	loop_->run_in_loop(std::bind(&timer_queue::add_timer_in_loop, this, 
 				timer));
 	return Timer_id(timer, timer->sequence());
 }
 
-void Timer_queue::cancel(const Timer_id& timerId)
+void timer_queue::cancel(const Timer_id& timerId)
 {
-	loop_->run_in_loop(std::bind(&Timer_queue::cancel_in_loop, this, 
+	loop_->run_in_loop(std::bind(&timer_queue::cancel_in_loop, this, 
 				std::ref(timerId)));
 }
 
-void Timer_queue::add_timer_in_loop(Timer* timer)
+void timer_queue::add_timer_in_loop(timer* timer)
 {
 	loop_->assert_in_loop_thread();
 	bool earliest_changed = insert(timer);
@@ -127,7 +127,7 @@ void Timer_queue::add_timer_in_loop(Timer* timer)
 	}
 }
 
-void Timer_queue::cancel_in_loop(const Timer_id& timerId)
+void timer_queue::cancel_in_loop(const Timer_id& timerId)
 {
 	loop_->assert_in_loop_thread();
 
@@ -152,7 +152,7 @@ void Timer_queue::cancel_in_loop(const Timer_id& timerId)
 	assert(timers_.size() == active_timers_.size());
 }
 
-void Timer_queue::handleRead()
+void timer_queue::handleRead()
 {
 	loop_->assert_in_loop_thread();
 	Timestamp now(Timestamp::now());
@@ -172,12 +172,12 @@ void Timer_queue::handleRead()
 	reset(expired, now);
 }
 
-std::vector<Timer_queue::Entry> Timer_queue::get_expired(Timestamp now)
+std::vector<timer_queue::Entry> timer_queue::get_expired(Timestamp now)
 {
 	assert(timers_.size() == active_timers_.size());
 
 	std::vector<Entry> expired;
-	Entry sentry(now, reinterpret_cast<Timer*>(UINTPTR_MAX));
+	Entry sentry(now, reinterpret_cast<timer*>(UINTPTR_MAX));
 	Timer_list::iterator end = timers_.lower_bound(sentry);
 
 	assert(end == timers_.end() || now < end->first);
@@ -197,7 +197,7 @@ std::vector<Timer_queue::Entry> Timer_queue::get_expired(Timestamp now)
 	return expired;
 }
 
-void Timer_queue::reset(const std::vector<Entry>& expired, Timestamp now)
+void timer_queue::reset(const std::vector<Entry>& expired, Timestamp now)
 {
 	Timestamp next_expire;
 
@@ -228,7 +228,7 @@ void Timer_queue::reset(const std::vector<Entry>& expired, Timestamp now)
 	}
 }
 
-bool Timer_queue::insert(Timer* timer)
+bool timer_queue::insert(timer* timer)
 {
 	loop_->assert_in_loop_thread();
 

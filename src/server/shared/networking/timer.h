@@ -9,16 +9,16 @@
 
 #include "common/timestamp.h"
 
-class Timer
+class timer
 {
 public:
-	Timer(const Timer_callback& cb, Timestamp when, double interval) :
+	timer(const Timer_callback& cb, Timestamp when, double interval) :
 		callback_(cb), expiration_(when), interval_(interval), 
 		repeat_(interval > 0.0), sequence_(++num_created_)
 	{}
 
-	Timer(const Timer&) = delete;
-	Timer& operator=(const Timer&) = delete;
+	timer(const timer&) = delete;
+	timer& operator=(const timer&) = delete;
 
 	void run() const { callback_(); }
 
@@ -39,20 +39,20 @@ private:
 	static std::atomic<int64_t> num_created_;
 };
 
-class Timer_id
+class timer_id
 {
 public:
 	friend class Timer_queue;
 
-	Timer_id() : timer_(nullptr), sequence_(0) {}
+	timer_id() : timer_(nullptr), sequence_(0) {}
 
-	explicit Timer_id(Timer* timer, int64_t sequence) : 
+	explicit timer_id(timer* timer, int64_t sequence) : 
 		timer_(timer), sequence_(sequence) {}
 
-	Timer_id(const Timer_id&) = delete;
-	Timer_id& operator=(const Timer_id&) = delete;
+	timer_id(const timer_id&) = delete;
+	timer_id& operator=(const timer_id&) = delete;
 private:
-	Timer* timer_;
+	timer* timer_;
 	int64_t sequence_;
 };
 

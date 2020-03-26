@@ -72,28 +72,14 @@ public:
 				threads[i].wait();
 	}
 
-	virtual void on_socket_open(socket&& socket, uint32_t thread_index)
+	virtual void on_socket_open(socket&& socket)
 	{
-		std::shared_ptr<SocketType> new_socket = std::make_shared<SocketType>(std::move(sock));
-		new_socket->start();
+		std::shared_ptr<SocketType> new_tcp_socket = std::make_shared<SocketType>(std::move(sock));
+		new_tcp_socket->start();
 
-std::shared_ptr<SocketType> newSocket = std::make_shared<SocketType>(std::move(sock));
+		uint32_t thread_index = select_thread_with_min_connection();
 
-uint32_t thread_index = select_thread_with_min_connection();
-_threads[threadIndex].AddSocket(newSocket);
-
-	Tcp_connection_ptr conn(new Tcp_connection(io_loop, std::move(socket)));
-	connections_[conn_name] = conn;
-	conn->set_connection_callback(connection_callback_);
-	conn->set_message_callback(message_callback_);
-	conn->set_write_complete_callback(write_complete_callback_);
-	conn->set_close_callback(
-      std::bind(&Tcp_server::remove_connection, this, std::placeholders::_1)); // FIXME: unsafe
-  io_loop->run_in_loop(std::bind(&Tcp_connection::connect_established, conn));
-
-
-
-		threads_[thread_index].add_socket(new_socket);
+		threads_[thread_index].add_socket(new_tcp_socket);
 	}
 
 	int32_t get_network_thread_count() const { return thread_count_; }

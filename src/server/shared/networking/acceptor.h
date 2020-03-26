@@ -12,13 +12,11 @@ class acceptor
 {
 public:
 	typedef std::function<void(socket&&)> new_connection_callback;
-	typedef std::function<void()> min_connection_thread_callback;
 
 	acceptor(event_loop* loop, const std::string& bind_ip, uint16_t port);
 	~acceptor();
 
 	void set_new_connection_callback(const new_connection_callback& cb);
-	void set_min_connection_thread_callback(const min_connection_thread_callback& cb)
 
 	bool bind();
 	bool is_open() const { return is_open_; }
@@ -38,7 +36,6 @@ private:
 	socket accept_socket_;
 	channel accept_channel_;
 	new_connection_callback new_connection_callback_;
-	min_connection_thread_callback min_connection_thread_callback_;
 
 	int idle_fd_;
 
