@@ -30,6 +30,8 @@ tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
 	socket_->set_keep_alive();
 
 	read_buffer_.resize(READ_BLOCK_SIZE);
+		
+	connect_established();
 }
 
 tcp_socket::~tcp_socket()
@@ -39,7 +41,7 @@ tcp_socket::~tcp_socket()
 	assert(state_ == kDisconnected);
 
 	closed_ = true;
-	socket_->close();
+	socket_.close();
 }
 
 void tcp_socket::shutdown()
@@ -137,7 +139,7 @@ void tcp_socket::connect_established()
 	assert(state_ == kConnecting);
 
 	set_state(kConnected);
-	channel_.tie(shared_from_this());
+	//channel_.tie(shared_from_this());
 	channel_.enable_read();
 
 	//connection_callback_(shared_from_this());
@@ -228,7 +230,7 @@ void tcp_socket::handle_close()
 connect_destroyed();
 }
 
-void tcp_socket::close_tcp_socket()
+void tcp_socket::close_socket()
 {
 	if(closed_.exchange(true))
 		return;
