@@ -15,10 +15,8 @@ int create_timerfd()
 {
 	int timerfd = timerfd_create(CLOCK_MONOTONIC, 
 			TFD_NONBLOCK | TFD_CLOEXEC);
-	if (timerfd < 0)
-	{
-		LOG_SYSFATAL << "Failed in timerfd_create";
-	}
+	
+	ASSERT(timerfd != -1, "create timerfd failed. Error %d: %s", errno, std::strerror(errno));
 	return timerfd;
 }
 
@@ -42,16 +40,12 @@ timespec how_much_time_from_now(Timestamp when)
 void read_timerfd(int timerfd, Timestamp now)
 {
 	uint64_t howmany;
-	ssize_t n = read(timerfd, &howmany, sizeof howmany);
+	ssize_t n = ::read(timerfd, &howmany, sizeof howmany);
 
-	LOG_TRACE << "timer_queue::handleRead() " << howmany << " at " << 
-		now.to_string();
+	LOG_TRACE("network", "read_timerfd: %llu at %s", howmany, now.to_string().c_str())
 
 	if (n != sizeof howmany)
-	{
-		LOG_ERROR << "timer_queue::handleRead() reads " << n << 
-			" bytes instead of 8";
-	}
+		LOG_ERROR("network", "read %u bytes instead of 8 in timerfd", n);
 }
 
 void reset_timerfd(int timerfd, Timestamp expiration)
