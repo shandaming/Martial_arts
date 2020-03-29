@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef LOGGER_H
-#define LOGGER_H
+#ifndef LOG_LOGGER_H
+#define LOG_LOGGER_H
 
 #include <unordered_map>
 #include <string>

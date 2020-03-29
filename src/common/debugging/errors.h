@@ -2,10 +2,10 @@
  * Copyright (C) 2019
  */
 
-#ifndef DEBUGGING_ERRORS_H
-#define DEBUGGING_ERRORS_H
+#ifndef DEB_DEBUGGING_ERRORS_H
+#define DEB_DEBUGGING_ERRORS_H
 
-#include "common/define.h"
+#include "define.h"
 
 void assert(const char* file, int line, const char* function, const char* message) ATTR_NORETURN;
 

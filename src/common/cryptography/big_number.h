@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef BIG_NUMBER_H
-#define BIG_NUMBER_H
+#ifndef CRY_BIG_NUMBER_H
+#define CRY_BIG_NUMBER_H
 
 #include <memory>
 #include <string>

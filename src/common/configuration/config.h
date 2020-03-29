@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef INI_CONFIG_H
-#define INI_CONFIG_H
+#ifndef CFG_INI_CONFIG_H
+#define CFG_INI_CONFIG_H
 
 #include <algorithm>
 #include <type_traits>

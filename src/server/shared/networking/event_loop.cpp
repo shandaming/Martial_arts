@@ -132,9 +132,7 @@ void event_loop::queue_in_loop(functor&& cb)
 	pending_functors_.push_back(std::move(cb));  // emplace_back
 
 	if (!is_in_loop_thread() || calling_pending_functors_)
-	{
 		wakeup();
-	}
 }
 
 Timer_id event_loop::run_at(const Timestamp& time, Timer_callback&& cb)

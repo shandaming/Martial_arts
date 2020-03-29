@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef WORLD_DATABASE_H
-#define WORLD_DATABASE_H
+#ifndef DB_WORLD_DATABASE_H
+#define DB_WORLD_DATABASE_H
 
 #include "database/mysql_connection.h"
 

@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef PACKET_H
-#define PACKET_H
+#ifndef S_PACKET_H
+#define S_PACKET_H
 
 #include "world_packet.h"
 

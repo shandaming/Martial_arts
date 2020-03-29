@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef CMDLINE_H
-#define CMDLINE_H
+#ifndef CMD_CMDLINE_H
+#define CMD_CMDLINE_H
 
 #include <functional>
 

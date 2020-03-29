@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef DATABASE_LOADER_H
-#define DATABASE_LOADER_H
+#ifndef DB_DATABASE_LOADER_H
+#define DB_DATABASE_LOADER_H
 
 #include <stack>
 

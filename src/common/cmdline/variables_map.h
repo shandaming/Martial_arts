@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef VARIABLES_MAP_H
-#define VARIABLES_MAP_H
+#ifndef CMD_VARIABLES_MAP_H
+#define CMD_VARIABLES_MAP_H
 
 #include <map>
 #include <string>

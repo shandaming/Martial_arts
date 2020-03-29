@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef LOGIN_DATABASE_H
-#define LOGIN_DATABASE_H
+#ifndef DB_LOGIN_DATABASE_H
+#define DB_LOGIN_DATABASE_H
 
 #include "database/mysql_connection.h"
 

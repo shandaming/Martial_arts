@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef REVISION_DATA_H
-#define REVISION_DATA_H
+#ifndef CFG_REVISION_DATA_H
+#define CFG_REVISION_DATA_H
 
 // 可以用cmake等工具生存
 

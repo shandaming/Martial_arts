@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef BIND_STDERR_H
-#define BIND_STDERR_H
+#ifndef PRO_BIND_STDERR_H
+#define PRO_BIND_STDERR_H
 
 #include <unistd.h>
 

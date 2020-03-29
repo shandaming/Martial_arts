@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef DATABASE_WORKER_H
-#define DATABASE_WORKER_H
+#ifndef DB_DATABASE_WORKER_H
+#define DB_DATABASE_WORKER_H
 
 #include <atomic>
 #include <thread>

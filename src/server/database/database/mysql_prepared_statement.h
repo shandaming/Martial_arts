@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef MYSQL_PREPARED_STATEMENT_H
-#define MYSQL_PREPARED_STATEMENT_H
+#ifndef DB_MYSQL_PREPARED_STATEMENT_H
+#define DB_MYSQL_PREPARED_STATEMENT_H
 
 // 每个MySQLConnection实例都是唯一的类
 //  - 仅在准备好的语句任务时才能访问这些类对象

@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef ADHOC_STATEMENT_H
-#define ADHOC_STATEMENT_H
+#ifndef DB_ADHOC_STATEMENT_H
+#define DB_ADHOC_STATEMENT_H
 
 #include "sql_operation.h"
 

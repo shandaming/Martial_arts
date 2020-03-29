@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef PACKET_LOG_H
-#define PACKET_LOG_H
+#ifndef PR_PACKET_LOG_H
+#define PR_PACKET_LOG_H
 
 enum direction
 {

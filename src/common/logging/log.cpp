@@ -12,8 +12,9 @@
 #include "common/debugging/errors.h"
 #include "common/configuration/config.h"
 #include "common/utility/util.h"
+#include "event_loop.h"
 
-log::log() : appender_id_(0), lowest_log_level_(LOG_LEVEL_FATAL), async_(false)
+log::log() : appender_id_(0), lowest_log_level_(LOG_LEVEL_FATAL), event_loop_(nullptr)
 {
 	logs_timestamp_ = "_" + get_timestamp_str();
 	register_appender<appender_console>();
@@ -206,15 +207,15 @@ void log::out_command(std::string&& message, std::string&& param1)
 	write(std::make_unique<log_message>(LOG_LEVEL_INFO, "commands.gm", std::move(message), std::move(param1)));
 }
 
-void log::write(std::unique_ptr<log_message>&& msg) /*const*/
+void log::write(std::unique_ptr<log_message>&& msg) const
 {
 	logger const* logger = get_logger_by_type(msg->type);
 
-	if (async_)
+	if (event_loop_)
 	{
 		std::shared_ptr<log_operation> new_log_operation = std::make_shared<log_operation>(logger, std::move(msg));
-		log_task task(std::bind(&log_operation::call, new_log_operation));
-		log_worker_.add_task(task);
+		//event_loop_.run_in_loop(std::bind(&log_operation::call, new_log_operation));
+		event_loop_->run_in_loop(std::bind([new_log_operation]() { new_log_operation->call(); }));
 	}
 	else
 		logger->write(msg.get());
@@ -324,8 +325,6 @@ void log::close()
 {
 	loggers_.clear();
 	appenders_.clear();
-	log_worker_.stop();
-	async_ = false;
 }
 
 bool log::should_log(const std::string& type, log_level level) const
@@ -352,21 +351,17 @@ log* log::instance()
 	return &instance;
 }
 
-void log::initialize(bool async)
+void log::initialize(event_loop* event_loop)
 {
-	if (async)
-	{
-		async_ = true;
-		log_worker_.working();
-	}
+	if (event_loop)
+		event_loop_ = event_loop;
 
 	load_from_config();
 }
 
 void log::set_synchronous()
 {
-	log_worker_.stop();
-	async_ = false;
+	event_loop_ = nullptr;
 }
 
 void log::load_from_config()

@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef PREPARED_STATEMENT_H
-#define PREPARED_STATEMENT_H
+#ifndef DB_PREPARED_STATEMENT_H
+#define DB_PREPARED_STATEMENT_H
 
 #include <mysql/mysql.h>
 

@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef APPENDER_FILE_H
-#define APPENDER_FILE_H
+#ifndef LOG_APPENDER_FILE_H
+#define LOG_APPENDER_FILE_H
 
 #include <type_traits>
 #include <atomic>

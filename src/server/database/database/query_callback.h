@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef QUERY_CALLBACK_H
-#define QUERY_CALLBACK_H
+#ifndef DB_QUERY_CALLBACK_H
+#define DB_QUERY_CALLBACK_H
 
 #include <list>
 

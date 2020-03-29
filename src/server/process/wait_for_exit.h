@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef _WAIT_FOR_EXIT_H
-#define _WAIT_FOR_EXIT_H
+#ifndef PRO_WAIT_FOR_EXIT_H
+#define PRO_WAIT_FOR_EXIT_H
 
 #include <sys/wait.h>
 #include <sys/types.h>

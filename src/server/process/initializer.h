@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef INITIALZER_H
-#define INITIALZER_H
+#ifndef PRO_INITIALZER_H
+#define PRO_INITIALZER_H
 
 struct initializer_base
 {

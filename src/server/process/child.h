@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef CHILD_H
-#define CHILD_H
+#ifndef PRO_CHILD_H
+#define PRO_CHILD_H
 
 #include <sys/types.h>
 

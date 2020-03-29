@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef CHARACTER_DATABASE_H
-#define CHARACTER_DATABASE_H
+#ifndef DB_CHARACTER_DATABASE_H
+#define DB_CHARACTER_DATABASE_H
 
 #include "database/mysql_connection.h"
 

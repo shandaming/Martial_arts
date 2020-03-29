@@ -2,9 +2,12 @@
  * Copyright (C) 2019
  */
 
+#ifndef __STRING_FORMAT_H
+#define __STRING_FORMAT_H
+
 #include <string>
 #include <cstdio>
-#include "common/define.h"
+#include "define.h"
 
 template<typename... Args>
 inline std::string string_format(const std::string& fmt, Args&&... args)
@@ -26,3 +29,5 @@ inline bool is_format_empty_or_null(const std::string& fmt)
 {
 	return fmt.empty();
 }
+
+#endif

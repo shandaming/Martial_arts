@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef OPTION_H
-#define OPTION_H
+#ifndef CMD_OPTION_H
+#define CMD_OPTION_H
 
 #include <vector>
 #include <string>

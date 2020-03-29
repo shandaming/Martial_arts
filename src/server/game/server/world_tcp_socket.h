@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef WORLD_TCP_SOCKET_H
-#define WORLD_TCP_SOCKET_H
+#ifndef S_WORLD_TCP_SOCKET_H
+#define S_WORLD_TCP_SOCKET_H
 
 #include <networking/tcp_socket.h>
 

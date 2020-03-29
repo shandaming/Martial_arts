@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef BUILTIN_CONFiG_H
-#define BUILTIN_CONFIG_H
+#ifndef CFG_BUILTIN_CONFiG_H
+#define CFG_BUILTIN_CONFiG_H
 
 #include <string>
 

@@ -1,7 +1,7 @@
 
 
-#ifndef APPENDERDB_H
-#define APPENDERDB_H
+#ifndef DB_APPENDERDB_H
+#define DB_APPENDERDB_H
 
 #include "Appender.h"
 

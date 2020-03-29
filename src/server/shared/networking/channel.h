@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef CHANNEL_H
-#define CHANNEL_H
+#ifndef NET_CHANNEL_H
+#define NET_CHANNEL_H
 
 #include <functional>
 #include <memory>

@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef SET_ARGS_H
-#define SET_ARGS_H
+#ifndef PRO_SET_ARGS_H
+#define PRO_SET_ARGS_H
 
 template<typename T>
 class set_args_ : public initializer_base

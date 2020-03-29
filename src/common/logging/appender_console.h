@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef APPENDER_CONSOLE_H
-#define APPENDER_SONSOLE_H
+#ifndef LOG_APPENDER_CONSOLE_H
+#define LOG_APPENDER_CONSOLE_H
 
 #include <type_traits>
 #include <vector>

@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef SOCKET_H
-#define SOCKET_H
+#ifndef NET_SOCKET_H
+#define NET_SOCKET_H
 
 #include "ip/endpoint.h"
 

@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef HOTFIX_DATABASE_H
-#define HOTFIX_DATABASE_H
+#ifndef DB_HOTFIX_DATABASE_H
+#define DB_HOTFIX_DATABASE_H
 
 #include "database/mysql_connection.h"
 

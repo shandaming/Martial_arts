@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2020
+ */
+
 #ifndef IP_ENDPOINT_H
 #define IP_ENDPOINT_H
 

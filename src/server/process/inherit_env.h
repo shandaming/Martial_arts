@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef INHERIT_ENV_H
-#define INHERIT_ENV_H
+#ifndef PRO_INHERIT_ENV_H
+#define PRO_INHERIT_ENV_H
 
 #include "initializer.h"
 

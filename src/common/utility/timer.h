@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef UTILITY_TIMER_H
+#define UTILITY_TIMER_H
 
 #include <chrono>
 #include <ctime>

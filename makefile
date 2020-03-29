@@ -1,20 +1,51 @@
-INC_DIR = -I ./src -I ./src/client -I ./src/server
+INC_DIR = -I ./src	\
+		  -I ./src/common	\
+		  -I ./src/common/cmdline	\
+		  -I ./src/common/configuration	\
+		  -I ./src/common/cryptography	\
+		  -I ./src/common/debugging	\
+		  -I ./src/common/logging	\
+		  -I ./src/common/serialization	\
+		  -I ./src/common/threading	\
+		  -I ./src/common/utility	\
+		  -I ./src/client	\
+		  -I ./src/server	\
+		  -I ./src/server/process	\
+		  -I ./src/server/database	\
+		  -I ./src/server/database/database	\
+		  -I ./src/server/database/database/implementation	\
+		  -I ./src/server/database/logging	\
+		  -I ./src/server/database/update	\
+		  -I ./src/server/game/server	\
+		  -I ./src/server/game/server/protocol	\
+		  -I ./src/server/process	\
+		  -I ./src/server/shared/networking	\
+		  -I ./src/server/shared/networking/ip	\
+		  -I ./src/server/shared/packets	\
+		  -I ./src/server/worldserver
 
 csrc = $(wildcard src/*.c)
 ccsrc = $(wildcard src/*.cpp) \
 		$(wildcard src/common/cmdline/*.cpp) \
 		$(wildcard src/common/configuration/*.cpp) \
+		$(wildcard src/common/cryptograp/*.cpp) \
 		$(wildcard src/common/debugging/*.cpp) \
 		$(wildcard src/common/logging/*.cpp) \
 		$(wildcard src/common/serialization/*.cpp) \
+		$(wildcard src/common/threading/*.cpp) \
 		$(wildcard src/common/utility/*.cpp) \
 		$(wildcard src/server/*.cpp) \
 		$(wildcard src/server/database/database/*.cpp) \
 		$(wildcard src/server/database/database/implementation/*.cpp) \
 		$(wildcard src/server/database/update/*.cpp) \
 		$(wildcard src/server/database/logging/*.cpp) \
-		$(wildcard src/server/net/*.cpp) \
-		$(wildcard src/server/process/*.cpp)
+		$(wildcard src/server/game/server/*.cpp) \
+		$(wildcard src/server/game/server/protocol/*.cpp) \
+		$(wildcard src/server/process/*.cpp) \
+		$(wildcard src/server/shared/networking/*.cpp) \
+		$(wildcard src/server/shared/networking/ip/*.cpp) \
+		$(wildcard src/server/shared/packets/*.cpp) \
+		$(wildcard src/server/worldserver/*.cpp)
 
 dep = $(obj:.o=.d)
 

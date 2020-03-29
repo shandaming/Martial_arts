@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef OP_CODES_H
-#define OP_CODES_H
+#ifndef PR_OP_CODES_H
+#define PR_OP_CODES_H
 
 enum connection_type : int8_t
 {

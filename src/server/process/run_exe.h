@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef RUN_EXE_H
-#define RUN_EXE_H
+#ifndef PRO_RUN_EXE_H
+#define PRO_RUN_EXE_H
 
 #include <filesystem>
 

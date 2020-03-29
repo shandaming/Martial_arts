@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef FILE_DESCRIPTOR_H
-#define FILE_DESCRIPTOR_H
+#ifndef PRO_FILE_DESCRIPTOR_H
+#define PRO_FILE_DESCRIPTOR_H
 
 class file_descriptor
 {

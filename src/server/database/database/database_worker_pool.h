@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef DATABASE_WORKER_POOL_H
-#define DATABASE_WORKER_POOL_H
+#ifndef DB_DATABASE_WORKER_POOL_H
+#define DB_DATABASE_WORKER_POOL_H
 
 #include "sql_operation.h"
 #include "mysql_connection.h"

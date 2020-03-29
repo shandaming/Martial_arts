@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef SOCKET_OPERATIONS_H
-#define SOCKET_OPERATIONS_H
+#ifndef NET_SOCKET_OPERATIONS_H
+#define NET_SOCKET_OPERATIONS_H
 
 #include <sys/uio.h>
 

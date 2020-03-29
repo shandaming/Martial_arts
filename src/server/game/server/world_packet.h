@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef WORLD_PACKET_H
-#define WORLD_PACKET_H
+#ifndef S_WORLD_PACKET_H
+#define S_WORLD_PACKET_H
 
 #include "packets/byte_buffer.h"
 #include "protocol/opcode.h"

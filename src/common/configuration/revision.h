@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef REVISION_H
-#define REVISION_H
+#ifndef CFG_REVISION_H
+#define CFG_REVISION_H
 
 namespace revision
 {

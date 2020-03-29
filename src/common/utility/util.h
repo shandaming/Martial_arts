@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef COMM_UTIL_H
+#define COMM_UTIL_H
 
 #include <vector>
 #include <string>

@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef APPENDER_H
-#define APPENDER_H
+#ifndef LOG_APPENDER_H
+#define LOG_APPENDER_H
 
 #include <string>
 #include <stdexcept>

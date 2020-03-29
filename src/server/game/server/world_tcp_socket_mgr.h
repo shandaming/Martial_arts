@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef WORLD_TCP_SOCKET_MGR_H
-#define WORLD_TCP_SOCKET_MGR_H
+#ifndef S_WORLD_TCP_SOCKET_MGR_H
+#define S_WORLD_TCP_SOCKET_MGR_H
 
 class world_tcp_socket_mgr
 {

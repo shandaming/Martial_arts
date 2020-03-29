@@ -2,13 +2,12 @@
  * Copyright (C) 2018-2019
  */
 
-#ifndef LOG_H
-#define LOG_H
+#ifndef LOGGING_LOG_H
+#define LOGGING_LOG_H
 
 //#include "appender.h"
 #include "logger.h"
-#include "log_worker.h"
-#include "common/utility/string_format.h"
+#include "string_format.h"
 
 #define LOGGER_ROOT "root"
 
@@ -20,12 +19,14 @@ appender* create_appender(uint8_t id, std::string const& name, log_level level, 
     return new AppenderImpl(id, name, level, flags, std::forward<std::vector<char const*>>(extra_args));
 }
 
+class event_loop;
+
 class log
 {
 public:
 	static log* instance();
 
-	void initialize(bool async);
+	void initialize(event_loop* event_loop);
 	void set_synchronous();
 	void load_from_config();
 	void close();
@@ -69,7 +70,7 @@ private:
 	log& operator=(log&&) = delete;
 
 	static std::string get_timestamp_str();
-	void write(std::unique_ptr<log_message>&& msg) /*const*/;
+	void write(std::unique_ptr<log_message>&& msg) const;
 
 	logger const* get_logger_by_type(std::string const& type) const;
 	appender* get_appender_by_name(std::string const& name);
@@ -91,10 +92,7 @@ private:
 	std::string logs_dir_;
 	std::string logs_timestamp_;
 
-	//Trinity::Asio::IoContext* _ioContext;
-	//Trinity::Asio::Strand* _strand;
-	bool async_;
-	log_worker log_worker_;
+	event_loop* event_loop_;
 };
 
 #define LOG log::instance()

@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef EXECUTOR_H
-#define EXECUTOR_H
+#ifndef PRO_EXECUTOR_H
+#define PRO_EXECUTOR_H
 
 #include <unistd.h>
 

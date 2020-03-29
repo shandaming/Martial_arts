@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef QUERY_HOLDER_H
-#define QUERY_HOLDER_H
+#ifndef DB_QUERY_HOLDER_H
+#define DB_QUERY_HOLDER_H
 
 #include "sql_operation.h"
 

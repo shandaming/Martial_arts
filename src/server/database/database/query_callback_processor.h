@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef QUERY_CALLBACK_PROCESSOR_H
-#define QUERY_CALLBACK_PROCESSOR_H
+#ifndef DB_QUERY_CALLBACK_PROCESSOR_H
+#define DB_QUERY_CALLBACK_PROCESSOR_H
 
 #include "query_callback.h"
 

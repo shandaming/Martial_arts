@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef TRANSACTION_H
-#define TRANSACTIOn_H
+#ifndef DB_TRANSACTION_H
+#define DB_TRANSACTION_H
 
 #include "sql_operation.h"
 #include "common/serialization/string_utils.h"

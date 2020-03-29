@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef MYSQL_THREADING_H
-#define MYSQL_THREADING_H
+#ifndef DB_MYSQL_THREADING_H
+#define DB_MYSQL_THREADING_H
 
 namespace mysql
 {

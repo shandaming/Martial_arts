@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef PIPE_H
-#define PIPE_H
+#ifndef PRO_PIPE_H
+#define PRO_PIPE_H
 
 #include "exceptions.h"
 

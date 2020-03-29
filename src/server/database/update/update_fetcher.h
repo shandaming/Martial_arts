@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef UPDATE_FETCHER_H
-#define UPDATE_FETCHER_H
+#ifndef DB_UPDATE_FETCHER_H
+#define DB_UPDATE_FETCHER_H
 
 #include <string>
 #include <functional>

@@ -2,8 +2,8 @@
  * Copyright (C) 2019
  */
 
-#ifndef OPTION_DESCRIPTION_H
-#define OPTION_DESCRIPTION_H
+#ifndef CMD_OPTION_DESCRIPTION_H
+#define CMD_OPTION_DESCRIPTION_H
 
 #include <memory>
 #include <string>

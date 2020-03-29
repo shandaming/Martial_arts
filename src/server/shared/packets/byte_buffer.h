@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef BYTE_BUFFER_H
-#define BYTE_BUFFER_H
+#ifndef PACKETS_BYTE_BUFFER_H
+#define PACKETS_BYTE_BUFFER_H
 
 class byte_buffer
 {

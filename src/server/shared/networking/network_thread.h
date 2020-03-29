@@ -2,8 +2,8 @@
  * Copyright (C) 2020
  */
 
-#ifndef NETWORK_THREAD_H
-#define NETWORK_THREAD_H
+#ifndef NET_NETWORK_THREAD_H
+#define NET_NETWORK_THREAD_H
 
 template<typename SocketType>
 class network_thread
