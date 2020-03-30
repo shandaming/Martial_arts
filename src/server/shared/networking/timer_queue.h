@@ -7,11 +7,9 @@
 
 #include <set>
 
-#include "net/channel.h"
-#include "net/timer.h"
+#include "channel.h"
+#include "timer.h"
 
-namespace net
-{
 class event_loop;
 
 class timer_queue
@@ -54,6 +52,5 @@ private:
 	bool calling_expired_timers_; /* atomic */
 	Active_timer_set canceling_timers_;
 };
-}
 
 #endif

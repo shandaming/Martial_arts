@@ -3,15 +3,14 @@
  */
 
 #include <sstream>
-#include <memory>
 
 #include "log.h"
 #include "appender_console.h"
 #include "appender_file.h"
 #include "log_operation.h"
-#include "common/debugging/errors.h"
-#include "common/configuration/config.h"
-#include "common/utility/util.h"
+#include "errors.h"
+#include "config.h"
+#include "util.h"
 #include "event_loop.h"
 
 log::log() : appender_id_(0), lowest_log_level_(LOG_LEVEL_FATAL), event_loop_(nullptr)

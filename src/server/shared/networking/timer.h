@@ -5,9 +5,12 @@
 #ifndef NET_TIMER_H
 #define NET_TIMER_H
 
+#include <functional>
 #include <atomic>
 
-#include "common/timestamp.h"
+#include "timestamp.h"
+
+typedef std::function<void()> Timer_callback;
 
 class timer
 {

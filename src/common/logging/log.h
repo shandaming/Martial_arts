@@ -5,7 +5,9 @@
 #ifndef LOGGING_LOG_H
 #define LOGGING_LOG_H
 
-//#include "appender.h"
+#include <memory>
+#include <vector>
+
 #include "logger.h"
 #include "string_format.h"
 

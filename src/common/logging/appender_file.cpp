@@ -4,6 +4,7 @@
 
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 
 #include "appender_file.h"
 #include "log.h"

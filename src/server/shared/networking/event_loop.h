@@ -5,7 +5,6 @@
 #ifndef NET_EVENT_LOOP_H
 #define NET_EVENT_LOOP_H
 
-#include <functional>
 #include <mutex>
 
 #include "epoll.h"

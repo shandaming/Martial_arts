@@ -7,8 +7,8 @@
 #include <cassert>
 
 #include "event_loop.h"
-#include "log/logging.h"
-#include "common/thread.h"
+#include "log.h"
+#include "thread.h"
 
 namespace
 {

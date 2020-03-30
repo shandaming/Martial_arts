@@ -8,7 +8,7 @@
 #include <functional>
 #include <memory>
 
-#include "common/timestamp.h"
+#include "timestamp.h"
 
 namespace net
 {

@@ -67,8 +67,6 @@ void reset_timerfd(int timerfd, Timestamp expiration)
 }
 }
 
-namespace net
-{
 timer_queue::timer_queue(event_loop* loop) :
 	loop_(loop),
     timerfd_(detail::create_timerfd()),
@@ -254,5 +252,4 @@ bool timer_queue::insert(timer* timer)
 
 	assert(timers_.size() == active_timers_.size());
 	return earliest_changed;
-}
 }
