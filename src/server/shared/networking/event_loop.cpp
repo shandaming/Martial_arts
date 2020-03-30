@@ -106,9 +106,7 @@ void event_loop::quit()
 	//然后Event_loop析构，然后我们访问一个无效的对象。
 	//可以在两个地方使用mutex_进行修复。
 	if (!is_in_loop_thread())
-	{
 		wakeup();
-	}
 }
 
 size_t event_loop::queue_size()
@@ -190,7 +188,8 @@ void event_loop::wakeup()
 	uint64_t one = 1;
 	ssize_t n = write(wakeup_fd_, &one, sizeof one);
 	if (n != sizeof one)
-		LOG_ERROR << "event_loop::wakeup() writes " << n << " bytes instead of 8";
+		LOG_ERROR("network", "wakeup failed. writes %u bytes instead of 8", n);
+		//LOG_ERROR << "event_loop::wakeup() writes " << n << " bytes instead of 8";
 }
 
 void event_loop::handle_read()
@@ -198,7 +197,8 @@ void event_loop::handle_read()
 	uint64_t one = 1;
 	ssize_t n = read(wakeup_fd_, &one, sizeof one);
 	if (n != sizeof one)
-		LOG_ERROR << "event_loop::handleRead() reads " << n << " bytes instead of 8";
+		LOG_ERROR("network", "handle read failed. read %u bytes instead of 8", n);
+		//LOG_ERROR << "event_loop::handleRead() reads " << n << " bytes instead of 8";
 }
 
 void event_loop::do_pending_functors()
