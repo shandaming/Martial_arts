@@ -128,8 +128,10 @@ void event_loop::run_in_loop(functor&& cb)
 
 void event_loop::queue_in_loop(functor&& cb)
 {
-	std::lock_guard<std::mutex> lock(mutex_);
-	pending_functors_.push_back(std::move(cb));  // emplace_back
+	{
+		std::lock_guard<std::mutex> lock(mutex_);
+		pending_functors_.push_back(std::move(cb));  // emplace_back
+	}
 
 	if (!is_in_loop_thread() || calling_pending_functors_)
 		wakeup();
