@@ -6,6 +6,7 @@
 #define NET_EPOLL_H
 
 #include <map>
+#include <vector>
 
 class channel;
 class event_loop;

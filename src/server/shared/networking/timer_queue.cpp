@@ -5,9 +5,9 @@
 #include <sys/timerfd.h>
 #include <unistd.h>
 
-#include "net/timer_queue.h"
-#include "net/event_loop.h"
-#include "log/logging.h"
+#include "timer_queue.h"
+#include "event_loop.h"
+#include "log.h"
 
 namespace detail
 {
@@ -24,7 +24,7 @@ timespec how_much_time_from_now(Timestamp when)
 {
 std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-std::chrono::duration_cast<std::chrono::microseconds>(now_c).count()
+std::chrono::duration_cast<std::chrono::microseconds>(now_c).count();
 
 	int64_t microseconds = when.micro_seconds_since_epoch() -
 		Timestamp::now().micro_seconds_since_epoch();
@@ -92,21 +92,21 @@ timer_queue::~timer_queue()
 	}
 }
 
-Timer_id timer_queue::add_timer(Timer_callback&& cb, Timestamp when,
+timer_id timer_queue::add_timer(Timer_callback&& cb, Timestamp when,
 		double interval)
 {
 	timer* timer = new timer(std::move(cb), when, interval);
 	if(timer == nullptr)
 	{
-		return Timer_id();
+		return timer_id();
 	}
 
 	loop_->run_in_loop(std::bind(&timer_queue::add_timer_in_loop, this, 
 				timer));
-	return Timer_id(timer, timer->sequence());
+	return timer_id(timer, timer->sequence());
 }
 
-void timer_queue::cancel(const Timer_id& timerId)
+void timer_queue::cancel(const timer_id& timerId)
 {
 	loop_->run_in_loop(std::bind(&timer_queue::cancel_in_loop, this, 
 				std::ref(timerId)));
@@ -123,7 +123,7 @@ void timer_queue::add_timer_in_loop(timer* timer)
 	}
 }
 
-void timer_queue::cancel_in_loop(const Timer_id& timerId)
+void timer_queue::cancel_in_loop(const timer_id& timerId)
 {
 	loop_->assert_in_loop_thread();
 

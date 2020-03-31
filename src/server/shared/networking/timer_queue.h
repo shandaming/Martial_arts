@@ -21,10 +21,10 @@ public:
 	timer_queue(const timer_queue&) = delete;
 	timer_queue& operator=(const timer_queue&) = delete;
 
-	Timer_id add_timer(Timer_callback&& cb, Timestamp when, 
+	timer_id add_timer(Timer_callback&& cb, Timestamp when, 
 			double interval);
 
-	void cancel(const Timer_id& timerId);
+	void cancel(const timer_id& timerId);
 private:
 	typedef std::pair<Timestamp, timer*> Entry;
 	typedef std::set<Entry> Timer_list;
@@ -32,7 +32,7 @@ private:
 	typedef std::set<Active_timer> Active_timer_set;
 
 	void add_timer_in_loop(timer* timer);
-	void cancel_in_loop(const Timer_id& timerId);
+	void cancel_in_loop(const timer_id& timerId);
 	// called when timerfd alarms
 	void handleRead();
 	// move out all expired timers

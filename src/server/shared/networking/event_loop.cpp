@@ -3,12 +3,10 @@
  */
 
 #include <sys/eventfd.h>
-#include <unistd.h>
-#include <cassert>
+//#include <unistd.h>
 
 #include "event_loop.h"
 #include "log.h"
-#include "thread.h"
 
 namespace
 {
@@ -135,24 +133,24 @@ void event_loop::queue_in_loop(functor&& cb)
 		wakeup();
 }
 
-Timer_id event_loop::run_at(const Timestamp& time, Timer_callback&& cb)
+timer_id event_loop::run_at(const Timestamp& time, Timer_callback&& cb)
 {
 	return timer_queue_->add_timer(std::move(cb), time, 0.0);
 }
 
-Timer_id event_loop::run_after(double delay, Timer_callback&& cb)
+timer_id event_loop::run_after(double delay, Timer_callback&& cb)
 {
 	Timestamp time(add_time(Timestamp::now(), delay));
 	return run_at(time, std::move(cb));
 }
 
-Timer_id event_loop::run_every(double interval, Timer_callback&& cb)
+timer_id event_loop::run_every(double interval, Timer_callback&& cb)
 {
 	Timestamp time(add_time(Timestamp::now(), interval));
 	return timer_queue_->add_timer(std::move(cb), time, interval);
 }
 
-void event_loop::cancel(Timer_id timerId)
+void event_loop::cancel(timer_id timerId)
 {
 	return timer_queue_->cancel(timerId);
 }
@@ -225,6 +223,11 @@ void event_loop::print_active_channels() const
 		const channel* ch = it;
 		LOG_TRACE << "{" << ch->revents_to_string() << "} ";
 	}
+}
+
+bool event_loop::is_in_loop_thread() const 
+{
+	return thread_id_ == this_thread_id(); 
 }
 
 void event_loop::assert_in_loop_thread()

@@ -36,6 +36,6 @@ private:
     storage_type storage_;
 };
 
-inline int this_thread_id()
+inline long this_thread_id();
 
 #endif

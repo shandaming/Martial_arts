@@ -28,18 +28,16 @@ public:
 
 	void quit();
 
-	int64_t iteration() const { return iteration_; }
-
 	size_t queue_size();
 
 	void run_in_loop(functor&& cb);
 	void queue_in_loop(functor&& cb);
 
-	void cancel(Timer_id timerId);
+	void cancel(timer_id timerId);
 
-	Timer_id run_at(const Timestamp& time, Timer_callback&& cb);
-	Timer_id run_after(double delay, Timer_callback&& cb);
-	Timer_id run_every(double interval, Timer_callback&& cb);
+	timer_id run_at(const Timestamp& time, Timer_callback&& cb);
+	timer_id run_after(double delay, Timer_callback&& cb);
+	timer_id run_every(double interval, Timer_callback&& cb);
 
 	// 内部使用
 	void wakeup();
@@ -49,10 +47,7 @@ public:
 
 	void assert_in_loop_thread();
 
-  	bool is_in_loop_thread() const 
-	{
-		return thread_id_ == get_current_thread_id(); 
-	}
+  	bool is_in_loop_thread() const;
 
 	bool event_handling() const { return event_handling_; }
 
@@ -69,7 +64,7 @@ private:
   	bool quit_; /* atomic and shared between threads, okay on x86, I guess. */
   	bool event_handling_; /* atomic */
   	bool calling_pending_functors_; /* atomic */
-  	const int thread_id_;
+  	const long thread_id_;
   	std::unique_ptr<epoll> epoll_;
   	std::unique_ptr<timer_queue> timer_queue_;
   	int wakeup_fd_;

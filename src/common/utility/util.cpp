@@ -2,7 +2,8 @@
  * Copyright (C) 2019
  */
 
-#include <sys/syscall.h> 
+#include <sys/syscall.h>
+#include <unistd.h>
 
 #include <cstring>
 
@@ -43,9 +44,9 @@ tokenizer::tokenizer(const std::string &src, const char sep, uint32_t vectorRese
     }
 }
 
-int this_thread_id()
+long this_thread_id()
 {
-	static int thread_local thread_id = 0;
+	static long thread_local thread_id = 0;
 	if(thread_id == 0)
 		thread_id = syscall(SYS_gettid);
 	return thread_id;
