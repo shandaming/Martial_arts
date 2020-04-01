@@ -5,7 +5,7 @@
 #ifndef NET_SOCKET_H
 #define NET_SOCKET_H
 
-#include "ip/endpoint.h"
+#include "endpoint.h"
 
 struct socket_option
 {
@@ -15,35 +15,16 @@ struct socket_option
 	int level;
 	int optname;
 	int optval;
-	std::string ;description;
+	std::string description;
 };
 
 struct option
 {
-	static socket_option tcp_no_delay() 
-	{
-		return socket_option(IPPROTO_TCP, TCP_NODELAY, 1, "tcp no delay");
-	}
-
-	static socket_option reuse_addr() 
-	{
-		return socket_option(SOL_SOCKET, SO_REUSEADDR, 1, "socket reuse address");
-	}
-
-	static socket_option reuse_port() 
-	{
-		return socket_option(SOL_SOCKET, SO_REUSEPORT, 1, "socket reuse port");
-	}
-
-	static socket_option keep_alive() 
-	{
-		return socket_option(SOL_SOCKET, SO_KEEPALIVE, 1, "socket keep alive");
-	}
-
-	static socket_option send_buffer_size(int size) 
-	{
-		return socket_option(SOL_SOCKET, SO_SNDBUF, size, "socket send buffer");
-	}
+	static socket_option tcp_no_delay();
+	static socket_option reuse_address();
+	static socket_option reuse_port();
+	static socket_option keep_alive();
+	static socket_option send_buffer_size(int size);
 };
 
 class socket
@@ -99,9 +80,9 @@ public:
 
 	operator int() { return fd_; }
 
-	bool is_open() const;
+	bool is_open() const { return fd_ != invalid_socket; }
 private:
-	const int fd_;
+	int fd_;
 };
 
 #endif

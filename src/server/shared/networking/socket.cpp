@@ -5,9 +5,33 @@
 #include <netinet/tcp.h>
 
 #include "socket.h"
-#include "socket_type.h"
 #include "socket_operations.h"
-#include "logging/log.h"
+#include "log.h"
+
+socket_option option::tcp_no_delay() 
+{
+	return socket_option(IPPROTO_TCP, TCP_NODELAY, 1, "tcp no delay");
+}
+
+socket_option option::reuse_address() 
+{
+	return socket_option(SOL_SOCKET, SO_REUSEADDR, 1, "socket reuse address");
+}
+
+socket_option option::reuse_port() 
+{
+	return socket_option(SOL_SOCKET, SO_REUSEPORT, 1, "socket reuse port");
+}
+
+socket_option option::keep_alive() 
+{
+	return socket_option(SOL_SOCKET, SO_KEEPALIVE, 1, "socket keep alive");
+}
+
+socket_option option::send_buffer_size(int size) 
+{
+	return socket_option(SOL_SOCKET, SO_SNDBUF, size, "socket send buffer");
+}
 
 socket::~socket()
 {
@@ -155,4 +179,4 @@ endpoint socket::remote_endpoint(std::error_code& ec)
 	return e;
 }
 
-bool socket::is_open() const { return fd_ != invalid_socket; }
+//bool socket::is_open() const { return fd_ != invalid_socket; }

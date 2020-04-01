@@ -8,7 +8,7 @@
 #include <array>
 #include <system_error>
 
-#include "networking/socket_types.h"
+#include "socket_types.h"
 
 class address_v6
 {

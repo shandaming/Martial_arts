@@ -6,7 +6,9 @@
 #define NET_ACCEPTOR_H
 
 #include "socket.h"
-#include "event_loop.h"
+#include "channel.h"
+
+class event_loop;
 
 class acceptor
 {

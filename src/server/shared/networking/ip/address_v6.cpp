@@ -5,8 +5,8 @@
 #include <cstring>
 
 #include "address_v6.h"
-#include "networking/socket_operations.h"
-#include "networking/network_exception.h"
+#include "socket_operations.h"
+#include "network_exception.h"
 
 address_v6::address_v6() : addr_(), scope_id_(0) {}
 

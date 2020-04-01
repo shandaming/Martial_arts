@@ -5,8 +5,8 @@
 #include <cstring>
 
 #include "address_v4.h"
-#include "networking/socket_operations.h"
-#include "networking/network_exception.h"
+#include "socket_operations.h"
+#include "network_exception.h"
 
 address_v4::address_v4(const address_v4::bytes_type& bytes)
 {

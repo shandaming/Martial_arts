@@ -7,7 +7,7 @@
 
 #include "endpoint.h"
 #include "socket_operations.h"
-#include "networking/network_exception.h"
+#include "network_exception.h"
 
 endpoint::endpoint() : data_()
 {

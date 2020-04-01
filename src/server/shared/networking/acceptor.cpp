@@ -5,11 +5,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <cassert>
-
 #include "acceptor.h"
 #include "socket_operations.h"
-#include "logging/log.h"
+#include "log.h"
 
 acceptor::acceptor(Event_loop* loop, const std::string& bind_ip, uint16_t port, bool reuseport) : 
 	loop_(loop),

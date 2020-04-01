@@ -3,7 +3,7 @@
  */
 
 #include "address.h"
-#include "networking/network_exception.h"
+#include "network_exception.h"
 
 address::address() : type_(ipv4), ipv4_address_(), ipv6_address_() {}
 

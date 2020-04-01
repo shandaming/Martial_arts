@@ -8,7 +8,7 @@
 #include "epoll.h"
 #include "channel.h"
 #include "event_loop.h"
-#include "log/logging.h"
+#include "log.h"
 
 epoll::epoll(event_loop* loop) : 
 	owner_loop_(loop), 
