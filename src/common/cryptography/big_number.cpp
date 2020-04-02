@@ -2,23 +2,18 @@
  * Copyright (C) 2020
  */
 
-#include "big_number.h"
-
 #include <openssl/bn.h>
 #include <cstring>
 #include <algorithm>
 #include <memory>
 
-big_number::big_number()
-    : bn_(BN_new())
-{ }
+#include "big_number.h"
 
-big_number::big_number(big_number const& bn)
-    : bn_(BN_dup(bn.bn_))
-{ }
+big_number::big_number() : bn_(BN_new()) {}
 
-big_number::big_number(uint32_t val)
-    : bn_(BN_new())
+big_number::big_number(big_number const& bn) : bn_(BN_dup(bn.bn_)) {}
+
+big_number::big_number(uint32_t val) : bn_(BN_new())
 {
     BN_set_word(bn_, val);
 }
@@ -191,8 +186,8 @@ std::string big_number::as_hex_str() const
 
 std::string big_number::as_dec_str() const
 {
-    char* ch = BN_bn2dec(bn_);
-    std::string ret = ch;
-    OPENSSL_free(ch);
-    return ret;
+	char* ch = BN_bn2dec(bn_);
+	std::string ret = ch;
+	OPENSSL_free(ch);
+	return ret;
 }

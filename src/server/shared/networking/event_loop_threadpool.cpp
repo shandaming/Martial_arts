@@ -2,9 +2,6 @@
  * Copyright (C) 2018
  */
 
-#include <cassert>
-//#include <memory>
-
 #include "event_loop_threadpool.h"
 
 event_loop_threadpool::event_loop_threadpool(event_loop* base_loop) : 

@@ -4,7 +4,7 @@
 
 #include <sstream>
 #include "appender.h"
-#include "common/utility/string_format.h"
+#include "string_format.h"
 
 appender::appender(uint8_t id, const std::string& name, log_level level, appender_flags flags) : 
 	id_(id), name_(name), level_(level), flags_(flags) { }
@@ -12,27 +12,19 @@ appender::appender(uint8_t id, const std::string& name, log_level level, appende
 void appender::write(log_message* message)
 {
 	if(!level_ || level_ > message->level)
-	{
 		return;
-	}
 
 	std::ostringstream ss;
 
 	if(flags_ & APPENDER_FLAGS_PREFIX_TIMESTAMP)
-	{
 		ss << message->get_time_str() << ' ';
-	}
 
 	if(flags_ & APPENDER_FLAGS_PREFIX_LOGLEVEL)
-	{
 		ss << string_format("%-5s ", 
 				appender::get_log_level_str(message->level));
-	}
 
 	if(flags_ & APPENDER_FLAGS_PREFIX_LOGFILTERTYPE)
-	{
 		ss << '[' << message->type << "] ";
-	}
 
 	message->prefix = ss.str();
 	write_stream(message);

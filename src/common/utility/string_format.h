@@ -7,6 +7,7 @@
 
 #include <string>
 #include <cstdio>
+
 #include "define.h"
 
 template<typename... Args>

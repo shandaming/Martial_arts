@@ -5,7 +5,6 @@
 #ifndef LOG_APPENDER_H
 #define LOG_APPENDER_H
 
-#include <string>
 #include <stdexcept>
 
 #include "log_message.h"

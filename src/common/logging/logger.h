@@ -6,7 +6,6 @@
 #define LOG_LOGGER_H
 
 #include <unordered_map>
-#include <string>
 
 #include "appender.h"
 

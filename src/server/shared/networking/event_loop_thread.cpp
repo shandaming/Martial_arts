@@ -3,6 +3,7 @@
  */
 
 #include "event_loop_thread.h"
+#include "event_loop.h"
 
 event_loop_thread::event_loop_thread() :
 	loop_(NULL),
@@ -10,14 +11,14 @@ event_loop_thread::event_loop_thread() :
 
 event_loop_thread::~event_loop_thread()
 {
-  exiting_ = true;
-  if (loop_ != NULL) // not 100% race-free, eg. thread_func could be running callback_.
-  {
+	exiting_ = true;
+	if (loop_ != NULL) // not 100% race-free, eg. thread_func could be running callback_.
+	{
     // still a tiny chance to call destructed object, if thread_func exits just now.
     // but when event_loop_thread destructs, usually programming is exiting anyway.
-    loop_->quit();
-    thread_->join();
-  }
+		loop_->quit();
+		thread_->join();
+	}
 }
 
 event_loop* event_loop_thread::start_loop()

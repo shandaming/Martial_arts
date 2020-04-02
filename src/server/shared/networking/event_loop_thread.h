@@ -9,7 +9,7 @@
 #include <condition_variable>
 #include <thread>
 
-#include "event_loop.h"
+class event_loop;
 
 class event_loop_thread
 {

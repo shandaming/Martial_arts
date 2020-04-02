@@ -37,9 +37,7 @@ public:
 		std::lock_guard<std::mutex> lock(mutex_);
 
 		if(queue_.empty() || shutdown_)
-		{
 			return false;
-		}
 
 		v = queue_.front();
 		queue_.pop();
@@ -52,14 +50,10 @@ public:
 		std::unique_lock<std::mutex> lock(mutex_);
 
 		while(queue_.empty() || shutdown_)
-		{
 			cv_.wait(lock);
-		}
 
 		if(queue_.empty() || shutdown_)
-		{
 			return;
-		}
 
 		v = queue_.front();
 		queue_.pop();

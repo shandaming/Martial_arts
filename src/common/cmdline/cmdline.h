@@ -33,7 +33,6 @@ public:
 
 	std::vector<std::string> args;
 	const options_description* desc;
-	//const positional_options_description* positional;
 };
 
 #endif

@@ -2,8 +2,6 @@
  * Copyright (C) 2018 by Shan Daming
  */
 
-#include <cstdio>
-
 #include "log_message.h"
 
 log_message::log_message(log_level level_, const std::string& type_, std::string&& text_) :
