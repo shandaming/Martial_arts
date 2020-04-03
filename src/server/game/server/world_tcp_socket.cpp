@@ -188,41 +188,41 @@ void world_tcp_socket::initialize_handler(std::error_code error, size_t transfer
 bool world_tcp_socket::update()
 {
 	encryptable_packet* queued;
-    message_buffer buffer(send_buffer_size_);
+	message_buffer buffer(send_buffer_size_);
 
-    while (buffer_queue_.dequeue(queued))
-    {
-        uint32_t packet_size = queued->size();
-        if (packet_size > min_size_for_compression && queued->needs_encryption())
-            packet_size = compress_bound(packet_size) + sizeof(compressed_world_packet);
+	while(buffer_queue_.dequeue(queued))
+	{
+		uint32_t packet_size = queued->size();
+		if(packet_size > min_size_for_compression && queued->needs_encryption())
+            		packet_size = compress_bound(packet_size) + sizeof(compressed_world_packet);
 
-        if (buffer.get_remaining_space() < packet_size + sizeof(packet_header))
-        {
-            queue_packet(std::move(buffer));
-            buffer.resize(send_buffer_size_);
-        }
+        	if(buffer.get_remaining_space() < packet_size + sizeof(packet_header))
+        	{
+            		queue_packet(std::move(buffer));
+            		buffer.resize(send_buffer_size_);
+        	}
 
-        if (buffer.get_remaining_space() >= packet_size + sizeof(packet_header))
-            write_packet_to_buffer(*queued, buffer);
-        else    // single packet larger than 4096 bytes
-        {
-            message_buffer packet_buffer(packet_size + sizeof(packet_header));
-            write_packet_to_buffer(*queued, packet_buffer);
-            queue_packet(std::move(packet_buffer));
-        }
+        	if(buffer.get_remaining_space() >= packet_size + sizeof(packet_header))
+            		write_packet_to_buffer(*queued, buffer);
+        	else    // single packet larger than 4096 bytes
+        	{
+            		message_buffer packet_buffer(packet_size + sizeof(packet_header));
+            		write_packet_to_buffer(*queued, packet_buffer);
+            		queue_packet(std::move(packet_buffer));
+        	}
 
-        delete queued;
-    }
+        	delete queued;
+    	}
 
-    if (buffer.get_active_size() > 0)
-        queue_packet(std::move(buffer));
+    	if(buffer.get_active_size() > 0)
+        	queue_packet(std::move(buffer));
 
-    if (!BaseSocket::update())
-        return false;
+    	if(!BaseSocket::update())
+        	return false;
 
-    query_processor_.process_ready_queries();
+    	query_processor_.process_ready_queries();
 
-    return true;
+    	return true;
 }
 
 void world_tcp_socket::handle_send_auth_session()
@@ -240,73 +240,73 @@ void world_tcp_socket::handle_send_auth_session()
 
 void world_tcp_socket::on_close()
 {
-    {
-        std::lock_guard<std::mutex> lock(world_session_lock_);
-        world_session_ = nullptr;
-    }
+	{
+        	std::lock_guard<std::mutex> lock(world_session_lock_);
+        	world_session_ = nullptr;
+    	}
 }
 
 void world_tcp_socket::read_handler()
 {
-    if (!is_open())
-        return;
+	if(!is_open())
+        	return;
 
-    message_buffer& packet = get_read_buffer();
-    while (packet.get_active_size() > 0)
-    {
-        if (header_buffer_.get_remaining_space() > 0)
-        {
-            // need to receive the header
-            size_t read_header_size = std::min(packet.get_active_size(), 
+    	message_buffer& packet = get_read_buffer();
+    	while(packet.get_active_size() > 0)
+    	{
+        	if(header_buffer_.get_remaining_space() > 0)
+        	{
+            		// need to receive the header
+            		size_t read_header_size = std::min(packet.get_active_size(), 
 					header_buffer_.get_remaining_space());
-            header_buffer_.write(packet.get_read_pointer(), read_header_size);
-            packet.read_completed(read_header_size);
+            		header_buffer_.write(packet.get_read_pointer(), read_header_size);
+            		packet.read_completed(read_header_size);
 
-            if (header_buffer_.get_remaining_space() > 0)
-            {
-                // Couldn't receive the whole header this time.
-                ASSERT(packet.get_active_size() == 0);
-                break;
-            }
+            		if(header_buffer_.get_remaining_space() > 0)
+            		{
+                		// Couldn't receive the whole header this time.
+                		ASSERT(packet.get_active_size() == 0);
+                		break;
+            		}
 
-            // We just received nice new header
-            if (!read_header_handler())
-            {
-                close_socket();
-                return;
-            }
-        }
+            		// We just received nice new header
+            		if(!read_header_handler())
+            		{
+                		close_socket();
+                		return;
+            		}
+        	}
 
-        // We have full read header, now check the data payload
-        if (packet_buffer_.get_remaining_space() > 0)
-        {
-            // need more data in the payload
-            size_t read_data_size = std::min(packet.get_active_size(), 
+        	// We have full read header, now check the data payload
+        	if(packet_buffer_.get_remaining_space() > 0)
+        	{
+            		// need more data in the payload
+            		size_t read_data_size = std::min(packet.get_active_size(), 
 					packet_buffer_.get_remaining_space());
-            packet_buffer_.write(packet.get_read_pointer(), read_data_size);
-            packet.read_completed(read_data_size);
+            		packet_buffer_.write(packet.get_read_pointer(), read_data_size);
+            		packet.read_completed(read_data_size);
 
-            if (packet_buffer_.get_remaining_space() > 0)
-            {
-                // Couldn't receive the whole data this time.
-                ASSERT(packet.get_active_size() == 0);
-                break;
-            }
-        }
+            		if(packet_buffer_.get_remaining_space() > 0)
+            		{
+                		// Couldn't receive the whole data this time.
+                		ASSERT(packet.get_active_size() == 0);
+                		break;
+            		}
+        	}
 
-        // just received fresh new payload
-        read_data_handler_result result = read_data_handler();
-        header_buffer_.Reset();
-        if (result != read_data_handler_result::ok)
-        {
-            if (result != read_data_handler_result::waiting_for_query)
-                close_socket();
+        	// just received fresh new payload
+        	read_data_handler_result result = read_data_handler();
+        	header_buffer_.Reset();
+        	if(result != read_data_handler_result::ok)
+        	{
+            		if(result != read_data_handler_result::waiting_for_query)
+                	close_socket();
 
-            return;
-        }
-    }
+            		return;
+        	}
+    	}
 
-    //AsyncRead();
+    	//AsyncRead();
 	set_read_handler_internal_callback();
 }
 
@@ -323,166 +323,166 @@ bool world_tcp_socket::read_header_handler()
 			"Header size " SZFMTD " different than expected " SZFMTD, header_buffer_.get_active_size(), 
 			sizeof(packet_header));
 
-    packet_header* header = reinterpret_cast<packet_header*>(header_buffer_.get_read_pointer());
+    	packet_header* header = reinterpret_cast<packet_header*>(header_buffer_.get_read_pointer());
 
-    if (!header->is_valid_size())
-    {
+    	if(!header->is_valid_size())
+    	{
 		LOG_ERROR("network", "world_tcp_socket::read_header_handler(): "
 				"client %s sent malformed packet (size: %u)",
-            get_remote_ip_address().to_string().c_str(), header->Size);
-        return false;
-    }
+            	get_remote_ip_address().to_string().c_str(), header->Size);
+        	return false;
+    	}
 
-    packet_buffer_.resize(header->Size);
-    return true;
+    	packet_buffer_.resize(header->size);
+    	return true;
 }
 
 world_tcp_socket::read_data_handler_result world_tcp_socket::read_data_handler()
 {
 	packet_header* header = reinterpret_cast<packet_header*>(header_buffer_.get_read_pointer());
 
-    if (!auth_crypt_.DecryptRecv(packet_buffer_.get_read_pointer(), header->Size, header->Tag))
-    {
-        LOG_ERROR("network", "world_tcp_socket::read_header_handler(): "
+    	if(!auth_crypt_.DecryptRecv(packet_buffer_.get_read_pointer(), header->size, header->tag))
+    	{
+        	LOG_ERROR("network", "world_tcp_socket::read_header_handler(): "
 				"client %s failed to decrypt packet (size: %u)",
-            get_remote_ip_address().to_string().c_str(), header->Size);
-        return read_data_handler_result::error;
-    }
+            	get_remote_ip_address().to_string().c_str(), header->Size);
+        	return read_data_handler_result::error;
+    	}
 
-    world_packet packet(std::move(packet_buffer_), GetConnectionType());
-    OpcodeClient opcode = packet.read<OpcodeClient>();
-    if (uint32_t(opcode) >= uint32_t(NUM_OPCODE_HANDLERS))
-    {
-        LOG_ERROR("network", "world_tcp_socket::read_header_handler(): "
+    	world_packet packet(std::move(packet_buffer_), GetConnectionType());
+    	opcode_client opcode = packet.read<opcode_client>();
+    	if(uint32_t(opcode) >= uint32_t(NUM_OPCODE_HANDLERS))
+    	{
+        	LOG_ERROR("network", "world_tcp_socket::read_header_handler(): "
 				"client %s sent wrong opcode (opcode: %u)",
-            get_remote_ip_address().to_string().c_str(), uint32_t(opcode));
-        return read_data_handler_result::error;
-    }
+            	get_remote_ip_address().to_string().c_str(), uint32_t(opcode));
+        	return read_data_handler_result::error;
+    	}
 
-    packet.SetOpcode(opcode);
+    	packet.set_opcode(opcode);
 
-    if (sPacketLog->can_log_packet())
-        sPacketLog->log_packet(packet, CLIENT_TO_SERVER, get_remote_ip_address(), get_remote_port(), 
+    	if(sPacketLog->can_log_packet())
+        	sPacketLog->log_packet(packet, CLIENT_TO_SERVER, get_remote_ip_address(), get_remote_port(), 
 				GetConnectionType());
 
-    std::unique_lock<std::mutex> lock(world_session_lock_, std::defer_lock);
+    	std::unique_lock<std::mutex> lock(world_session_lock_, std::defer_lock);
 
-    switch (opcode)
-    {
-        case CMSG_PING:
-        {
-            log_opcode_text(opcode, lock);
-            world_packets::Auth::Ping ping(std::move(packet));
-            if (!ping.ReadNoThrow())
-            {
-                LOG_ERROR("network", "world_tcp_socket::read_data_handler(): "
+    	switch(opcode)
+	{
+		case CMSG_PING:
+        	{
+            		log_opcode_text(opcode, lock);
+            		world_packets::Auth::Ping ping(std::move(packet));
+            		if(!ping.ReadNoThrow())
+            		{
+                		LOG_ERROR("network", "world_tcp_socket::read_data_handler(): "
 						"client %s sent malformed CMSG_PING", get_remote_ip_address().to_string().c_str());
-                return read_data_handler_result::error;
-            }
-            if (!handle_ping(ping))
-                return read_data_handler_result::error;
-            break;
-        }
-        case CMSG_AUTH_SESSION:
-        {
-            log_opcode_text(opcode, lock);
-            if (authed_)
-            {
-                // locking just to safely log offending user is probably overkill but we are disconnecting him anyway
-                if (lock.try_lock())
-                    LOG_ERROR("network", "world_tcp_socket::ProcessIncoming: "
+                		return read_data_handler_result::error;
+            		}
+            		if(!handle_ping(ping))
+                		return read_data_handler_result::error;
+            		break;
+        	}
+        	case CMSG_AUTH_SESSION:
+        	{
+            		log_opcode_text(opcode, lock);
+            		if(authed_)
+            		{
+                		// locking just to safely log offending user is probably overkill but we are disconnecting him anyway
+                		if(lock.try_lock())
+                    			LOG_ERROR("network", "world_tcp_socket::ProcessIncoming: "
 							"received duplicate CMSG_AUTH_SESSION from %s", world_session_->GetPlayerInfo().c_str());
-                return read_data_handler_result::error;
-            }
+                		return read_data_handler_result::error;
+            		}
 
-            std::shared_ptr<world_packets::Auth::AuthSession> authSession = std::make_shared<world_packets::Auth::AuthSession>(std::move(packet));
-            if (!authSession->ReadNoThrow())
-            {
-                LOG_ERROR("network", "world_tcp_socket::read_data_handler(): client %s sent malformed CMSG_AUTH_SESSION", get_remote_ip_address().to_string().c_str());
-                return read_data_handler_result::error;
-            }
-            HandleAuthSession(authSession);
-            return read_data_handler_result::waiting_for_query;
-        }
-        case CMSG_AUTH_CONTINUED_SESSION:
-        {
-            log_opcode_text(opcode, lock);
-            if (authed_)
-            {
-                // locking just to safely log offending user is probably overkill but we are disconnecting him anyway
-                if (lock.try_lock())
-                    LOG_ERROR("network", "world_tcp_socket::ProcessIncoming: received duplicate CMSG_AUTH_CONTINUED_SESSION from %s", world_session_->GetPlayerInfo().c_str());
-                return read_data_handler_result::error;
-            }
+            		std::shared_ptr<world_packets::Auth::AuthSession> authSession = std::make_shared<world_packets::Auth::AuthSession>(std::move(packet));
+            		if(!authSession->ReadNoThrow())
+            		{
+                		LOG_ERROR("network", "world_tcp_socket::read_data_handler(): client %s sent malformed CMSG_AUTH_SESSION", get_remote_ip_address().to_string().c_str());
+                		return read_data_handler_result::error;
+            		}
+            		HandleAuthSession(authSession);
+            		return read_data_handler_result::waiting_for_query;
+        	}
+        	case CMSG_AUTH_CONTINUED_SESSION:
+        	{
+            		log_opcode_text(opcode, lock);
+            		if(authed_)
+            		{
+                		// locking just to safely log offending user is probably overkill but we are disconnecting him anyway
+                		if(lock.try_lock())
+                    			LOG_ERROR("network", "world_tcp_socket::ProcessIncoming: received duplicate CMSG_AUTH_CONTINUED_SESSION from %s", world_session_->GetPlayerInfo().c_str());
+                		return read_data_handler_result::error;
+            		}
 
-            std::shared_ptr<world_packets::Auth::AuthContinuedSession> authSession = std::make_shared<world_packets::Auth::AuthContinuedSession>(std::move(packet));
-            if (!authSession->ReadNoThrow())
-            {
-                LOG_ERROR("network", "world_tcp_socket::read_data_handler(): client %s sent malformed CMSG_AUTH_CONTINUED_SESSION", get_remote_ip_address().to_string().c_str());
-                return read_data_handler_result::error;
-            }
-            HandleAuthContinuedSession(authSession);
-            return read_data_handler_result::waiting_for_query;
-        }
-        case CMSG_KEEP_ALIVE:
-            log_opcode_text(opcode, lock);
-            break;
-        case CMSG_LOG_DISCONNECT:
-            log_opcode_text(opcode, lock);
-            packet.rfinish();   // contains uint32_t disconnectReason;
-            break;
-        case CMSG_ENABLE_NAGLE:
-            log_opcode_text(opcode, lock);
-            SetNoDelay(false);
-            break;
-        case CMSG_CONNECT_TO_FAILED:
-        {
-            lock.lock();
+            		std::shared_ptr<world_packets::Auth::AuthContinuedSession> authSession = std::make_shared<world_packets::Auth::AuthContinuedSession>(std::move(packet));
+            		if(!authSession->ReadNoThrow())
+            		{
+                		LOG_ERROR("network", "world_tcp_socket::read_data_handler(): client %s sent malformed CMSG_AUTH_CONTINUED_SESSION", get_remote_ip_address().to_string().c_str());
+                		return read_data_handler_result::error;
+            		}
+            		HandleAuthContinuedSession(authSession);
+            		return read_data_handler_result::waiting_for_query;
+        	}
+        	case CMSG_KEEP_ALIVE:
+            		log_opcode_text(opcode, lock);
+            		break;
+        	case CMSG_LOG_DISCONNECT:
+            		log_opcode_text(opcode, lock);
+            		packet.rfinish();   // contains uint32_t disconnectReason;
+            		break;
+        	case CMSG_ENABLE_NAGLE:
+            		log_opcode_text(opcode, lock);
+            		SetNoDelay(false);
+            		break;
+        	case CMSG_CONNECT_TO_FAILED:
+        	{
+            		lock.lock();
 
-            log_opcode_text(opcode, lock);
-            world_packets::Auth::ConnectToFailed connectToFailed(std::move(packet));
-            if (!connectToFailed.ReadNoThrow())
-            {
-                LOG_ERROR("network", "world_tcp_socket::read_data_handler(): client %s sent malformed CMSG_CONNECT_TO_FAILED", get_remote_ip_address().to_string().c_str());
-                return read_data_handler_result::error;
-            }
-            HandleConnectToFailed(connectToFailed);
-            break;
-        }
-        case CMSG_ENABLE_ENCRYPTION_ACK:
-            log_opcode_text(opcode, lock);
-            handle_enable_encryption_ack();
-            break;
-        default:
-        {
-            lock.lock();
+            		log_opcode_text(opcode, lock);
+            		world_packets::Auth::ConnectToFailed connectToFailed(std::move(packet));
+            		if(!connectToFailed.ReadNoThrow())
+            		{
+                		LOG_ERROR("network", "world_tcp_socket::read_data_handler(): client %s sent malformed CMSG_CONNECT_TO_FAILED", get_remote_ip_address().to_string().c_str());
+                		return read_data_handler_result::error;
+            		}
+            		HandleConnectToFailed(connectToFailed);
+            		break;
+        	}
+        	case CMSG_ENABLE_ENCRYPTION_ACK:
+            		log_opcode_text(opcode, lock);
+            		handle_enable_encryption_ack();
+            		break;
+        	default:
+		{
+            		lock.lock();
 
-            log_opcode_text(opcode, lock);
+            		log_opcode_text(opcode, lock);
 
-            if (!world_session_)
-            {
-                LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32_t(opcode));
-                return read_data_handler_result::error;
-            }
+            		if(!world_session_)
+            		{
+                		LOG_ERROR("network.opcode", "ProcessIncoming: Client not authed opcode = %u", uint32_t(opcode));
+                		return read_data_handler_result::error;
+            		}
 
-            OpcodeHandler const* handler = opcodeTable[opcode];
-            if (!handler)
-            {
-                LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", get_opcode_name_for_logging(static_cast<OpcodeClient>(packet.get_opcode())).c_str(), world_session_->GetPlayerInfo().c_str());
-                break;
-            }
+            		OpcodeHandler const* handler = opcodeTable[opcode];
+            		if(!handler)
+            		{
+                		LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", get_opcode_name_for_logging(static_cast<OpcodeClient>(packet.get_opcode())).c_str(), world_session_->GetPlayerInfo().c_str());
+                		break;
+            		}
 
-            // Our Idle timer will reset on any non PING opcodes.
-            // Catches people idling on the login screen and any lingering ingame connections.
-            world_session_->ResetTimeOutTime();
+            		// Our Idle timer will reset on any non PING opcodes.
+            		// Catches people idling on the login screen and any lingering ingame connections.
+            		world_session_->ResetTimeOutTime();
 
-            // Copy the packet to the heap before enqueuing
-            world_session_->queue_packet(new world_packet(std::move(packet)));
-            break;
-        }
-    }
+            		// Copy the packet to the heap before enqueuing
+            		world_session_->queue_packet(new world_packet(std::move(packet)));
+            		break;
+        	}
+    	}
 
-    return read_data_handler_result::ok;
+    	return read_data_handler_result::ok;
 }
 
 void world_tcp_socket::log_opcode_text(OpcodeClient opcode, std::unique_lock<std::mutex> const& guard) const
