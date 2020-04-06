@@ -3,13 +3,16 @@
  */
 
 #include <iostream>
+#include <csignal> 
 
-#include "common/configuration/revision.h"
-#include "common/cmdline/option_description.h"
-#include "common/cmdline/cmdline.h"
-#include "common/cmdline/variables_map.h"
-#include "database/database/mysql_threading.h"
-#include "database/database/database_loader.h"
+#include "revision.h"
+#include "option_description.h"
+#include "cmdline.h"
+#include "variables_map.h"
+#include "mysql_threading.h"
+#include "database_loader.h"
+#include "database_env.h"
+#include "errors.h"
 
 variables_map get_console_arguments(int argc, char** argv)
 {
@@ -45,7 +48,7 @@ bool start_db()
 	if(!loader.load())
 		return false;
 
-	world_database.execute("update version set core_version = '%s', core_revision = '%s'", get_full_version(), get_hash());
+	world_database.p_execute("update version set core_version = '%s', core_revision = '%s'", revision::get_full_version(), /*get_hash()*/"123");
 
 	return true;
 };

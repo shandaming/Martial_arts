@@ -369,7 +369,7 @@ void database_worker_pool<T>::execute_or_append(sql_transaction<T>& trans, prepa
 		trans->append(stmt);
 }
 
-database_worker_pool<world_database_connection> world_database;
-database_worker_pool<character_database_connection> character_database;
-database_worker_pool<login_database_connection> login_database;
-database_worker_pool<hotfix_database_connection> hotfix_database;
+template class database_worker_pool<world_database_connection>;
+template class database_worker_pool<character_database_connection>;
+template class database_worker_pool<login_database_connection>;
+template class database_worker_pool<hotfix_database_connection>;

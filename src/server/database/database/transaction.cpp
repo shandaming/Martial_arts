@@ -2,9 +2,13 @@
  * Copyright (C) 2019
  */
 
-#include "transaction.h"
+#include <cstring>
+#include <mysql/mysqld_error.h>
 
-std::mutex transaction_task::dead_lock_lock;
+#include "transaction.h"
+#include "mysql_connection.h"
+
+std::mutex transaction_task::dead_lock_lock_;
 
 // 将原始查询附加到事务
 void transaction_base::append(const char* sql)
@@ -30,9 +34,9 @@ void transaction_base::cleanup()
 	if(cleaned_up_)
 		return;
 
-	for(auto& i : queries_)
+	for(auto& data : queries_)
 	{
-		switch(i.type)
+		switch(data.type)
 		{
 			case SQL_ELEMENT_PREPARED:
 				delete data.element.stmt;
@@ -50,7 +54,7 @@ void transaction_base::cleanup()
 
 bool transaction_task::execute()
 {
-	int error_code = conn_->execute_transaction(trans_);
+	int error_code = conn->execute_transaction(trans_);
 	if(!error_code)
 	{
 		return true;
@@ -63,7 +67,7 @@ bool transaction_task::execute()
 		uint8_t loop_breaker = 5;// 处理MySQL错误1213，而无需将死锁扩展到内核本身
 		for(uint8_t i = 0; i < loop_breaker; ++i)
 		{
-			if(conn_->execute_transaction(trans_))
+			if(conn->execute_transaction(trans_))
 			{
 				return true;
 			}

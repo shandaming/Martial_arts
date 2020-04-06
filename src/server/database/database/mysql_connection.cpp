@@ -2,18 +2,18 @@
  * Copyright (C) 2019
  */
 
-#include <mysql.h>
-#include <mysqld_error.h>
+#include <mysql/mysql.h>
+#include <mysql/mysqld_error.h>
 
 #include "mysql_connection.h"
 #include "string_utils.h"
+#include "log.h"
 
 mysql_connection_info::mysql_connection_info(const std::string& info_string){
 	std::vector<std::string> tokens = split(info_string, ';');
 	if(tokens.size() != 5)
-	{
 		return;
-	}
+
 	uint8_t i = 0;
 	host.assign(tokens[i++]);
 	port_or_socket.assign(tokens[i++]);
@@ -34,21 +34,21 @@ mysql_connection::~mysql_connection() { close(); }
 
 uint32_t mysql_connection::open()
 {
-	MYSQL* mysql_init;
-	mysql_init = mysql_init(nullptr);
-	if(!mysql_init)
+	MYSQL* mysql;
+	mysql = mysql_init(nullptr);
+	if(!mysql)
 	{
-		LOG_ERR << "sql.sql Could not initialize Mysql connection to database " << connection_info_.database;
+		LOG_ERROR("sql.sql", "Could not initialize MySql connection to database %s", connection_info_.database.c_str());
 		return CR_UNKNOWN_ERROR;
 	}
 
-	mysql_options(mysql_init, MYSQL_SET_CHAREST_NAME, "utf8");
+	mysql_options(mysql, MYSQL_SET_CHAREST_NAME, "utf8");
 	int port;
 	const char* unix_socket;
 	if(connection_info_.host == ".")
 	{
 		unsigned int opt = MYSQL_PROTOCOL_SOCKET;
-		mysql_options(mysql_init, MYSQL_OPT_PROTOCOL, (const char*)&opt);
+		mysql_options(mysql, MYSQL_OPT_PROTOCOL, (const char*)&opt);
 		connection_info_.host = "localhost";
 		port = 0;
 		unix_socket = connection_info_.port_or_socket.c_str();
@@ -59,16 +59,16 @@ uint32_t mysql_connection::open()
 		unix_socket = nullptr;
 	}
 
-	mysql_ = mysql_real_connect(mysql_init, connection_info_.host.c_str(), connection_info_.user.c_str(), connection_info_.password.c_str(), connection_info_.database.c_str(), port, unix_socket, 0);
+	mysql_ = mysql_real_connect(mysql, connection_info_.host.c_str(), connection_info_.user.c_str(), connection_info_.password.c_str(), connection_info_.database.c_str(), port, unix_socket, 0);
 	if(mysql_)
 	{
 		if(!reconnection)
 		{
-			LOG_INFO << "sql.sql MySQL client library: " << mysql_get_client_info();
-			LOG_INFO << "sql.sql MySQL server ver: " << mysql_get_server_info(mysql_);
+			LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info().c_str());
+			LOG_INFO("sql.sql", "MySQL server ver: %s", mysql_get_server_info(mysql_));
 		}
 
-		LOG_INFO << "sql.sql Connected to MySQL database at " << connection_info_.host;
+		LOG_INFO("sql.sql", "Connected to MySQL database at %s", connection_info_.host.c_str());
 		mysql_autocommit(mysql_, 1);
 
 		//将连接属性设置为UTF8以正确处理不同的语言环境
@@ -78,9 +78,9 @@ uint32_t mysql_connection::open()
 	}
 	else
 	{
-		LOG_ERR << "sql.sql Could not connect to MySQL database at " << connection_info_.host << " : " << mysql_error(mysql_init);
-		mysql_close(mysql_init);
-		return mysql_errno(mysql_init);
+		LOG_ERROR("sql.sql", "Could not connect to MySQL database at %s : %s", connection_info_.host.c_str(), mysql_error(mysql));
+		mysql_close(mysql);
+		return mysql_errno(mysql);
 	}
 }
 
@@ -106,28 +106,22 @@ bool mysql_connection::prepare_statements()
 bool mysql_connection::execute(const char* sql)
 {
 	if(!mysql_)
-	{
 		return false;
-	}
 
 	uint32_t ms = get_ms_time();
 	if(mysql_query(mysql_, sql))
 	{
 		uint32_t errno = mysql_errno(mysql_);
 
-		LOG_INFO << "sql.sql SQL:" << sql;
-		LOG_ERROR << "sql.sql [" << errno << "] " << mysql_error(mysql_);
+		LOG_INFO("sql.sql", "SQL:%s", sql);
+		LOG_ERROR("sql.sql", "[" %d "] %s", errno, mysql_error(mysql_));
 
 		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
-		{
 			return execute(sql); //再试一次
-		}
 		return false;
 	}
 	else
-	{
-		LOG_DEBUG << "sql.sql [" << get_ms_time_diff << " ms] SQL:" << sql;
-	}
+		LOG_DEBUG("sql.sql", "[%d ms] SQL:%s" get_ms_time_diff, sql;
 	return true;
 }
 
@@ -239,17 +233,16 @@ bool mysql_connection::query(const char* sql, MYSQL_RES* result, MYSQL_FIELD* fi
 	{
 		uint32_t errno = mysql_errno(mysql_);
 
-		LOG_INFO << "sql.sql SQL: " << sql;
-		LOG_ERROR << "sql.sql [" << errno << "] " << mysql_error(mysql_);
+		LOG_INFO("sql.sql", "SQL: %s", sql);
+		LOG_ERROR("sql.sql", "[%d] %s", errno, mysql_error(mysql_));
 
 		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
 			return query(sql, result, fields, row_count, field_count);
 		return false;
 	}
 	else
-	{
-		LOG_DEBUG << "sql.sql [" << get_ms_time_diff(start_ms, get_ms_time()) << " ms] SQL: " << sql;
-	}
+		LOG_DEBUG("sql.sql", "[%d ms] SQL: %s", get_ms_time_diff(start_ms, get_ms_time()), sql);
+
 	*result = mysql_store_result(mysql_);
 	*row_count = mysql_affected_rows(mysql_);
 	*field_count = mysql_field_count(mysql_);
@@ -299,7 +292,7 @@ int mysql_connectin::execute_transaction(sql_transaction& transaction)
 					assert(stmt);
 					if(!execute(stmt))
 					{
-						LOG_WARN << "sql.sql Transaction aborted. " << queries.size() << " queries not executed.";
+						LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", queries.size());
 
 						int error_code = get_last_error();
 						rollback_transaction();
@@ -313,7 +306,7 @@ int mysql_connectin::execute_transaction(sql_transaction& transaction)
 					assert(sql);
 					if(!execute(sql))
 					{
-						LOG_WARN << "sql.sql Transaction abored. " << queries.size() << " queries not executed.";
+						LOG_WARN("sql.sql", "Transaction abored. %u queries not executed." << queries.size());
 
 						int error_code = get_last_error();
 						rollback_transaction();

@@ -12,7 +12,7 @@
 #include "query_result.h"
 #include "transaction.h"
 #include "database_worker.h"
-#include "common/threading/producer_consumer_queue.h"
+#include "producer_consumer_queue.h"
 
 enum connection_flags
 {
@@ -45,7 +45,7 @@ class mysql_connection
 	friend class ping_operation;
 public:
 	mysql_connection(mysql_connection_info& info); // 同步连接的构造函数。
-	mysql_connection(producer_consumer_queue<sql_operation*> queue, mysql_connection_info& conn_info); // 异步连接的构造函数。
+	mysql_connection(producer_consumer_queue<sql_operation*>* queue, mysql_connection_info& conn_info); // 异步连接的构造函数。
 	virtual ~mysql_connection();
 
 	mysql_connection(const mysql_connection&) = delete;
@@ -93,7 +93,7 @@ protected:
 private:
 	bool handle_mysql_errno(uint32_t errno, uint8_t attempts = 5);
 
-	producer_consumer_queue<sql_operation*> queue_; // 队列与其他异步连接共享。
+	producer_consumer_queue<sql_operation*>* queue_; // 队列与其他异步连接共享。
 	std::unique_ptr<database_worker> worker_; // 核心工作者任务。
 	MYSQL* mysql_;
 	mysql_connection_info& connection_info_;

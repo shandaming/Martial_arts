@@ -47,7 +47,7 @@ public:
 		{
 			return;
 		}
-		execute(string_format(std::forward<F>(sql, std::forward<Args>(args)...).c_str()));
+		execute(string_format(sql, std::forward<Args>(args)...).c_str());
 	}
 
 	// ！ 以准备好的语句格式排队单向SQL操作，该操作将异步执行。 ！ 语句必须带有CONNECTION_ASYNC标志。
