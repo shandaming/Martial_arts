@@ -101,7 +101,7 @@ database_loader& database_loader::add_database(database_worker_pool<T>& pool, co
 bool database_loader::load()
 {
 	if(!update_flags_)
-		LOG_INFO << "sql.updates Automatic database updates are disabled for all databases!";
+		LOG_INFO("sql.updates", "Automatic database updates are disabled for all databases!");
 	if(!open_databases())
 		return false;
 	if(!populate_databases())
