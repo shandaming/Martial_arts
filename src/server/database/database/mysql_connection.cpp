@@ -144,7 +144,7 @@ bool mysql_connection::execute(prepared_statement_base* stmt)
 	if(mysql_stmt_bind_param(mysql_stmt, mysql_bind))
 	{
 		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR << "sql.sql, SQL(p): " << prepared_stmt->get_query_string(queries_[index].first) << "\n [ERROR]: [" << errno << "] " << mysql_stmt_error(mysql_stmt);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
 		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
 			return execute(stmt); 
 		prepared_stmt->clear_parameters();
@@ -153,14 +153,14 @@ bool mysql_connection::execute(prepared_statement_base* stmt)
 	if(mysql_stmt_execute(mysql_stmt))
 	{
 		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR << "sql.sql, SQL(p): " << prepared_stmt->get_query_string(queries_[indxe].first) << "\n [ERROR]: [" << errno << "] " << mysql_stmt_error(mysql_stmt);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
 		if(handle_mysql_errno(errno)) // If it returns true, an error was handled successfully (i.e. reconnection)
 			return execute(stmt); 
 		prepared_stmt->clear_parameters();
 		return false;
 	}
 
-	LOG_DEBUG << "sql.sql, [" << get_ms_time_diff(start_ms, get_ms_time()) << " ms] SQL(p): " << prepared_stmt->get_query_string(queries_[index].first);
+	LOG_DEBUG("sql.sql", "[%d ms] SQL(p): %s", get_ms_time_diff(start_ms, get_ms_time()), prepared_stmt->get_query_string(queries_[index].first).c_str());
 
 	prepared_stmt->clear_parameters();
 	return true;
@@ -184,7 +184,7 @@ bool mysql_connection::query(prepared_statement_base* stmt, MYSQL_RES** result, 
 	if(mysql_stmt_bind_param(mysql_stmt, mysql_bind))
 	{
 		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR << "sql.sql, SQL(p): " << prepared_stmt->get_query_string(queries_[index].first) << "\n [ERROR]: [" << errno << "] " << mysql_stmt_error(mysql_stmt);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
 		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
 			return query(stmt, result, row_count, field_count); 
 		prepared_stmt->clear_parameters();
@@ -193,14 +193,14 @@ bool mysql_connection::query(prepared_statement_base* stmt, MYSQL_RES** result, 
 	if(mysql_stmt_execute(mysql_stmt))
 	{
 		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR << "sql.sql, SQL(p): " << prepared_stmt->get_query_string(queries_[index].first) << "\n [ERROR]: [" << errno << "] " << mysql_stmt_error(mysql_stmt);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
 		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
 			return query(stmt, result, row_count, field_count); 
 		prepared_stmt->clear_parameters();
 		return false;
 	}
 
-	LOG_DEBUG << "sql.sql, [" << get_ms_time_diff(start_ms, get_ms_time()) << " ms] SQL(p): " << prepared_stmt->get_query_string(queries_[index].first);
+	LOG_DEBUG("sql.sql", "[%d ms] SQL(p): %s", get_ms_time_diff(start_ms, get_ms_time()), prepared_stmt->get_query_string(queries_[index].first).c_str());
 
 	prepared_stmt->clear_parameters();
 	*result = mysql_stmt_result_metadata(mysql_stmt);
@@ -306,7 +306,7 @@ int mysql_connectin::execute_transaction(sql_transaction& transaction)
 					assert(sql);
 					if(!execute(sql))
 					{
-						LOG_WARN("sql.sql", "Transaction abored. %u queries not executed." << queries.size());
+						LOG_WARN("sql.sql", "Transaction abored. %u queries not executed.", queries.size());
 
 						int error_code = get_last_error();
 						rollback_transaction();
@@ -349,7 +349,7 @@ mysql_prepared_statement* mysql_connection::get_prepared_statement(uint32_t inde
 	assert(index < stmts_.size());
 	mysql_prepared_statement* ret = stmts_[index].get();
 	if(!ret)
-		LOG_ERROR << "sql.sql Could not fetch prepared statement " << index << " on database '" << connection_info_.database << "', connectin type: " << (connectin_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous";
+		LOG_ERROR("sql.sql", "Could not fetch prepared statement %u on database '%s', connectin type: %s", index, connection_info_.database.c_str(), (connectin_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 	return ret;
 }
 
@@ -367,16 +367,16 @@ void mysql_connection::prepared_statement(uint32_t index, const char* sql, conne
 	MYSQL_STMT* stmt = mysql_stmt_init(mysql_);
 	if(!stmt)
 	{
-		LOG_ERROR << "sql.sql In mysql_stmt_init() id: " << index << ", sql: \"" << sql << "\"";
-		LOG_ERROR << "sql.sql " << mysql_error(mysql_);
+		LOG_ERROR("sql.sql", "In mysql_stmt_init() id: %u, sql: \"%s\"", index, sql);
+		LOG_ERROR("sql.sql", "%s", mysql_error(mysql_));
 		prepared_error_ = true;
 	}
 	else
 	{
 		if(mysql_stmt_prepare(stmt, sql, static_cast<unsigned long>(strlen(sql))))
 		{
-			LOG_ERROR << "sql.sql In mysql_stmt_prepare() id:" << index << ", sql \"" << sql << "\"";
-			LOG_ERROR << "sql.sql " << mysql_stmt_error(stmt);
+			LOG_ERROR("sql.sql", "In mysql_stmt_prepare() id:%u, sql \"%s\"", index, sql);
+			LOG_ERROR("sql.sql", "%s", mysql_stmt_error(stmt));
 			mysql_stmt_close(stmt);
 			prepare_error_ = true;
 		}
@@ -411,7 +411,7 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 			{
 				if(mysql_)
 				{
-					LOG_ERROR << "sql.sql Lost the connection to the MySQL server!";
+					LOG_ERROR("sql.sql", "Lost the connection to the MySQL server!");
 
 					mysql_close(get_handle());
 					mysql_ = 0;
@@ -419,7 +419,7 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 			}
 		case CR_CONN_HOST_ERROR:
 			{
-				LOG_INFO << "sql.sql Attempting to reconnect to the MySQL server ...";
+				LOG_INFO("sql.sql", "Attempting to reconnect to the MySQL server ...");
 
 				reconnectin_ = true;
 				const uint32_t err = open();
@@ -428,13 +428,13 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 					// 除非你想跳过加载所有准备好的语句，否则不要删除'this'指针...
 					if(!this->prepare_statements())
 					{
-						LOG_FATAL << "sql.sql Could not re-prepare statements!";
+						LOG_FATAL("sql.sql", "Could not re-prepare statements!");
 
 						std::this_thread::sleep_for(std::chrono::seconds(10));
 						abort();
 					}
 
-					LOG_INFO << "sql.sql Successfully reconnected to " << connection_info_.database << " @" << connectin_info_.host << ":" << connection_info_.port_or_socket << " (" << (connection_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous" << ").";
+					LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%d (%s).", connection_info_.database.c_str(), connectin_info_.host.c_str(), connection_info_.port_or_socket, (connection_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
 					reconnection_ = false;
 					return true;
@@ -442,7 +442,7 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 				if( --attempts == 0)
 				{
 					// 当mysql服务器无法访问一段时间时关闭服务器
-					LOG_FATAL << "sql.sql Failed to reconnect to the MySQL server, terminating the server to prevent data corruption!";
+					LOG_FATAL("sql.sql", "Failed to reconnect to the MySQL server, terminating the server to prevent data corruption!");
 
 					// 我们也可以通过使用std :: raise（SIGTERM）来启动关闭
 					std::this_thread::sleep_for(std::chrono::seconds(10));
@@ -464,19 +464,19 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 			// 过时的表或数据库结构 - 终止核心
 		case ER_BAD_FIELD_ERROR:
 		case ER_NO_SUCH_TABLE:
-			LOG_ERROR << "sql.sql Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.";
+			LOG_ERROR("sql.sql", "Your database structure is not up to date. Please make sure you've executed all queries in the sql/updates folders.");
 
 			std::this_thread::sleep_for(std::chrono::seconds(10));
 			abort();
 			return false;
 		case ER_PARSE_ERROR:
-			LOG_ERROR << "sql.sql Error while parsing SQL. Core fix requires.";
+			LOG_ERROR("sql.sql", "Error while parsing SQL. Core fix requires.");
 
 			std::this_thread::sleep_for(std::chrono::seconds(10));
 			abort();
 			return false;
 		default:
-			LOG_ERROR << "sql.sql Unhandled MySQL errno " << errno << ". Unexpected behaviour possible.";
+			LOG_ERROR("sql.sql", "Unhandled MySQL errno %d. Unexpected behaviour possible.", errno);
 			return false;
 	}
 }
