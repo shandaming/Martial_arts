@@ -49,14 +49,14 @@ void update_fetcher::fill_file_list_recursively(const path& path, locale_file_st
 		}
 		else if(it->path().extension() == ".sql")
 		{
-			LOG_TRACE << "sql.updates. Added locale file \"" << it->path().filename().generic_string() << "\".";
+			LOG_TRACE("sql.updates", "Added locale file \"%s\".", it->path().filename().generic_string().c_str());
 
 			const locale_file_entry entry = {it->path(), state};
 
 			// 检查加倍的文件名。 因为元素只是通过文件名进行比较，所以这没关系
 			if(storage.find(entry) != storage.end())
 			{
-				LOG_FATAL << "sql.updates. Duplicate filename \"" << it->path().generic_string() << "\" occurred. Because updates are ordered by their filenames, every name needs to be unique!";
+				LOG_FATAL("sql.updates", "Duplicate filename \"%s\" occurred. Because updates are ordered by their filenames, every name needs to be unique!", it->path().generic_string().c_str());
 
 				throw update_exception("Updating failed. see the log for details.");
 			}
@@ -86,14 +86,14 @@ update_fetcher::directory_storage update_fetcher::receive_include_directories() 
 		const path p(path);
 		if(!is_directory(p))
 		{
-			LOG_WARN << "sql.updates. db_updater: given update include directory \"" << p.generic_strig() <, "\" does not exist, skipped.";
+			LOG_WARN("sql.updates", "db_updater: given update include directory \"%s\" does not exist, skipped.", p.generic_strig().c_str());
 			continue;
 		}
 
 		const directory_entry entry = {p, applied_file_entry::state_convert(fields[i].get_string())};
 		directories.push_back(entry);
 
-		LOG_TRACE << "sql.updates. Added applied file \"" << p.filename().generic_string() << "\" from remote.";
+		LOG_TRACE("sql.updates", "Added applied file \"%s\" from remote.", p.filename().generic_string().c_str());
 	}(while(result->next_row()));
 
 	return directories;
@@ -124,7 +124,7 @@ std::string update_fetcher::read_sql_update(const path& file) const
 	std::ifstream in(file);
 	if(!in.is_open())
 	{
-		LOG_FATAL << "sql.updates. Failed to open the sql update \"" << file.generic_string() << "\" for reading! Stopping the server to keep the database intergrity. try to identify and solve the issue or disable the database updater.";
+		LOG_FATAL("sql.updates", "Failed to open the sql update \"%s\" for reading! Stopping the server to keep the database intergrity. try to identify and solve the issue or disable the database updater.", file.generic_string().c_str());
 
 		throw update_exception("Opening the sql update failed!");
 	}
@@ -173,7 +173,7 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 
 	for(auto& i : available)
 	{
-		LOG_DEBUG << "sql.updates. Checking update \"" << i.first.filename().generic_string() << "\"...";
+		LOG_DEBUG("sql.updates", "Checking update \"%s\"...", i.first.filename().generic_string().c_str());
 
 		auto it = applied.find(i.first.filename().string());
 		if(it != applied.end())
@@ -181,7 +181,7 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 			// 如果禁用冗余，请跳过它，因为已应用更新。
 			if(!redundancy_checks)
 			{
-				LOG_DEBUG << "sql.updates. >> Update is already applied, skipping redundancy checks.";
+				LOG_DEBUG("sql.updates", ">> Update is already applied, skipping redundancy checks.");
 				applied.erase(it);
 				continue;
 			}
@@ -189,7 +189,7 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 			// 如果更新位于存档目录中并在我们的数据库中标记为已存档，则跳过冗余检查（存档更新永远不会更改）。
 			if(!archived_redundancy && (it->second.state == ARCHIVED) && (i.second == ARCHIVED))
 			{
-				LOG_DEBUG << "sql.updates. >> Update is archived and marked as archived in database, skipping redundancy checks.";
+				LOG_DEBUG("sql.updates", ">> Update is archived and marked as archived in database, skipping redundancy checks.");
 				applied.earse(it);
 				continue;
 			}
@@ -219,12 +219,12 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 				// 冲突！
 				if(locale_it != i.end())
 				{
-					LOG_WARN << "sql updates. >> It seems like the update \"" << i.first.filename().string() << "\" \"" << hash.substr(0, 7) << "\" was renamed, but the old file is still there! Treating it as a new file! (It is probably an unmodified copy of the file \"" << locale_it->first.filename().string() << "\")";
+					LOG_WARN("sql updates", ">> It seems like the update \"%s\" \"%d\" was renamed, but the old file is still there! Treating it as a new file! (It is probably an unmodified copy of the file \"%s\")", i.first.filename().string().c_str(), hash.substr(0, 7), locale_it->first.filename().string().c_str());
 				}
 				// 将文件视为此处重命名是安全的
 				else
 				{
-					LOG_INFO << "sql.updates. >> Renaming update\"" << hash_it->second << "\" to \"" << i.first.filename().string() << "\" \"" << hash.substr(0, 7) << "\".";
+					LOG_INFO("sql.updates", ">> Renaming update\"%s\" to \"%s\" \"%s\".", hash_it->second.c_str(), i.first.filename().string().c_str(), hash.substr(0, 7).c_str());
 
 					rename_entry(hash_it->second, i.first.filename().string());
 					applied.erase(hash_it->second);
@@ -234,7 +234,7 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 			// 如果以前从未见过，请应用更新。
 			else
 			{
-				LOG_INFO << "sql.updates. >> Applying update \"" << i.first.filename().string() << "\" \"" << hash.substr(0, 7) << "\"...";
+				LOG_INFO("sql.updates", ">> Applying update \"%s\" \"%s\"...", i.first.filename().string().c_str(), hash.substr(0, 7).c_str());
 			}
 		}
 		// 如果更新条目存在于我们的数据库中，则使用空哈希重新更新更新条目。
@@ -242,26 +242,24 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 		{
 			mode = MODE_REHASH;
 
-			LOG_INFO << "sql.updates. >> Re-hashing update \"" << i.first.filename().string() << "\" \"" << hash.substr(0, 7) << "\"...";
+			LOG_INFO("sql.updates", ">> Re-hashing update \"%s\" \"%s\"...", i.first.filename().string().c_str(), hash.substr(0, 7).c_str());
 		}
 		else
 		{
 			// 如果文件的哈希值与我们数据库中存储的哈希值不同，请重新应用更新（因为它已更改）。
 			if(it->second.hash != hash)
-			{
-				LOG_INFO << "sql.updates. >> Reapplying update \"" << i.first.filename().string() << "\" \"" << it->second.hash.bustr(0, 7) << "\" -> \"" << hash.substr(0, 7) << "\" (it changed)...";
-			}
+				LOG_INFO("sql.updates", ">> Reapplying update \"%s\" \"%s\" -> \"%s\" (it changed)...", i.first.filename().string().c_str(), it->second.hash.bustr(0, 7).c_str(), hash.substr(0, 7).c_str());
 			else
 			{
 				// 如果文件未更改且刚刚移动，请更新其状态（如有必要）。
 				if(it->second.state != i.second)
 				{
-					LOG_DEBUG << "sql.update. >> Updating the state of \"" << i.first.filename().string() << "\" to \"" << applied_file_entry::state_convert(i.second) << "\"...";
+					LOG_DEBUG("sql.update", ">> Updating the state of \"%s\" to \"%s\"...", i.first.filename().string().c_str(), applied_file_entry::state_convert(i.second).c_str());
 
 					update_state(i.fisrt.filename().string(), i.second);
 				}
 
-				LOG_DEBUG << "sql.updates. >> Update is already applied and matches the hash \"" << hash.substr(0, 7) << "\"";
+				LOG_DEBUG("sql.updates", ">> Update is already applied and matches the hash \"%s\"", hash.substr(0, 7).c_str());
 
 				applied.erase(it);
 				continue;
@@ -299,10 +297,10 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 
 		for(auto& i : applied)
 		{
-			LOG_WARN << "sql.updates. The file \"" << i.first << "\" was applied to the database, but is missing in your update directory now!";
+			LOG_WARN("sql.updates", "The file \"%s\" was applied to the database, but is missing in your update directory now!", i.first.c_str());
 			if(do_cleanup)
 			{
-				LOG_INFO << "sql.updates. Deleting orphaned entry \"" << i.first << "\"";
+				LOG_INFO("sql.updates", "Deleting orphaned entry \"%s\"", i.first.c_str());
 			}
 		}
 
@@ -312,7 +310,7 @@ update_result update_fetcher::update(const bool redumdancy_checks,
 		}
 		else
 		{
-			LOG_ERROR << "sql.updates. Cleanup is disabled! There were " << applied.size() << " dirty files applied to ypur database, but they are now missing in your source directory";
+			LOG_ERROR("sql.updates", "Cleanup is disabled! There were %u dirty files applied to ypur database, but they are now missing in your source directory", applied.size());
 		}
 	}
 	return update_result(imported_updates, count_recent_updates, count_archived_updates);
