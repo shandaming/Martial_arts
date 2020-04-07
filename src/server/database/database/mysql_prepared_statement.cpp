@@ -8,7 +8,7 @@ namespace
 {
 bool paramenter_index_assert_fail(uint32_t stmt_index, uint8_t index, uint32_t param_count)
 {
-	LOG_ERROR << "sql.drive Attempted to bind parameter " << (index + 1) << (index == 1) ? "st" : (index == 2 ? "nd" : (index == 3 ? "rd" : "nd")) << " on a prepared_statement " << stmt_index << " (statement has only " << param_count << " parameters)";
+	LOG_ERROR("sql.drive", "Attempted to bind parameter %u%s on a prepared_statement %u (statement has only %u parameters)", (index + 1), (index == 1) ? "st" : (index == 2 ? "nd" : (index == 3 ? "rd" : "nd")), stmt_index, param_count);
 	return false;
 }
 
@@ -185,7 +185,7 @@ void mysql_prepared_statement::check_vaild_index(uint8_t index)
 {
 	assert(index < param_count_ || paramenter_index_assert_fail(prepared_stmt_->index_, index, param_count_));
 	if(param_set_[index])
-		LOG_WARN << "sql.sql [WARING] Prepared statement (id: " << prepared_stmt_->index_ << ") trying to bind value on already bound index (" << index << ").";
+		LOG_WARN("sql.sql", "[WARING] Prepared statement (id: %u) trying to bind value on already bound index (%u).", prepared_stmt_->index_, index);
 }
 
 std::string mysql_prepared_statement::get_query_string(const std::string& sql_pattern) const
