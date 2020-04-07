@@ -18,7 +18,7 @@ std::string search_path(const std::string &filename, std::string path = "")
 		path = ::getenv("PATH");
 		if (path.empty())
 		{
-			LOG_ERROR << "Environment variable PATH not found";
+			LOG_ERROR("Environment variable PATH not found");
 			return "";
 		}
 	}
@@ -43,13 +43,9 @@ std::string search_path(const std::string &filename, std::string path = "")
 std::string DB_updater_util::get_corrected_mysql_executable()
 {
 	if(!corrected_path().empty())
-	{
 		return corrected_path();
-	}
 	else
-	{
 		return get_mysql_executable();
-	}
 }
 
 bool DB_updater_util::check_executable()
@@ -65,7 +61,7 @@ bool DB_updater_util::check_executable()
 			return true;
 		}
 
-		LOG_FATAL << "sql.updates. Didn't find any executable MySQL binary at \'" << std::filesystem::absolute(exe).generic_string() << "\' or in path, correct the path in the *.conf (\'MySQLExecutable\')";
+		LOG_FATAL("sql.updates", "Didn't find any executable MySQL binary at \'%s\' or in path, correct the path in the *.conf (\'MySQLExecutable\')", std::filesystem::absolute(exe).generic_string().c_str());
 
 		return false;
 	}
@@ -201,18 +197,15 @@ base_location::DB_updater<T>::get_base_location_type()
 template<typename T>
 bool db_updater<T>::create(database_worker_ool<T>& pool)
 {
-	LOG_INFO << "sql.update. Dtabase\"" << pool.get_connection_info()->database 
-		<< "\" does not exist, do you want to create it? [yes (default) / no]:";
+	LOG_INFO("sql.update", "Dtabase\"%s\" does not exist, do you want to create it? [yes (default) / no]:", pool.get_connection_info()->database.c_str());
 
 	// 从控制台获取是否更新
 	std::string answer;
 	std::getline(std::cin, answer);
 	if(!answer.empty() && !(answer.substr(0, 1) == 'y'))
-	{
 		return false;
-	}
 
-	LOG_INFO << "sql.updates. Creating database \"" << pool.get_connection_info()->database << "\"...";
+	LOG_INFO("sql.updates", "Creating database \"%s\"...", pool.get_connection_info()->database.c_str());
 
 	// 临时文件的路径
 	static const path temp("create_table.sql");
@@ -221,7 +214,7 @@ bool db_updater<T>::create(database_worker_ool<T>& pool)
 	std::ofstream file(temp.generic_string());
 	if(!file.is_open())
 	{
-		LOG_FATAL << "sql.updates. Failed to create temporary query file \"" << temp.generic_string() << "\"";
+		LOG_FATAL("sql.updates", "Failed to create temporary query file \"%s\"", temp.generic_string().c_str());
 		return false;
 	}
 
@@ -236,14 +229,14 @@ bool db_updater<T>::create(database_worker_ool<T>& pool)
 	}
 	catch(update_exception&)
 	{
-		LOG_FATAL << "sql.updates. Failed to create database " << pool.get_connection_info()->database 
-			<< "! Does the user (named in *.cfg) have 'create', 'alter', 'drop', \
-			'insert' and 'delete' privileges on the MySQL server?";
+		LOG_FATAL("sql.updates", "Failed to create database %s! \
+			  Does the user (named in *.cfg) have 'create', 'alter', 'drop', \
+			'insert' and 'delete' privileges on the MySQL server?", pool.get_connection_info()->database.c_str());
 		remove(temp);
 		return false;
 	}
 
-	LOG_INFO << "sql.updates. Done.";
+	LOG_INFO("sql.updates", "Done.");
 	remove(temp); // 删除临时文集
 	return true;
 }
@@ -252,16 +245,14 @@ template<typename T>
 bool db_updater<T>::update(database_worker_pool<T>& pool)
 {
 	if(!db_updater_utils::check_executable())
-	{
 		return false;
-	}
 
-	LOG_INFO << "sql.updates. Updating " << db_updater<T>::get_table_name() << " database...";
+	LOG_INFO("sql.updates", "Updating %s database...", db_updater<T>::get_table_name().c_str());
 
 	const path source_directory(get_source_directory());
 	if(!is_directory(source_directory))
 	{
-		LOG_ERROR << "sql.updates. db_updater: The given source directory " << source_directory.generic_string() << " does not exist, change the path to the directory where your sql directory exists (for example c:\\source\\server). Shutting down.";
+		LOG_ERROR("sql.updates", "db_updater: The given source directory %s does not exist, change the path to the directory where your sql directory exists (for example c:\\source\\server). Shutting down.", source_directory.generic_string().c_str());
 		return false;
 	}
 
@@ -283,13 +274,9 @@ bool db_updater<T>::update(database_worker_pool<T>& pool)
 	const std::string info = string_format("Containing "SZFNTD" new and "SZFNTD" archived updates.", result.recent, result.archived);
 
 	if(!result.updated)
-	{
-		LOG_INFO << "sql.updates. >> " << db_update<T>::get_table_name() << " database is up-to-data! " << info;
-	}
+		LOG_INFO("sql.updates", ">> %s database is up-to-data! %s", db_update<T>::get_table_name().c_str(), info.c_str());
 	else
-	{
-		LOG_INFO << "sql.updates. >> Applied " << result.updated << " " << result.updated == 1 ? "query" : "queries" << ". " << info;
-	}
+		LOG_INFO("sql.updates", ">> Applied %s %s. %s", result.updated.c_str(), result.updated == 1 ? "query" : "queries", info.c_str());
 	return true;
 }
 
@@ -299,22 +286,18 @@ bool db_update<T>::populate(database_worker_pool<T>& pool)
 	{
 		query_result = retrieve(pool, "show tables");
 		if(result && (result->get_row_count() > 0))
-		{
 			return true;
-		}
 	}
 
 	if(!db_updater_util::check_executable())
-	{
 		return false;
-	}
 
-	LOG_INFO << "sql.updates. Database " << db_updater<T>::get_table_name() << " is empty. auto populating it...";
+	LOG_INFO("sql.updates", "Database %s is empty. auto populating it...", db_updater<T>::get_table_name().c_str());
 
 	const std::string p = db_updater<T>::get_base_file();
 	if(p.empty())
 	{
-		LOG_INFO << "sql.updates. >> No base file provided, skipped!";
+		LOG_INFO("sql.updates", ">> No base file provided, skipped!");
 		return true;
 	}
 
@@ -325,14 +308,14 @@ bool db_update<T>::populate(database_worker_pool<T>& pool)
 		{
 			case LOCATION_REPOSITORY:
 				{
-					LOG_ERROR << "sql.updates. >> Base file \"" << base.generic_string() << "\" is missing. Try fixing it by cloning the source again.";
+					LOG_ERROR("sql.updates", ">> Base file \"%s\" is missing. Try fixing it by cloning the source again.", base.generic_string().c_str());
 					break;
 				}
 			case LOCATION_DOWLOAD:
 				{
 					const std::string filename = base.filename().generic_string();
 					const std::string workdir = fs::current_path().generic_string();
-					LOG_ERROR << "sql.updates. >> File \"" << filename << "\" is missing, download it from \"https://\" uncompress it and place the file \"" << filename << "\" in the directory \"" << workdir << "\".";
+					LOG_ERROR("sql.updates", ">> File \"%s\" is missing, download it from \"https://\" uncompress it and place the file \"%s\" in the directory \"%s\".", filename.c_str(), filename.c_str(), workdir.c_str());
 					break;
 				}
 			default:
@@ -341,7 +324,7 @@ bool db_update<T>::populate(database_worker_pool<T>& pool)
 		return true;
 	}
 	// 更新数据库
-	LOG_INFO << "sql. updates. >> Applying \"" << base.generic_string() << "\"...";
+	LOG_INFO("sql. updates", ">> Applying \"%s\"...", base.generic_string().c_str());
 	try
 	{
 		apply_file(pool, base);
@@ -350,7 +333,7 @@ bool db_update<T>::populate(database_worker_pool<T>& pool)
 	{
 		return false;
 	}
-	LOG_INFO << "sql.updates. >> Done.";
+	LOG_INFO("sql.updates", ">> Done.");
 	return true;
 }
 
@@ -421,12 +404,11 @@ void db_updater<T>:: apply_file(database_worker_pool<T>& pool, const std::string
 
 	if(ret != EXIT_SUCCESS)
 	{
-		LOG_FATAL << "sql. updates. Applying of file '" << path.generic_string() 
-			<< "' to database '" << pool.get_connection_info()->database 
-			<< "' failed! If you are a user, please pull the latest revision from the repository.\
+		LOG_FATAL("sql. updates", "Applying of file '%s' to database '%s' failed! If you are a user, \
+			please pull the latest revision from the repository.\
 			Also make sure you have not applied any of the database with your sql client. \
 			You cannot use auto-update system and import sql files from TrinityCore repository with your sql client.\
-			If you are a developer, please fix you sql Query.";
+			If you are a developer, please fix you sql Query.", path.generic_string().c_str(), pool.get_connection_info()->database.c_str());
 		throw update_exception("update failed.");
 	}
 }
