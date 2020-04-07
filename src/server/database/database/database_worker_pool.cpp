@@ -46,7 +46,7 @@ uint32_t database_worker_pool<T>::open()
 {
 	wp_tatal(connection_info_.get(), "Connection info was not set!");
 
-	LOG_INFO << "sql.driver. Opening Database pool " << get_database_name() << ". Asynchronous connections: " << async_threads_ << ", synchronous connections: " << synch_threads_;
+	LOG_INFO("sql.driver", "Opening Database pool %s. Asynchronous connections: %d, synchronous connections: %d", get_database_name().c_str(), async_threads_ , synch_threads_);
 
 	uint32_t error = open_connections(IDX_ASYNC, async_threads_);
 	if(error)
@@ -55,7 +55,7 @@ uint32_t database_worker_pool<T>::open()
 	error = open_connections(IDX_SYNCH, synch_threads_);
 	if(!error)
 	{
-		LOG_INFO << "sql.driver. Database pool " << get_database_name() << " opened successfully. " << connections_[IDX_SYNCH].size() + connections_[IDX_ASYNC].size() << " total connections running.";
+		LOG_INFO("sql.driver", "Database pool %s opened successfully. %u total connections running.", get_database_name().c_str(), connections_[IDX_SYNCH].size() + connections_[IDX_ASYNC].size());
 	}
 	return error;
 }
@@ -63,17 +63,17 @@ uint32_t database_worker_pool<T>::open()
 template<typename T>
 void database_worker_pool<T>::close()
 {
-	LOG_INFO << "sql.driver. Closing down database pool " << get_database_name();
+	LOG_INFO("sql.driver", "Closing down database pool %s", get_database_name().c_str());
 
 	// 关闭实际的MySQL连接。
 	connection_[IDX_ASYNC].clear();
 
-	LOG_INFO << "sql.driver. Asynchronous connections on database pool '" << get_database_name() << "' terminated. Proceeding with synchronous connections";
+	LOG_INFO("sql.driver", "Asynchronous connections on database pool '%s' terminated. Proceeding with synchronous connections", get_database_name().c_str());
 
 	// 关闭同步连接！ 无需锁定连接，因为DatabaseWorkerPool <> :: Close！ 仅应在内核中的任何其他线程任务退出后才调用！ 表示此时无法进行并发访问。
 	connections_[IDX_SYNCH].clear();
 
-	LOG_INFO << "sql.driver. All connections on database pool '" << get_database_name() << "'";
+	LOG_INFO("sql.driver", "All connections on database pool '%s'", get_database_name().c_str());
 }
 
 template<typename T>
@@ -264,7 +264,7 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 		}
 		else if(mysql_get_server_version(connection->get_handle()) < MIN_MYUSQL_SERVER_VERSION)
 		{
-			LOG_ERROR << "sql.driver. TrinityCore does not support MySQL versions below 5.1";
+			LOG_ERROR("sql.driver", "TrinityCore does not support MySQL versions below 5.1");
 			return 1;
 		}
 		else
@@ -315,7 +315,7 @@ const char* database_worker_pool<T>::get_database_name() const
 template<typename T>
 void database_worker_pool<T>::execute(const char* sql)
 {
-	if(trinity::is_format_empty_or_null(sql))
+	if(is_format_empty_or_null(sql))
 		return;
 
 	basic_statement_task* task = new basic_statement_task(sql);
@@ -332,10 +332,9 @@ void database_worker_pool<T>::execute(prepared_statement<T>* stmt)
 template<typename T>
 void database_worker_pool<T>::direct_execute(const char* sql)
 {
-	if(trinity::is_format_empty_or_null(sql))
-	{
+	if(is_format_empty_or_null(sql))
 		return;
-	}
+
 	T* connection = get_free_connection();
 	connection->execute(sql);
 	connection->unlock();
