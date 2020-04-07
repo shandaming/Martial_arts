@@ -49,7 +49,7 @@ static uint32_t size_for_type(MYSQL_FIELD* field)
 		    MYSQL_TYPE_SET:
 		    */
 		default:
-			LOG_WARIN << "sql.sql SQL::size_for_type(): invalid field type " << uint32_t(field->type);
+			LOG_WARIN("sql.sql", "SQL::size_for_type(): invalid field type %u", uint32_t(field->type));
 			return 0;
 	}
 }
@@ -91,7 +91,7 @@ database_field_type mysql_type_to_field_type(enum_field_types type)
 		case MYSQL_TYPE_VAR_STRING:
 		    return database_field_type::Binary;
 		default:
-			LOG_WARIN << "sql.sql mysql_type_to_field_type(): invalid field type " << uint32_t(type);
+			LOG_WARIN("sql.sql", "mysql_type_to_field_type(): invalid field type %u", uint32_t(type));
 			break;
 	}
 	return database_field_type::Null;
@@ -125,7 +125,7 @@ bool result_set::next_row()
 	unsigned long* lengths = mysql_fetch_lengths(result_);
 	if(!lengths)
 	{
-		LOG_WARIN << "sql.sql " << __FUNCTION__ << ": mysql_fetch_lengths, cannot retrieve value lengths. Error " << mysql_error(result->heandle);
+		LOG_WARIN("sql.sql", "%s: mysql_fetch_lengths, cannot retrieve value lengths. Error %s", __FUNCTION__, mysql_error(result->heandle));
 		clean_up();
 		return false;
 	}
@@ -162,9 +162,8 @@ const field& result_set::operator[](size_t index) const
 prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, uint64_t row_count, uint32_t field_count) : row_count_(row_count), row_position_(0), field_count_(field_count), bind_(NULL), stmt_(stmt), metadata_result_(result)
 {
 	if(!metadata_result_)
-	{
 		return;
-	}
+
 	if(stmt_->bind_result_done)
 	{
 		delete[] stmt->bind->length;
@@ -186,7 +185,7 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 	// 这是我们存储（整个）结果集的地方
 	if(mysql_stmt_store_result(stmt_))
 	{
-		LOG_WARIN << "sql.sql " << __FUNCTION__ << ": mysql_stmt_store_result, cannot bind result from MySQL server. Error: " << mysql_stmt_error(stmt_);
+		LOG_WARIN("sql.sql", "%s: mysql_stmt_store_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(stmt_));
 		delete[] bind_;
 		delete[] is_null;
 		delete[] length;
@@ -221,7 +220,7 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 	// 这是我们将缓冲区绑定到语句的位置
 	if(mysql_stmt_bind_result(stmt_, bind_))
 	{
-		LOG_WARIN << "sql.sql " << __FUNCTION__ << ": mysql_stmt_bind_result, cannot bind result from MySQL server. Error: " << mysql_stmt_error(stmt_);
+		LOG_WARIN << "sql.sql", "%s: mysql_stmt_bind_result, cannot bind result from MySQL server. Error: ", __FUNCTION__, mysql_stmt_error(stmt_));
 		mysql_stmt_free_result(stmt_);
 		clean_up();
 		delete[] is_null;
@@ -250,9 +249,7 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 						// 警告 - 当mysql_stmt_fetch返回MYSQL_DATA_TRUNCATED时，如果缓冲区中没有空间，则字符串将不会以空值终止我们不能盲目地终止数据，因为它可能被检索为二进制blob而不是特定字符串在这种情况下使用 Field :: GetCString将导致垃圾.
 					//TODO：删除Field :: GetCString并使用boost :: string_ref（目前提议用于TS作为string_view，可能在C ++ 17中）
 						if (fetched_length < buffer_length)
-						{
 							*((char*)buffer + fetched_length) = '\0';
-						}
 						break;
 					default:
 						break;
@@ -285,9 +282,7 @@ bool prepared_result_set::next_row()
 {
 	// 只更新m_rowPosition，以便上层代码知道行向量的哪个元素要查看
 	if(++row_position_ >= row_count_)
-	{
 		return false;
-	}
 	return true;
 }
 
@@ -307,9 +302,7 @@ const field* prepared_result_set::operator[](size_t index) const
 void prepared_result_set::clean_up()
 {
 	if(metadata_result_)
-	{
 		mysql_free_result(metadata_result_);
-	}
 	if(bind_)
 	{
 		delete[] (char*)bind_->buffer;
@@ -322,9 +315,7 @@ bool prepared_result_set::goto_next_row()
 {
 	// 只在低级代码中调用，即构造函数将迭代每一行数据并缓冲它
 	if(row_position_ >= row_count_)
-	{
 		return false;
-	}
 	int retval = mysql_stmt_fetch(stmt_);
 	return retval == 0 || retval == MYSQL_DATA_TRUNCATED;
 }
