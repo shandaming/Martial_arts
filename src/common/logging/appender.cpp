@@ -26,6 +26,9 @@ void appender::write(log_message* message)
 	if(flags_ & APPENDER_FLAGS_PREFIX_LOGFILTERTYPE)
 		ss << '[' << message->type << "] ";
 
+	if(flags_ & APPENDER_FLAGS_PREFIX_THREAD)
+		ss << ':' << message->thread_id << " ";
+
 	message->prefix = ss.str();
 	write_stream(message);
 }

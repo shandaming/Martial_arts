@@ -28,6 +28,7 @@ struct log_message
 	std::string prefix;
 	std::string param1;
 	time_t mtime;
+	long thread_id;
 
 	uint32_t size() const
 	{

@@ -5,12 +5,12 @@
 #include "log_message.h"
 
 log_message::log_message(log_level level_, const std::string& type_, std::string&& text_) :
-	level(level_), type(type_), text(std::forward<std::string>(text_)), mtime(time(nullptr)){}
+	level(level_), type(type_), text(std::forward<std::string>(text_)), mtime(time(nullptr)), thread_id(this_thread_id()) {}
 
 log_message::log_message(log_level level_, const std::string& type_, std::string&& text_, 
 		std::string&& param1_) : 
 	level(level_), type(type_), text(std::forward<std::string>(text_)), 
-	param1(std::forward<std::string>(param1)), mtime(time(nullptr)){}
+	param1(std::forward<std::string>(param1)), mtime(time(nullptr)), thread_id(this_thread_id()) {}
 
 std::string log_message::get_time_str(time_t time)
 {

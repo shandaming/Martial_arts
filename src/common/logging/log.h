@@ -36,9 +36,9 @@ public:
 	bool set_log_level(std::string const& name, char const* level, bool is_logger = true);
 
 	template<typename Fmt, typename... Args>
-	inline void out_message(const char* file, const char* function, int line, std::string const& filter, log_level const level, Fmt&& fmt, Args&&... args)
+	inline void out_message(std::string const& filter, log_level const level, Fmt&& fmt, Args&&... args)
 	{
-		out_message(file, function, line, filter, level, string_format(std::forward<Fmt>(fmt), std::forward<Args>(args)...));
+		out_message(filter, level, string_format(std::forward<Fmt>(fmt), std::forward<Args>(args)...));
 	}
 
 	template<typename Format, typename... Args>
@@ -82,7 +82,7 @@ private:
 	void read_appenders_from_config();
 	void read_loggers_from_config();
 	void register_appender(uint8_t index, appender_creator_fn appender_create_fn);
-	void out_message(const char* file, const char* function, int line, std::string const& filter, log_level const level, std::string&& message);
+	void out_message(std::string const& filter, log_level const level, std::string&& message);
 	void out_command(std::string&& message, std::string&& param1);
 
 	std::unordered_map<uint8_t, appender_creator_fn> appender_factory_;
@@ -103,11 +103,11 @@ private:
 	{	\
 		try	\
 		{	\
-			LOG->out_message(__FILE__, __FUNCTION__, __LINE__, filter_type, level, __VA_ARGS__);	\
+			LOG->out_message(filter_type, level, __VA_ARGS__);	\
 		}	\
 		catch(std::exception& e)	\
 		{	\
-			LOG->out_message(__FILE__, __FUCTION__, __LINE__, "server", LOG_LEVEL_ERROR,	\
+			LOG->out_message("server", LOG_LEVEL_ERROR,	\
 					"Wrong format occurred (%s) at %s:%u.", e.what(), __FILE__, __LINE__);	\
 		}	\
 	}
