@@ -26,6 +26,8 @@ enum class database_field_type : uint8_t
 
 class field
 {
+	friend class result_set;
+	friend class prepared_result_set;
 public:
 	field();
 	~field();
@@ -65,7 +67,7 @@ public:
 		uint32_t index;
 	};
 	*/
-private:
+protected:
 	bool is_type(database_field_type type) const { return data_.type == type; }
 
 	bool is_numeric() const;
@@ -75,7 +77,7 @@ private:
 
 	void clean_up();
 
-#pragma pack(push, 1)
+#pragma pack(1)
 	struct
 	{
 		uint32_t length;
@@ -83,7 +85,10 @@ private:
 		database_field_type type;
 		bool raw;
 	} data_;
-#pragma pop(pop)
+#pragma pack()
+private:
+#ifdef DEBUG
+#endif
 };
 
 

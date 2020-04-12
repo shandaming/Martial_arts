@@ -59,7 +59,7 @@ public:
 	uint32_t get_field_count() const { return field_count_; }
 
 	field* fetch() const;
-	const field* operator[](size_t index) const;
+	const field operator[](size_t index) const;
 private:
 	void clean_up();
 	bool goto_next_row();

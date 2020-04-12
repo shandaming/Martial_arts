@@ -5,9 +5,15 @@
 #include <mysql/mysql.h>
 #include <mysql/mysqld_error.h>
 
+#include <cstring>
+
 #include "mysql_connection.h"
+#include "mysql_prepared_statement.h"
+#include "prepared_statement.h"
 #include "string_utils.h"
 #include "log.h"
+#include "timer.h"
+#include "errors.h"
 
 mysql_connection_info::mysql_connection_info(const std::string& info_string){
 	std::vector<std::string> tokens = split(info_string, ';');
@@ -42,7 +48,7 @@ uint32_t mysql_connection::open()
 		return CR_UNKNOWN_ERROR;
 	}
 
-	mysql_options(mysql, MYSQL_SET_CHAREST_NAME, "utf8");
+	mysql_options(mysql, MYSQL_SET_CHARSET_NAME, "utf8");
 	int port;
 	const char* unix_socket;
 	if(connection_info_.host == ".")
@@ -62,9 +68,9 @@ uint32_t mysql_connection::open()
 	mysql_ = mysql_real_connect(mysql, connection_info_.host.c_str(), connection_info_.user.c_str(), connection_info_.password.c_str(), connection_info_.database.c_str(), port, unix_socket, 0);
 	if(mysql_)
 	{
-		if(!reconnection)
+		if(!reconnection_)
 		{
-			LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info().c_str());
+			LOG_INFO("sql.sql", "MySQL client library: %s", mysql_get_client_info());
 			LOG_INFO("sql.sql", "MySQL server ver: %s", mysql_get_server_info(mysql_));
 		}
 
@@ -108,20 +114,20 @@ bool mysql_connection::execute(const char* sql)
 	if(!mysql_)
 		return false;
 
-	uint32_t ms = get_ms_time();
+	uint32_t start_ms = get_ms_time();
 	if(mysql_query(mysql_, sql))
 	{
-		uint32_t errno = mysql_errno(mysql_);
+		uint32_t errno_code = mysql_errno(mysql_);
 
 		LOG_INFO("sql.sql", "SQL:%s", sql);
-		LOG_ERROR("sql.sql", "[" %d "] %s", errno, mysql_error(mysql_));
+		LOG_ERROR("sql.sql", "[ %u ] %s", errno_code, mysql_error(mysql_));
 
-		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
+		if(handle_mysql_errno(errno_code)) // 如果返回true，则成功处理错误（即重新连接）
 			return execute(sql); //再试一次
 		return false;
 	}
 	else
-		LOG_DEBUG("sql.sql", "[%d ms] SQL:%s" get_ms_time_diff, sql;
+		LOG_DEBUG("sql.sql", "[%u ms] SQL:%s", get_ms_time_diff(start_ms, get_ms_time()), sql);
 	return true;
 }
 
@@ -131,30 +137,30 @@ bool mysql_connection::execute(prepared_statement_base* stmt)
 		return false;
 	uint32_t index = stmt->index_;
 	mysql_prepared_statement* prepared_stmt = get_prepared_statement(index);
-	assert(mysql_stmt);	// 如果准备失败，服务器端错误或查询错误，则只能为null
+	ASSERT(prepared_stmt);	// 如果准备失败，服务器端错误或查询错误，则只能为null
 	prepared_stmt->prepared_stmt_ = stmt; // 交叉引用它们以进行调试输出
 	stmt->stmt_ = prepared_stmt; //
 
-	stmt->bind_prameters();
+	stmt->bind_parameters();
 	MYSQL_STMT* mysql_stmt = prepared_stmt->get_stmt();
 	MYSQL_BIND* mysql_bind = prepared_stmt->get_bind();
 
-	uint64_t start_ms = get_ms_tine();
+	uint64_t start_ms = get_ms_time();
 
 	if(mysql_stmt_bind_param(mysql_stmt, mysql_bind))
 	{
-		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
-		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
+		uint32_t errno_code = mysql_errno(mysql_);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno_code, mysql_stmt_error(mysql_stmt));
+		if(handle_mysql_errno(errno_code)) // 如果返回true，则成功处理错误（即重新连接）
 			return execute(stmt); 
 		prepared_stmt->clear_parameters();
 		return false;
 	}
 	if(mysql_stmt_execute(mysql_stmt))
 	{
-		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
-		if(handle_mysql_errno(errno)) // If it returns true, an error was handled successfully (i.e. reconnection)
+		uint32_t errno_code = mysql_errno(mysql_);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno_code, mysql_stmt_error(mysql_stmt));
+		if(handle_mysql_errno(errno_code)) // If it returns true, an error was handled successfully (i.e. reconnection)
 			return execute(stmt); 
 		prepared_stmt->clear_parameters();
 		return false;
@@ -173,7 +179,7 @@ bool mysql_connection::query(prepared_statement_base* stmt, MYSQL_RES** result, 
 
 	uint32_t index = stmt->index_;
 	mysql_prepared_statement* prepared_stmt = get_prepared_statement(index);
-	assert(prepared_stmt); // 如果准备失败，服务器端错误或查询错误，则只能为null
+	ASSERT(prepared_stmt); // 如果准备失败，服务器端错误或查询错误，则只能为null
 	prepared_stmt->prepared_stmt_ = stmt; // 交叉引用它们以进行调试输出
 	stmt->stmt_ = prepared_stmt; //
 
@@ -183,18 +189,18 @@ bool mysql_connection::query(prepared_statement_base* stmt, MYSQL_RES** result, 
 	uint64_t start_ms = get_ms_time();
 	if(mysql_stmt_bind_param(mysql_stmt, mysql_bind))
 	{
-		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
-		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
+		uint32_t errno_code = mysql_errno(mysql_);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno_code, mysql_stmt_error(mysql_stmt));
+		if(handle_mysql_errno(errno_code)) // 如果返回true，则成功处理错误（即重新连接）
 			return query(stmt, result, row_count, field_count); 
 		prepared_stmt->clear_parameters();
 		return false;
 	}
 	if(mysql_stmt_execute(mysql_stmt))
 	{
-		uint32_t errno = mysql_errno(mysql_);
-		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno, mysql_stmt_error(mysql_stmt));
-		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
+		uint32_t errno_code = mysql_errno(mysql_);
+		LOG_ERROR("sql.sql", "SQL(p): %s\n [ERROR]: [%d] %s", prepared_stmt->get_query_string(queries_[index].first).c_str(), errno_code, mysql_stmt_error(mysql_stmt));
+		if(handle_mysql_errno(errno_code)) // 如果返回true，则成功处理错误（即重新连接）
 			return query(stmt, result, row_count, field_count); 
 		prepared_stmt->clear_parameters();
 		return false;
@@ -224,19 +230,19 @@ result_set* mysql_connection::query(const char* sql)
 	return new result_set(result, fields, row_count, field_count);
 }
 
-bool mysql_connection::query(const char* sql, MYSQL_RES* result, MYSQL_FIELD* fields, uint64_t* row_count, uint32_t* field_count)
+bool mysql_connection::query(const char* sql, MYSQL_RES** result, MYSQL_FIELD** fields, uint64_t* row_count, uint32_t* field_count)
 {
 	if(!mysql_)
 		return false;
 	uint32_t start_ms = get_ms_time();
 	if(mysql_query(mysql_, sql))
 	{
-		uint32_t errno = mysql_errno(mysql_);
+		uint32_t errno_code = mysql_errno(mysql_);
 
 		LOG_INFO("sql.sql", "SQL: %s", sql);
-		LOG_ERROR("sql.sql", "[%d] %s", errno, mysql_error(mysql_));
+		LOG_ERROR("sql.sql", "[%d] %s", errno_code, mysql_error(mysql_));
 
-		if(handle_mysql_errno(errno)) // 如果返回true，则成功处理错误（即重新连接）
+		if(handle_mysql_errno(errno_code)) // 如果返回true，则成功处理错误（即重新连接）
 			return query(sql, result, fields, row_count, field_count);
 		return false;
 	}
@@ -273,9 +279,9 @@ void mysql_connection::commit_transaction()
 	execute("COMMIT");
 }
 
-int mysql_connectin::execute_transaction(sql_transaction& transaction)
+int mysql_connection::execute_transaction(std::shared_ptr<transaction_base>& transaction)
 {
-	const std::vector<sql_element_data> queries = transactin->queries_;
+	const std::vector<sql_element_data> queries = transaction->queries_;
 	if(queries.empty())
 		return -1;
 
@@ -289,10 +295,10 @@ int mysql_connectin::execute_transaction(sql_transaction& transaction)
 			case SQL_ELEMENT_PREPARED:
 				{
 					prepared_statement_base* stmt = data.element.stmt;
-					assert(stmt);
+					ASSERT(stmt);
 					if(!execute(stmt))
 					{
-						LOG_WARN("sql.sql", "Transaction aborted. %u queries not executed.", queries.size());
+						LOG_WARN("sql.sql", "Transaction aborted. %lu queries not executed.", queries.size());
 
 						int error_code = get_last_error();
 						rollback_transaction();
@@ -303,10 +309,10 @@ int mysql_connectin::execute_transaction(sql_transaction& transaction)
 			case SQL_ELEMENT_RAW:
 				{
 					const char* sql = data.element.query;
-					assert(sql);
+					ASSERT(sql);
 					if(!execute(sql))
 					{
-						LOG_WARN("sql.sql", "Transaction abored. %u queries not executed.", queries.size());
+						LOG_WARN("sql.sql", "Transaction abored. %lu queries not executed.", queries.size());
 
 						int error_code = get_last_error();
 						rollback_transaction();
@@ -346,14 +352,14 @@ void mysql_connection::unlock()
 
 mysql_prepared_statement* mysql_connection::get_prepared_statement(uint32_t index)
 {
-	assert(index < stmts_.size());
+	ASSERT(index < stmts_.size());
 	mysql_prepared_statement* ret = stmts_[index].get();
 	if(!ret)
-		LOG_ERROR("sql.sql", "Could not fetch prepared statement %u on database '%s', connectin type: %s", index, connection_info_.database.c_str(), (connectin_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
+		LOG_ERROR("sql.sql", "Could not fetch prepared statement %u on database '%s', connectin type: %s", index, connection_info_.database.c_str(), (connection_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 	return ret;
 }
 
-void mysql_connection::prepared_statement(uint32_t index, const char* sql, connection_flags flasg)
+void mysql_connection::prepared_statement(uint32_t index, const char* sql, connection_flags flags)
 {
 	queries_.insert(prepared_statement_map::value_type(index, std::make_pair(sql, flags)));
 
@@ -369,7 +375,7 @@ void mysql_connection::prepared_statement(uint32_t index, const char* sql, conne
 	{
 		LOG_ERROR("sql.sql", "In mysql_stmt_init() id: %u, sql: \"%s\"", index, sql);
 		LOG_ERROR("sql.sql", "%s", mysql_error(mysql_));
-		prepared_error_ = true;
+		prepare_error_ = true;
 	}
 	else
 	{
@@ -400,9 +406,9 @@ prepared_result_set* mysql_connection::query(prepared_statement_base* stmt)
 	return new prepared_result_set(stmt->stmt_->get_stmt(), result, row_count, field_count);
 }
 
-bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
+bool mysql_connection::handle_mysql_errno(uint32_t error_code, uint8_t attempts)
 {
-	switch(errno)
+	switch(error_code)
 	{
 		case CR_SERVER_GONE_ERROR:
 		case CR_SERVER_LOST:
@@ -421,7 +427,7 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 			{
 				LOG_INFO("sql.sql", "Attempting to reconnect to the MySQL server ...");
 
-				reconnectin_ = true;
+				reconnection_ = true;
 				const uint32_t err = open();
 				if(!err)
 				{
@@ -434,7 +440,7 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 						abort();
 					}
 
-					LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%d (%s).", connection_info_.database.c_str(), connectin_info_.host.c_str(), connection_info_.port_or_socket, (connection_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
+					LOG_INFO("sql.sql", "Successfully reconnected to %s @%s:%s (%s).", connection_info_.database.c_str(), connection_info_.host.c_str(), connection_info_.port_or_socket.c_str(), (connection_flags_ & CONNECTION_ASYNC) ? "asynchronous" : "synchronous");
 
 					reconnection_ = false;
 					return true;
@@ -476,7 +482,7 @@ bool mysql_connection::handle_mysql_errno(uint32_t errno, uint8_t attempts)
 			abort();
 			return false;
 		default:
-			LOG_ERROR("sql.sql", "Unhandled MySQL errno %d. Unexpected behaviour possible.", errno);
+			LOG_ERROR("sql.sql", "Unhandled MySQL errno %d. Unexpected behaviour possible.", error_code);
 			return false;
 	}
 }

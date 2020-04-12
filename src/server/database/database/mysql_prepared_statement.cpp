@@ -2,7 +2,13 @@
  * Copyright (C) 2019
  */
 
+#include <cstring>
+#include <sstream>
+
 #include "mysql_prepared_statement.h"
+#include "prepared_statement.h"
+#include "log.h"
+#include "errors.h"
 
 namespace
 {
@@ -29,8 +35,8 @@ mysql_prepared_statement::mysql_prepared_statement(MYSQL_STMT* stmt) : prepared_
 {
 	// 初始化变量参数
 	param_count_ = mysql_stmt_param_count(stmt);
-	param_set_.assign(param_count_, false);
-	bind_ = new MYSQL_BIND(param_count_);
+	params_set_.assign(param_count_, false);
+	bind_ = new MYSQL_BIND[param_count_];
 	memset(bind_, 0, sizeof(MYSQL_BIND) * param_count_);
 
 	// “如果设置为1，则导致mysql_stmt_store_result（）更新元数据MYSQL_FIELD-> max_length值。”
@@ -58,14 +64,14 @@ void mysql_prepared_statement::clear_parameters()
 		bind_[i].length = 0;
 		delete[] (char*)bind_[i].buffer;
 		bind_[i].buffer = 0;
-		param_set_[i] = false;
+		params_set_[i] = false;
 	}
 }
 
 void mysql_prepared_statement::set_null(const uint8_t index)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
 	param->buffer_type = MYSQL_TYPE_NULL;
 	delete[] static_cast<char*>(param->buffer);
@@ -84,86 +90,86 @@ void mysql_prepared_statement::set_bool(const uint8_t index, const bool value)
 void mysql_prepared_statement::set_uint8(const uint8_t index, const uint8_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_TINY, &value, sizeof uint8_t, true);
+	set_parameter_value(param, MYSQL_TYPE_TINY, &value, sizeof(uint8_t), true);
 }
 
 void mysql_prepared_statement::set_uint16(const uint8_t index, const uint16_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_SHORT, &value, sizeof uint16_t, true);
+	set_parameter_value(param, MYSQL_TYPE_SHORT, &value, sizeof(uint16_t), true);
 }
 
 void mysql_prepared_statement::set_uint32(const uint8_t index, const uint32_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_LONG, &value, sizeof uint32_t, true);
+	set_parameter_value(param, MYSQL_TYPE_LONG, &value, sizeof(uint32_t), true);
 }
 
 void mysql_prepared_statement::set_uint64(const uint8_t index, const uint64_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_LONGLONG, &value, sizeof uint64_t, true);
+	set_parameter_value(param, MYSQL_TYPE_LONGLONG, &value, sizeof(uint64_t), true);
 }
 
 void mysql_prepared_statement::set_int8(const uint8_t index, const int8_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_TINY, &value, sizeof int8_t, false);
+	set_parameter_value(param, MYSQL_TYPE_TINY, &value, sizeof(int8_t), false);
 }
 
 void mysql_prepared_statement::set_int16(const uint8_t index, const int16_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_SHORT, &value, sizeof int16_t, false);
+	set_parameter_value(param, MYSQL_TYPE_SHORT, &value, sizeof(int16_t), false);
 }
 
 void mysql_prepared_statement::set_int32(const uint8_t index, const int32_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_LONG, &value, sizeof int32_t, false);
+	set_parameter_value(param, MYSQL_TYPE_LONG, &value, sizeof(int32_t), false);
 }
 
 void mysql_prepared_statement::set_int64(const uint8_t index, const int64_t value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_LONGLONG, &value, sizeof int64_t, false);
+	set_parameter_value(param, MYSQL_TYPE_LONGLONG, &value, sizeof(int64_t), false);
 }
 
 void mysql_prepared_statement::set_float(const uint8_t index, const float value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_FLOAT, &value, sizeof float, (value ? 0.0f));
+	set_parameter_value(param, MYSQL_TYPE_FLOAT, &value, sizeof(float), (value > 0.0f));
 }
 
 void mysql_prepared_statement::set_double(const uint8_t index, const double value)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
-	set_parameter_value(param, MYSQL_TYPE_DOUBLE, &value, sizeof double, value > 0.0f);
+	set_parameter_value(param, MYSQL_TYPE_DOUBLE, &value, sizeof(double), value > 0.0f);
 }
 void mysql_prepared_statement::set_binary(const uint8_t index, const std::vector<uint8_t>& value, bool is_string)
 {
 	check_valid_index(index);
-	param_set_[index] = true;
+	params_set_[index] = true;
 	MYSQL_BIND* param = &bind_[index];
 	uint32_t len = uint32_t(value.size());
 	param->buffer_type = MYSQL_TYPE_BLOB;
@@ -181,10 +187,10 @@ void mysql_prepared_statement::set_binary(const uint8_t index, const std::vector
 	memcpy(param->buffer, value.data(), len);
 }
 
-void mysql_prepared_statement::check_vaild_index(uint8_t index)
+void mysql_prepared_statement::check_valid_index(uint8_t index)
 {
-	assert(index < param_count_ || paramenter_index_assert_fail(prepared_stmt_->index_, index, param_count_));
-	if(param_set_[index])
+	ASSERT(index < param_count_ || paramenter_index_assert_fail(prepared_stmt_->index_, index, param_count_));
+	if(params_set_[index])
 		LOG_WARN("sql.sql", "[WARING] Prepared statement (id: %u) trying to bind value on already bound index (%u).", prepared_stmt_->index_, index);
 }
 

@@ -118,16 +118,15 @@ private:
 void check_args(const char*, ...) ATTR_PRINTF(1, 2);
 void check_args(const std::string&, ...);
 
-#define LOG_MESSAGE_BODY(filter_type, level, ...)					\
-	do																\
-	{																\
-		if(LOG->should_log(filter_type, level))						\
-		{															\
-			if(false)												\
-				check_args(__VA_ARGS__)								\
-																	\
+#define LOG_MESSAGE_BODY(filter_type, level, ...)	\
+	do	\
+	{	\
+		if(LOG->should_log(filter_type, level))	\
+		{	\
+			if(false)	\
+				check_args(__VA_ARGS__);	\
 			LOG_EXCEPTION_FREE(filter_type, level, __VA_ARGS__);	\
-		}															\
+		}	\
 	}while(0)
 #endif
 

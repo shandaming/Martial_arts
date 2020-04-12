@@ -5,12 +5,20 @@
 #ifndef DB_MYSQL_PREPARED_STATEMENT_H
 #define DB_MYSQL_PREPARED_STATEMENT_H
 
+#include <mysql/mysql.h>
+
+#include <vector>
+#include <string>
+
 // 每个MySQLConnection实例都是唯一的类
 //  - 仅在准备好的语句任务时才能访问这些类对象
 //  - 被执行。
+
+class prepared_statement_base;
+
 class mysql_prepared_statement
 {
-	friend class prepared_statement;
+	friend class prepared_statement_base;
 	friend class mysql_connection;
 public:
 	mysql_prepared_statement(MYSQL_STMT* stmt);
@@ -36,7 +44,7 @@ private:
 	MYSQL_STMT* get_stmt() { return stmt_; }
 	MYSQL_BIND* get_bind() { return bind_; }
 
-	prepared_statement* prepared_stmt_;
+	prepared_statement_base* prepared_stmt_;
 
 	void clear_parameters();
 	void check_valid_index(uint8_t index);

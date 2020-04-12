@@ -81,7 +81,7 @@ protected:
 	void unlock();
 
 	MYSQL* get_handle() { return mysql_; }
-	mysql_prepared_statement* get_prepare_statement(uint32_t index);
+	mysql_prepared_statement* get_prepared_statement(uint32_t index);
 	void prepared_statement(uint32_t index, const char* sql, connection_flags flag);
 
 	virtual void do_prepare_statements() = 0;
@@ -91,7 +91,7 @@ protected:
 	bool reconnection_; // 我们重新连接了吗？
 	bool prepare_error_; // 在准备陈述时是否有任何错误？
 private:
-	bool handle_mysql_errno(uint32_t errno, uint8_t attempts = 5);
+	bool handle_mysql_errno(uint32_t error_code, uint8_t attempts = 5);
 
 	producer_consumer_queue<sql_operation*>* queue_; // 队列与其他异步连接共享。
 	std::unique_ptr<database_worker> worker_; // 核心工作者任务。

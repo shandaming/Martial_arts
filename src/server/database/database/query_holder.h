@@ -29,6 +29,8 @@ private:
 typedef std::future<sql_query_holder_base*> query_result_holder_future;
 typedef std::promise<sql_query_holder_base*> query_result_holder_promise;
 
+template<typename T>
+class prepared_statement;
 
 template<typename T>
 class sql_query_holder : public sql_query_holder_base

@@ -99,19 +99,17 @@ public:
 };
 
 
-
-
 // 排队操作
 class prepared_statement_task : public sql_operation
 {
 public:
-	prepared_statement_task(prepared_statement* stmt, bool async = false);
+	prepared_statement_task(prepared_statement_base* stmt, bool async = false);
 	~prepared_statement_task();
 
 	bool execute() override;
 	prepared_query_result_future get_future() { return result_->get_future(); }
 private:
-	prepared_statement* stmt_;
+	prepared_statement_base* stmt_;
 	bool has_result_;
 	prepared_query_result_promise* result_;
 };

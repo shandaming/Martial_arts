@@ -14,7 +14,7 @@
 class database_worker
 {
 public:
-	database_worker(producer_consumer_queue<sql_operation*> new_queue, mysql_connection* connection);
+	database_worker(producer_consumer_queue<sql_operation*>* new_queue, mysql_connection* connection);
 	~database_worker();
 private:
 	database_worker(const database_worker&) = delete;

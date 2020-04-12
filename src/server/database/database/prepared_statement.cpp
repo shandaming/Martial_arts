@@ -198,7 +198,7 @@ void prepared_statement_base::bind_parameters()
 
 /* -------------------------- prepared_statement_task ------------------------------- */
 
-prepared_statement_task::prepared_statement_task(prepared_statement* stmt, bool async) : stmt_(stmt), result(nullptr)
+prepared_statement_task::prepared_statement_task(prepared_statement_base* stmt, bool async) : stmt_(stmt), result(nullptr)
 {
 	has_result_ = async; // 如果它是异步的，那么就有结果
 	if(async)

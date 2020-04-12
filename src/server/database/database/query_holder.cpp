@@ -3,12 +3,15 @@
  */
 
 #include "query_holder.h"
+#include "mysql_connection.h"
+#include "log.h"
+#include "prepared_statement.h"
 
-bool sql_query_holder_base::set_prepared_query_imp(size_t index, prepared_statement_base* stmt)
+bool sql_query_holder_base::set_prepared_query_impl(size_t index, prepared_statement_base* stmt)
 {
-	if(queries.size() <= index)
+	if(queries_.size() <= index)
 	{
-		LOG_ERROR("sql.sql", "Query index (%u) out of range (size:%u) for prepared statement.", index, queries.size());
+		LOG_ERROR("sql.sql", "Query index (%lu) out of range (size:%lu) for prepared statement.", index, queries_.size());
 		return false;
 	}
 	queries_[index].first = stmt;
@@ -18,7 +21,7 @@ bool sql_query_holder_base::set_prepared_query_imp(size_t index, prepared_statem
 prepared_query_result sql_query_holder_base::get_prepared_result(size_t index)
 {
 	// 如果索引是预准备语句，则不要调用此函数
-	if(index < queries.size())
+	if(index < queries_.size())
 		return queries_[index].second;
 	else
 		return prepared_query_result(nullptr);
@@ -41,7 +44,8 @@ sql_query_holder_base::~sql_query_holder_base()
 	for(size_t i = 0; i < queries_.size(); ++i)
 	{
 		// 如果从未使用过结果，则释放已经使用过的资源结果（称为getresult）将被删除
-		delete queries_[i].first;
+		if(queries_[i].first)
+			delete queries_[i].first;
 	}
 }
 

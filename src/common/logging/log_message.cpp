@@ -3,6 +3,7 @@
  */
 
 #include "log_message.h"
+#include "util.h"
 
 log_message::log_message(log_level level_, const std::string& type_, std::string&& text_) : 
 	level(level_), 

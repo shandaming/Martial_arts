@@ -6,6 +6,9 @@
 #define DB_QUERY_CALLBACK_H
 
 #include <list>
+#include <queue>
+
+#include "query_result.h"
 
 class query_callback
 {
@@ -57,7 +60,7 @@ private:
 	bool is_prepared_;
 
 	struct query_callback_data;
-	std::unique_ptr<query_callback_data, std::list<query_callback_data>> callbacks_;
+	std::queue<query_callback_data, std::list<query_callback_data>> callbacks_;
 };
 
 #endif

@@ -2,7 +2,11 @@
  * Copyright (C) 2019
  */
 
+#include <cstring>
+
 #include "query_result.h"
+#include "errors.h"
+#include "log.h"
 
 static uint32_t size_for_type(MYSQL_FIELD* field)
 {
@@ -49,7 +53,7 @@ static uint32_t size_for_type(MYSQL_FIELD* field)
 		    MYSQL_TYPE_SET:
 		    */
 		default:
-			LOG_WARIN("sql.sql", "SQL::size_for_type(): invalid field type %u", uint32_t(field->type));
+			LOG_WARN("sql.sql", "SQL::size_for_type(): invalid field type %u", uint32_t(field->type));
 			return 0;
 	}
 }
@@ -59,49 +63,49 @@ database_field_type mysql_type_to_field_type(enum_field_types type)
 	switch (type)
 	{
 		case MYSQL_TYPE_NULL:
-			return database_field_type::Null;
+			return database_field_type::null;
 		case MYSQL_TYPE_TINY:
-		    return database_field_type::Int8;
+		    return database_field_type::int8;
 		case MYSQL_TYPE_YEAR:
 		case MYSQL_TYPE_SHORT:
-		    return database_field_type::Int16;
+		    return database_field_type::int16;
 		case MYSQL_TYPE_INT24:
 		case MYSQL_TYPE_LONG:
-		    return database_field_type::Int32;
+		    return database_field_type::int32;
 		case MYSQL_TYPE_LONGLONG:
 		case MYSQL_TYPE_BIT:
-		    return database_field_type::Int64;
+		    return database_field_type::int64;
 		case MYSQL_TYPE_FLOAT:
-		    return database_field_type::Float;
+		    return database_field_type::float_t;
 		case MYSQL_TYPE_DOUBLE:
-		    return database_field_type::Double;
+		    return database_field_type::double_t;
 		case MYSQL_TYPE_DECIMAL:
 		case MYSQL_TYPE_NEWDECIMAL:
-		    return database_field_type::Decimal;
+		    return database_field_type::decimal;
 		case MYSQL_TYPE_TIMESTAMP:
 		case MYSQL_TYPE_DATE:
 		case MYSQL_TYPE_TIME:
 		case MYSQL_TYPE_DATETIME:
-		    return database_field_type::Date;
+		    return database_field_type::date;
 		case MYSQL_TYPE_TINY_BLOB:
 		case MYSQL_TYPE_MEDIUM_BLOB:
 		case MYSQL_TYPE_LONG_BLOB:
 		case MYSQL_TYPE_BLOB:
 		case MYSQL_TYPE_STRING:
 		case MYSQL_TYPE_VAR_STRING:
-		    return database_field_type::Binary;
+		    return database_field_type::binary;
 		default:
-			LOG_WARIN("sql.sql", "mysql_type_to_field_type(): invalid field type %u", uint32_t(type));
+			LOG_WARN("sql.sql", "mysql_type_to_field_type(): invalid field type %u", uint32_t(type));
 			break;
 	}
-	return database_field_type::Null;
+	return database_field_type::null;
 }
 
 
 result_set::result_set(MYSQL_RES* result, MYSQL_FIELD* fields, uint64_t row_count, uint32_t field_count) : row_count_(row_count), field_count_(field_count), result_(result), fields_(fields)
 {
 	current_row_ = new field[field_count_];
-	assert(current_row_);
+	ASSERT(current_row_);
 }
 
 result_set::~result_set()
@@ -125,14 +129,14 @@ bool result_set::next_row()
 	unsigned long* lengths = mysql_fetch_lengths(result_);
 	if(!lengths)
 	{
-		LOG_WARIN("sql.sql", "%s: mysql_fetch_lengths, cannot retrieve value lengths. Error %s", __FUNCTION__, mysql_error(result->heandle));
+		LOG_WARN("sql.sql", "%s: mysql_fetch_lengths, cannot retrieve value lengths. Error %s", __FUNCTION__, mysql_error(result_->handle));
 		clean_up();
 		return false;
 	}
 
 	for(uint32_t i = 0; i < field_count_; ++i)
 	{
-		current_row[i].set_structure_value(row[i], mysql_type_to_field_type(fields[i].type), lengths[i]);
+		current_row_[i].set_structure_value(row[i], mysql_type_to_field_type(fields_[i].type), lengths[i]);
 	}
 	return true;
 }
@@ -153,7 +157,7 @@ void result_set::clean_up()
 
 const field& result_set::operator[](size_t index) const
 {
-	assert(index < field_count_);
+	ASSERT(index < field_count_);
 	return current_row_[index];
 }
 
@@ -171,12 +175,12 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 	}
 
 	bind_ = new MYSQL_BIND[field_count_];
-	assert(bind_);
+	ASSERT(bind_);
 
 	//对于未来的读者想知道他妈的这个被释放的位置 -  mysql_stmt_bind_result将指针从m_rBind移动到m_stmt-> bind，稍后它被上面的`if（m_stmt-> bind_result_done）`块释放MYSQL_STMT生命周期等于连接生命周期
 	my_bool* is_null = new my_bool[field_count_];
 	unsigned long* length = new unsigned long[field_count_];
-	assert(is_null && length);
+	ASSERT(is_null && length);
 
 	memset(is_null, 0, sizeof(my_bool) * field_count_);
 	memset(bind_, 0, sizeof(MYSQL_BIND) * field_count_);
@@ -185,7 +189,7 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 	// 这是我们存储（整个）结果集的地方
 	if(mysql_stmt_store_result(stmt_))
 	{
-		LOG_WARIN("sql.sql", "%s: mysql_stmt_store_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(stmt_));
+		LOG_WARN("sql.sql", "%s: mysql_stmt_store_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(stmt_));
 		delete[] bind_;
 		delete[] is_null;
 		delete[] length;
@@ -210,7 +214,7 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 	}
 
 	char* data_buffer = new char[row_size * row_count_];
-	assert(data_buffer);
+	ASSERT(data_buffer);
 	for(uint32_t i = 0, offset = 0; i < field_count_; ++i)
 	{
 		bind_[i].buffer = data_buffer + offset;
@@ -220,7 +224,7 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 	// 这是我们将缓冲区绑定到语句的位置
 	if(mysql_stmt_bind_result(stmt_, bind_))
 	{
-		LOG_WARIN << "sql.sql", "%s: mysql_stmt_bind_result, cannot bind result from MySQL server. Error: ", __FUNCTION__, mysql_stmt_error(stmt_));
+		LOG_WARN("sql.sql", "%s: mysql_stmt_bind_result, cannot bind result from MySQL server. Error: %s", __FUNCTION__, mysql_stmt_error(stmt_));
 		mysql_stmt_free_result(stmt_);
 		clean_up();
 		delete[] is_null;
@@ -234,7 +238,7 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 		for(uint32_t i = 0; i < field_count_; ++i)
 		{
 			unsigned long buffer_length = bind_[i].buffer_length;
-			unsigned long fetched_length = bind_[i].length;
+			unsigned long fetched_length = *bind_[i].length;
 			if(!bind_[i].is_null)
 			{
 				void* buffer = stmt_->bind[i].buffer;
@@ -258,11 +262,11 @@ prepared_result_set::prepared_result_set(MYSQL_STMT* stmt, MYSQL_RES* result, ui
 				rows_[uint32_t(row_position_) * field_count_ + i].set_byte_value(buffer, mysql_type_to_field_type(bind_[i].buffer_type), fetched_length);
 
 				//将缓冲区指针移动到下一部分
-				stmt_->bind[o].buffer = (char*)buffer + row_size;
+				stmt_->bind[i].buffer = (char*)buffer + row_size;
 			}
 			else
 			{
-				rows_[uint32_t(row_position) * field_count_ + i].set_byte_value(nullptr, mysql_type_to_field_type(bind_[i].buffer_type), *bind_[i].length)
+				rows_[uint32_t(row_position_) * field_count_ + i].set_byte_value(nullptr, mysql_type_to_field_type(bind_[i].buffer_type), *bind_[i].length);
 			}
 		}
 		++row_position_;
@@ -288,15 +292,15 @@ bool prepared_result_set::next_row()
 
 field* prepared_result_set::fetch() const
 {
-	assert(row_position_ < row_count_);
+	ASSERT(row_position_ < row_count_);
 	return const_cast<field*>(&rows_[uint32_t(row_position_) * field_count_]);
 }
 
-const field* prepared_result_set::operator[](size_t index) const
+const field prepared_result_set::operator[](size_t index) const
 {
-	assert(row_position_ < row_count_);
-	assert(index < field_count_);
-	return rows_[uint32_t(row_position_) * field_count + index];
+	ASSERT(row_position_ < row_count_);
+	ASSERT(index < field_count_);
+	return rows_[uint32_t(row_position_) * field_count_ + index];
 }
 
 void prepared_result_set::clean_up()
