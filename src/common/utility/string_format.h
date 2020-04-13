@@ -18,7 +18,7 @@ inline std::string string_format(const std::string& fmt, Args&&... args)
 	buffer.reserve(size + 1);
 	buffer.resize(size);
 	snprintf(&buffer[0], size + 1, fmt.c_str(), std::forward<Args>(args)...);
-	return buffer;
+	return std::move(buffer);
 };
 
 inline bool is_format_empty_or_null(const char* fmt)
