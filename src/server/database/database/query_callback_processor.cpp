@@ -15,9 +15,7 @@ void query_callback_processor::add_query(query_callback&& query)
 void query_callback_processor::process_ready_queries()
 {
 	if(callbacks_.empty())
-	{
 		return;
-	}
 
 	std::vector<query_callback> update_callbacks(std::move(callbacks_));
 
@@ -26,5 +24,5 @@ void query_callback_processor::process_ready_queries()
 				 return callback.invoke_if_ready() == query_callback::completed;
 				}), update_callbacks.end());
 
-	callbacks_.insert(callbacks_.end(), std::make_move_iterator(update_callbacks.begin(), std::make_move_iterator(update_callbacks.end())));
+	callbacks_.insert(callbacks_.end(), std::make_move_iterator(update_callbacks.begin()), std::make_move_iterator(update_callbacks.end()));
 }
