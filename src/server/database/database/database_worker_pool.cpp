@@ -8,6 +8,13 @@
 #include "implementation/character_database.h"
 #include "implementation/world_database.h"
 #include "implementation/hotfix_database.h"
+#include "adhoc_statement.h"
+#include "prepared_statement.h"
+#include "errors.h"
+#include "log.h"
+
+#define MIN_MYSQL_SERVER_VERSION 50100u
+#define MIN_MYSQL_CLIENT_VERSION 50100u
 
 class ping_operation : public sql_operation
 {
@@ -22,19 +29,19 @@ class ping_operation : public sql_operation
 template<typename T>
 database_worker_pool<T>::database_worker_pool() : queue_(new producer_consumer_queue<sql_operation*>()), async_threads_(0), synch_threads_(0)
 {
-	wp_fatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe");
-	wp_fatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL version below 5.1");
-	wp_fatal(mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile TrinityCore (%s). Search on forum for TCE00011", mysql_get_client_info(), MYSQL_SERVER_VERSION);
+	FATAL(mysql_thread_safe(), "Used MySQL library isn't thread-safe");
+	FATAL(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL version below 5.1");
+	FATAL(mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s) does not match the version used to compile TrinityCore (%s). Search on forum for TCE00011", mysql_get_client_info(), MYSQL_SERVER_VERSION);
 }
 
 template<typename T>
 database_worker_pool<T>::~database_worker_pool()
 {
-	queue_->canel();
+	queue_->cancel();
 }
 
 template<typename T>
-void database_worker_pool<T>:: set_connection_info(const std::string& info_string, const uint8_t async_threads, const uint8_t synch_threads)
+void database_worker_pool<T>::set_connection_info(const std::string& info_string, const uint8_t async_threads, const uint8_t synch_threads)
 {
 	connection_info_ = std::make_unique<mysql_connection_info>(info_string);
 	async_threads_ = async_threads;
@@ -44,7 +51,7 @@ void database_worker_pool<T>:: set_connection_info(const std::string& info_strin
 template<typename T>
 uint32_t database_worker_pool<T>::open()
 {
-	wp_tatal(connection_info_.get(), "Connection info was not set!");
+	FATAL(connection_info_.get(), "Connection info was not set!");
 
 	LOG_INFO("sql.driver", "Opening Database pool %s. Asynchronous connections: %d, synchronous connections: %d", get_database_name().c_str(), async_threads_ , synch_threads_);
 
@@ -66,7 +73,7 @@ void database_worker_pool<T>::close()
 	LOG_INFO("sql.driver", "Closing down database pool %s", get_database_name().c_str());
 
 	// 关闭实际的MySQL连接。
-	connection_[IDX_ASYNC].clear();
+	connections_[IDX_ASYNC].clear();
 
 	LOG_INFO("sql.driver", "Asynchronous connections on database pool '%s' terminated. Proceeding with synchronous connections", get_database_name().c_str());
 
@@ -115,7 +122,7 @@ query_result database_worker_pool<T>::query(const char* sql, T* connection)
 template<typename T>
 prepared_query_result database_worker_pool<T>::query(prepared_statement<T>* stmt)
 {
-	auto connection = get_fre_connection();
+	auto connection = get_free_connection();
 	prepared_result_set* ret = connection->query(stmt);
 	connection->unlock();
 
@@ -206,7 +213,7 @@ prepared_statement<T>* database_worker_pool<T>::get_prepared_statement(prepared_
 }
 
 template<typename T>
-void database_worker_pool<T>::escape_string(std:;string& str)
+void database_worker_pool<T>::escape_string(std::string& str)
 {
 	if(str.empty())
 		return;
@@ -238,7 +245,7 @@ void database_worker_pool<T>::keepalive()
 }
 
 template<typename T>
-uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t num_connectins)
+uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t num_connections)
 {
 	for(uint8_t i = 0; i < num_connections; ++i)
 	{
@@ -248,9 +255,9 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 				switch(type)
 				{
 					case IDX_ASYNC:
-						return trinity::make_unique<T>(queue_.get(), *connection_info_);
+						return std::make_unique<T>(queue_.get(), *connection_info_);
 					case IDX_SYNCH:
-						return trinity::make_unique<T>(*connection_info_);
+						return std::make_unique<T>(*connection_info_);
 					default:
 						ABORT();
 				}
@@ -262,7 +269,7 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 			connections_[type].clear();
 			return error;
 		}
-		else if(mysql_get_server_version(connection->get_handle()) < MIN_MYUSQL_SERVER_VERSION)
+		else if(mysql_get_server_version(connection->get_handle()) < MIN_MYSQL_SERVER_VERSION)
 		{
 			LOG_ERROR("sql.driver", "TrinityCore does not support MySQL versions below 5.1");
 			return 1;
@@ -290,7 +297,7 @@ void database_worker_pool<T>::enqueue(sql_operation* op)
 }
 
 template<typename T>
-T* database_worker_pool<T>::get_free_connection()
+T* database_worker_pool<T>::get_free_connection() const
 {
 	uint8_t i = 0;
 	auto num_cons = connections_[IDX_SYNCH].size();

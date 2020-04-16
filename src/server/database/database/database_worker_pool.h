@@ -132,7 +132,7 @@ public:
 	void escape_string(std::string& str);
 
 	// 使我们所有的MySQL连接保持活动状态，防止服务器断开我们的连接。
-	void keep_alive();
+	void keepalive();
 private:
 	enum internal_index
 	{

@@ -3,7 +3,6 @@
  */
 
 #include <algorithm>
-//#include <iterator>
 
 #include "query_callback_processor.h"
 
@@ -19,7 +18,7 @@ void query_callback_processor::process_ready_queries()
 
 	std::vector<query_callback> update_callbacks(std::move(callbacks_));
 
-	update_callbacks.erase(std::remove_if(update_callbacks.begin(), update_callbacks.end(), [](query_callback&& callback)
+	update_callbacks.erase(std::remove_if(update_callbacks.begin(), update_callbacks.end(), [](query_callback& callback)
 				{
 				 return callback.invoke_if_ready() == query_callback::completed;
 				}), update_callbacks.end());
