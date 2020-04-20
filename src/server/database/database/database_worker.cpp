@@ -4,7 +4,11 @@
 
 #include "database_worker.h"
 
-database_worker::database_worker(producer_consumer_queue<sql_operation*>* new_queue, mysql_connection* connection) : connection_(connection), queue_(new_queue), cancelation_token_(false), worker_thread_(std::thread(&database_worker::worker_thread_, this)) {}
+database_worker::database_worker(producer_consumer_queue<sql_operation*>* new_queue, mysql_connection* connection) :
+	cancelation_token_(false), 
+	worker_thread_(std::thread(&database_worker::worker_thread_, this)),
+	queue_(new_queue), 
+	connection_(connection) {}
 
 database_worker::~database_worker()
 {

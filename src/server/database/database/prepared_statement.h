@@ -7,6 +7,8 @@
 
 #include <mysql/mysql.h>
 
+#include <vector>
+
 #include "sql_operation.h"
 
 // Union for data buffer（高级绑定 - >队列 - >低级绑定）
@@ -60,7 +62,7 @@ class prepared_statement_base
 	friend class mysql_prepared_statement;
 	friend class mysql_connection;
 public:
-	explicit prepared_statement_base(uint32_t index);
+	explicit prepared_statement_base(uint32_t index, uint8_t capacity);
 	~prepared_statement_base();
 
 	prepared_statement_base(const prepared_statement_base&) = delete;
@@ -92,7 +94,7 @@ template<typename T>
 class prepared_statement : public prepared_statement_base
 {
 public:
-	prepared_statement(uint32_t index) : prepared_statement_base(index) {}
+	prepared_statement(uint32_t index, uint8_t capacity) : prepared_statement_base(index, capacity) {}
 
 	prepared_statement(const prepared_statement&) = delete;
 	prepared_statement& operator=(const prepared_statement&) = delete;

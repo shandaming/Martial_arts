@@ -33,11 +33,11 @@ public:
 	};
 private:
 	// 打开数据库
-	bool open_databse();
+	bool open_databases();
 	// 填充数据库
-	bool populate_database();
+	bool populate_databases();
 	// 更新数据库
-	bool update_database();
+	bool update_databases();
 	// 准备sql
 	bool prepare_statements();
 
@@ -47,7 +47,7 @@ private:
 	// 调用给定队列中的所有函数，并在出错时关闭数据库。 出现错误时返回false。
 	bool process(std::queue<predicate_func>& queue);
 
-	const std::string& logger_;
+	std::string logger_;
 	const bool auto_setup_;
 	const uint32_t update_flags_;
 

@@ -32,10 +32,10 @@ struct conversion
 
 field::field()
 {
-	data.value = NULL;
-	data.type = database_file_types::null;
-	data.length = 0;
-	data.raw = false;
+	data_.value = NULL;
+	data_.type = database_field_type::null;
+	data_.length = 0;
+	data_.raw = false;
 }
 
 field::~field()

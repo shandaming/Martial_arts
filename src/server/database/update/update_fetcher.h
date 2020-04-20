@@ -14,7 +14,7 @@
 #include <memory>
 #include <filesystem>
 
-#include "database/query_result.h"
+#include "query_result.h"
 
 struct update_result
 {

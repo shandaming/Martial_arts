@@ -5,8 +5,10 @@
 #ifndef DB_TRANSACTION_H
 #define DB_TRANSACTION_H
 
+#include <mutex>
+
 #include "sql_operation.h"
-#include "common/serialization/string_utils.h"
+#include "string_utils.h"
 
 class prepared_statement_base;
 template<typename T>

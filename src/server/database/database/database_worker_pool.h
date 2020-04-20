@@ -18,7 +18,7 @@ public:
 	database_worker_pool();
 	~database_worker_pool();
 
-	void set_connection_infO(const std::string& info_string, const uint8_t async_threads, const uint8_t synch_threads);
+	void set_connection_info(const std::string& info_string, const uint8_t async_threads, const uint8_t synch_threads);
 
 	uint32_t open();
 
@@ -154,6 +154,7 @@ private:
 	std::unique_ptr<producer_consumer_queue<sql_operation*>> queue_;
 	std::array<std::vector<std::unique_ptr<T>>, IDX_SIZE> connections_;
 	std::unique_ptr<mysql_connection_info> connection_info_;
+	std::vector<uint8_t> prepared_statement_size_;
 	uint8_t async_threads_;
 	uint8_t synch_threads_;
 };

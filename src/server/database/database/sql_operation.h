@@ -5,7 +5,8 @@
 #ifndef DATABASE_SQL_OPERATION_H
 #define DATABASE_SQL_OPERATION_H
 
-#include "query_result.h"
+//#include "query_result.h"
+#include "database_env_fwd.h"
 
 class prepared_statement_base;
 

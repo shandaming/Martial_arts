@@ -8,7 +8,7 @@
 #include <list>
 #include <queue>
 
-#include "query_result.h"
+#include "database_env_fwd.h"
 
 class query_callback
 {

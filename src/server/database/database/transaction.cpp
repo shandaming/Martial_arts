@@ -7,6 +7,8 @@
 
 #include "transaction.h"
 #include "mysql_connection.h"
+#include "sql_operation.h"
+#include "prepared_statement.h"
 
 std::mutex transaction_task::dead_lock_lock_;
 

@@ -5,7 +5,6 @@
 #ifndef DATABASE_QUERY_RESULT_H
 #define DATABASE_QUERY_RESULT_H
 
-#include <future>
 #include <mysql/mysql.h>
 
 #include "field.h"
@@ -39,12 +38,6 @@ private:
 	MYSQL_FIELD* fields_;
 };
 
-typedef std::shared_ptr<result_set> query_result;
-typedef std::future<query_result> query_result_future;
-typedef std::promise<query_result> query_result_promise;
-
-
-
 class prepared_result_set
 {
 public:
@@ -73,9 +66,5 @@ private:
 	MYSQL_STMT* stmt_;
 	MYSQL_RES* metadata_result_; // 字段元数据，由mysql_stmt_result_metadata返回
 };
-
-typedef std::shared_ptr<prepared_result_set> prepared_query_result;
-typedef std::future<prepared_query_result> prepared_query_result_future;
-typedef std::promise<prepared_query_result> prepared_query_result_promise;
 
 #endif

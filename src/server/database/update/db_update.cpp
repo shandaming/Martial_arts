@@ -8,8 +8,12 @@
 
 #include "db_update.h"
 #include "builtin_config.h"
+#include "database_env.h"
+#include "database_loader.h"
+#include "log.h"
+#include "revision.h"
 
-namepsace
+namespace
 {
 std::string search_path(const std::string &filename, std::string path = "")
 {
@@ -18,13 +22,13 @@ std::string search_path(const std::string &filename, std::string path = "")
 		path = ::getenv("PATH");
 		if (path.empty())
 		{
-			LOG_ERROR("Environment variable PATH not found");
+			LOG_ERROR("sql.updates", "Environment variable PATH not found");
 			return "";
 		}
 	}
 
 	std::string result;
-	std::vector<std::string> paths = utils::split(path, ':');
+	std::vector<std::string> paths = split(path, ':');
 
 	for (auto it : paths)
 	{
@@ -40,7 +44,7 @@ std::string search_path(const std::string &filename, std::string path = "")
 }
 }
 
-std::string DB_updater_util::get_corrected_mysql_executable()
+std::string db_updater_util::get_corrected_mysql_executable()
 {
 	if(!corrected_path().empty())
 		return corrected_path();
@@ -48,9 +52,9 @@ std::string DB_updater_util::get_corrected_mysql_executable()
 		return get_mysql_executable();
 }
 
-bool DB_updater_util::check_executable()
+bool db_updater_util::check_executable()
 {
-	std::filesystem::path exe(get_corrected_mysql_executable())
+	std::filesystem::path exe(get_corrected_mysql_executable());
 	if(!std::filesystem::exists(exe)) // 不存在
 	{
 		exe = Trinity::search_executable_in_path("mysql"); // ?????
@@ -68,7 +72,7 @@ bool DB_updater_util::check_executable()
 	return true;
 }
 
-std::string& DB_updater_util::corrected_path()
+std::string& db_updater_util::corrected_path()
 {
 	static std::string path;
 	return path;
@@ -76,25 +80,25 @@ std::string& DB_updater_util::corrected_path()
 
 // Auth Database
 template<>
-std::string DB_updater<login_database_connection>::get_config_entry()
+std::string db_updater<login_database_connection>::get_config_entry()
 {
 	return "Updates.Auth";
 }
 
 template<>
-std::string DB_updater<login_database_connection>::get_table_name()
+std::string db_updater<login_database_connection>::get_table_name()
 {
 	return "Auth";
 }
 
 template<>
-std::string DB_updater<login_database_connection>::get_base_file()
+std::string db_updater<login_database_connection>::get_base_file()
 {
 	return get_source_directory() + "/sql/base/auth_database.sql"; //????
 }
 
 template<>
-bool DB_updater<login_database_connection>::is_enabled(const uint32_t update_mask)
+bool db_updater<login_database_connection>::is_enabled(const uint32_t update_mask)
 {
 	// 这样可以在msvc下静音警告
 	return (update_mask & database_loader::DATABASE_LOGIN) ? true : false;
@@ -102,100 +106,100 @@ bool DB_updater<login_database_connection>::is_enabled(const uint32_t update_mas
 
 // World Database
 template<>
-std::string DB_updater<world_database_connection>::get_config_entry()
+std::string db_updater<world_database_connection>::get_config_entry()
 {
 	return "Updates.World";
 }
 
 template<>
-std::string DB_updater<world_database_connection>::get_table_name()
+std::string db_updater<world_database_connection>::get_table_name()
 {
 	return "World";
 }
 
 template<>
-std::string DB_updater<world_database_connection>::get_base_file()
+std::string db_updater<world_database_connection>::get_base_file()
 {
 	return revision::get_full_database();// ???
 }
 
 template<>
-bool UB_updater<world_database_connection>::is_enabled(const uint32_t update_mask)
+bool db_updater<world_database_connection>::is_enabled(const uint32_t update_mask)
 {
 	return (update_mask & database_loader::DATABASE_WORLD) ? true : false;
 }
 
 template<>
-base_location::DB_updater<world_database_world>::get_base_loaction_type()
+base_location::db_updater<world_database_world>::get_base_loaction_type()
 {
 	return LOCATION_DOWNLOAD;
 }
 
 // Character Database
 template<>
-std::string DB_updater<character_database_connection>::get_config_entry()
+std::string db_updater<character_database_connection>::get_config_entry()
 {
 	return "Updates.Character";
 }
 
 template<>
-std::string DB_updater<character_database_connection>::get_table_name()
+std::string db_updater<character_database_connection>::get_table_name()
 {
 	return "Character";
 }
 
 template<>
-std::string DB_updater<character_database_connection>::get_base_file()
+std::string db_updater<character_database_connection>::get_base_file()
 {
 	return get_source_directory() + "/sql/base/characters_database.sql"; //???????
 }
 
 template<>
-bool DB_updater<character_database_connection>::is_enabled(const uint32_t update_mask)
+bool db_updater<character_database_connection>::is_enabled(const uint32_t update_mask)
 {
 	return (update_mask & database_loader::DATABASE_CHARACTER) ? true : false;
 }
 
 // Hotfix Database
 template<>
-std::string DB_updater<hotfix_database_connection>::get_config_entry()
+std::string db_updater<hotfix_database_connection>::get_config_entry()
 {
 	return "Updates.Hotfix";
 }
 
 template<>
-std::string DB_updater<hotfix_database_connection>::get_table_name()
+std::string db_updater<hotfix_database_connection>::get_table_name()
 {
 	return "Hotfives";
 }
 
 template<>
-std::string DB_updater<hotfix_database_connection>::get_base_file()
+std::string db_updater<hotfix_database_connection>::get_base_file()
 {
 	return revision::get_hotfixes_database(); // ???
 }
 
 template<>
-bool DB_updater<hotfix_database_connection>::is_enabled(const uint32_t update_mask)
+bool db_updater<hotfix_database_connection>::is_enabled(const uint32_t update_mask)
 {
 	return (update_mask & database_loader::DATABASE_HOTFIX) ? true : false;
 }
 
 template<>
-base_location::DB_updater<hotfix_database_connection>::get_base_location_type()
+base_location::db_updater<hotfix_database_connection>::get_base_location_type()
 {
 	return LOCATION_DOWNLOAD;
 }
 
 // ALL
 template<typename T>
-base_location::DB_updater<T>::get_base_location_type()
+base_location::db_updater<T>::get_base_location_type()
 {
 	return LOCATION_REPOITORY;
 }
 
 template<typename T>
-bool db_updater<T>::create(database_worker_ool<T>& pool)
+bool db_updater<T>::create(database_worker_pool<T>& pool)
 {
 	LOG_INFO("sql.update", "Dtabase\"%s\" does not exist, do you want to create it? [yes (default) / no]:", pool.get_connection_info()->database.c_str());
 
@@ -244,7 +248,7 @@ bool db_updater<T>::create(database_worker_ool<T>& pool)
 template<typename T>
 bool db_updater<T>::update(database_worker_pool<T>& pool)
 {
-	if(!db_updater_utils::check_executable())
+	if(!db_updater_util::check_executable())
 		return false;
 
 	LOG_INFO("sql.updates", "Updating %s database...", db_updater<T>::get_table_name().c_str());

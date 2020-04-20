@@ -2,9 +2,14 @@
  * Copyright (C) 2019
  */
 
-#include "prepared_statement.h"
+#include <cstring>
 
-prepared_statement_base::prepared_statement_base(uint32_t index) : stmt_(0), index_(index) {}
+#include "prepared_statement.h"
+#include "mysql_prepared_statement.h"
+#include "mysql_connection.h"
+#include "errors.h"
+
+prepared_statement_base::prepared_statement_base(uint32_t index, uint8_t capacity) : stmt_(0), index_(index), statement_data_(capacity) {}
 
 prepared_statement_base::~prepared_statement_base() {}
 
@@ -137,15 +142,15 @@ void prepared_statement_base::set_null(const uint8_t index)
 
 void prepared_statement_base::bind_parameters()
 {
-	assert(stmt_);
+	ASSERT(stmt_);
 
 	uint8_t i = 0;
 	for(; i < statement_data_.size(); ++i)
 	{
-		swtich(statement_data_[i].type)
+		switch(statement_data_[i].type)
 		{
 			case TYPE_BOOL:
-				stmt_->set_bool(i, statement_data_[i].data.boolen);
+				stmt_->set_bool(i, statement_data_[i].data.boolean);
 				break;
 			case TYPE_UINT8:
 				stmt_->set_uint8(i, statement_data_[i].data.uint8);
@@ -174,7 +179,7 @@ void prepared_statement_base::bind_parameters()
 			case TYPE_FLOAT:
 				stmt_->set_float(i, statement_data_[i].data.float_t);
 				break;
-			case TYPE_DBOULE:
+			case TYPE_DOUBLE:
 				stmt_->set_double(i, statement_data_[i].data.double_t);
 				break;
 			case TYPE_STRING:
@@ -198,13 +203,13 @@ void prepared_statement_base::bind_parameters()
 
 /* -------------------------- prepared_statement_task ------------------------------- */
 
-prepared_statement_task::prepared_statement_task(prepared_statement_base* stmt, bool async) : stmt_(stmt), result(nullptr)
+prepared_statement_task::prepared_statement_task(prepared_statement_base* stmt, bool async) : stmt_(stmt), result_(nullptr)
 {
 	has_result_ = async; // 如果它是异步的，那么就有结果
 	if(async)
 	{
 		result_ = new prepared_query_result_promise();
-		assert(result_);
+		ASSERT(result_);
 	}
 }
 

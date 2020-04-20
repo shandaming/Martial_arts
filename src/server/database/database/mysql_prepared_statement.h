@@ -40,6 +40,8 @@ public:
 	void set_float(const uint8_t index, const float value);
 	void set_double(const uint8_t index, const double value);
 	void set_binary(const uint8_t index, const std::vector<uint8_t>& value, bool is_string);
+
+	uint32_t get_parameter_count() const { return param_count_; }
 private:
 	MYSQL_STMT* get_stmt() { return stmt_; }
 	MYSQL_BIND* get_bind() { return bind_; }

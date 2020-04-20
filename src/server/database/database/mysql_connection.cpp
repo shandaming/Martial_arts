@@ -279,7 +279,7 @@ void mysql_connection::commit_transaction()
 	execute("COMMIT");
 }
 
-int mysql_connection::execute_transaction(std::shared_ptr<transaction_base>& transaction)
+int mysql_connection::execute_transaction(std::shared_ptr<transaction_base> transaction)
 {
 	const std::vector<sql_element_data> queries = transaction->queries_;
 	if(queries.empty())

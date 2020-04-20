@@ -3,7 +3,7 @@
  */
 
 #include "hotfix_database.h"
-#include "database/mysql_prepared_statement.h"
+#include "mysql_prepared_statement.h"
 
 void hotfix_database_connection::do_prepare_statements()
 {

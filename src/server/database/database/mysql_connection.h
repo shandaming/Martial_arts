@@ -68,7 +68,7 @@ public:
 	void begin_transaction();
 	void rollback_transaction();
 	void commit_transaction();
-	int execute_transaction(std::shared_ptr<transaction_base>& transaction);
+	int execute_transaction(std::shared_ptr<transaction_base> transaction);
 
 	void ping();
 

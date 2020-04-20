@@ -44,7 +44,7 @@ tokenizer::tokenizer(const std::string &src, const char sep, uint32_t vectorRese
     }
 }
 
-long this_thread_id()
+inline long this_thread_id()
 {
 	static long thread_local thread_id = 0;
 	if(thread_id == 0)

@@ -2,6 +2,7 @@
  * Copyright (C) 2019
  */
 
+#include <mysql/mysqld_error.h>
 
 #include "database_worker_pool.h"
 #include "implementation/login_database.h"
@@ -10,6 +11,7 @@
 #include "implementation/hotfix_database.h"
 #include "adhoc_statement.h"
 #include "prepared_statement.h"
+#include "mysql_prepared_statement.h"
 #include "errors.h"
 #include "log.h"
 
@@ -53,7 +55,7 @@ uint32_t database_worker_pool<T>::open()
 {
 	FATAL(connection_info_.get(), "Connection info was not set!");
 
-	LOG_INFO("sql.driver", "Opening Database pool %s. Asynchronous connections: %d, synchronous connections: %d", get_database_name().c_str(), async_threads_ , synch_threads_);
+	LOG_INFO("sql.driver", "Opening Database pool %s. Asynchronous connections: %u, synchronous connections: %u", get_database_name(), async_threads_ , synch_threads_);
 
 	uint32_t error = open_connections(IDX_ASYNC, async_threads_);
 	if(error)
@@ -62,7 +64,7 @@ uint32_t database_worker_pool<T>::open()
 	error = open_connections(IDX_SYNCH, synch_threads_);
 	if(!error)
 	{
-		LOG_INFO("sql.driver", "Database pool %s opened successfully. %u total connections running.", get_database_name().c_str(), connections_[IDX_SYNCH].size() + connections_[IDX_ASYNC].size());
+		LOG_INFO("sql.driver", "Database pool %s opened successfully. %lu total connections running.", get_database_name(), connections_[IDX_SYNCH].size() + connections_[IDX_ASYNC].size());
 	}
 	return error;
 }
@@ -70,17 +72,17 @@ uint32_t database_worker_pool<T>::open()
 template<typename T>
 void database_worker_pool<T>::close()
 {
-	LOG_INFO("sql.driver", "Closing down database pool %s", get_database_name().c_str());
+	LOG_INFO("sql.driver", "Closing down database pool %s", get_database_name());
 
 	// 关闭实际的MySQL连接。
 	connections_[IDX_ASYNC].clear();
 
-	LOG_INFO("sql.driver", "Asynchronous connections on database pool '%s' terminated. Proceeding with synchronous connections", get_database_name().c_str());
+	LOG_INFO("sql.driver", "Asynchronous connections on database pool '%s' terminated. Proceeding with synchronous connections", get_database_name());
 
 	// 关闭同步连接！ 无需锁定连接，因为DatabaseWorkerPool <> :: Close！ 仅应在内核中的任何其他线程任务退出后才调用！ 表示此时无法进行并发访问。
 	connections_[IDX_SYNCH].clear();
 
-	LOG_INFO("sql.driver", "All connections on database pool '%s'", get_database_name().c_str());
+	LOG_INFO("sql.driver", "All connections on database pool '%s'", get_database_name());
 }
 
 template<typename T>
@@ -99,8 +101,28 @@ bool database_worker_pool<T>::prepare_statements()
 			}
 			else
 				i->unlock();
+
+			const size_t prepared_size = i->stmts_.size();
+			if(prepared_statement_size_.size() < prepared_size)
+				prepared_statement_size_.resize(prepared_size);
+
+			for(size_t idx = 0; idx < prepared_size; ++idx)
+			{
+				if(prepared_statement_size_[idx] > 0)
+					continue;
+
+				if(mysql_prepared_statement* stmt = i->stmts_[idx].get())
+				{
+					const uint32_t param_count = stmt->get_parameter_count();
+
+					ASSERT(param_count < std::numeric_limits<uint8_t>::max());
+
+					prepared_statement_size_[idx] = static_cast<uint8_t>(param_count);
+				}
+			}
 		}
 	}
+	return true;
 }
 
 template<typename T>
@@ -209,7 +231,7 @@ void database_worker_pool<T>::direct_commit_transaction(sql_transaction<T>& tran
 template<typename T>
 prepared_statement<T>* database_worker_pool<T>::get_prepared_statement(prepared_statement_index index)
 {
-	return new prepared_statement<T>(index);
+	return new prepared_statement<T>(index, prepared_statement_size_[index]);
 }
 
 template<typename T>
@@ -261,6 +283,7 @@ uint32_t database_worker_pool<T>::open_connections(internal_index type, uint8_t 
 					default:
 						ABORT();
 				}
+				return std::unique_ptr<T>();
 			}();
 
 		if(uint32_t error = connection->open())

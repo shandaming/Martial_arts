@@ -8,6 +8,8 @@
 #include <string>
 #include <filesystem>
 
+#include "database_env_fwd.h"
+
 class update_exception : public std::exception
 {
 public:
@@ -25,7 +27,7 @@ enum base_location
 	LOCATION_DOWNLOAD // 位置下载
 };
 
-class DB_updater_util
+class db_updater_util
 {
 public:
 	// 获取mysql可执行程序的路径
@@ -37,7 +39,10 @@ private:
 };
 
 template<typename T>
-class DB_updater
+class database_worker_pool;
+
+template<typename T>
+class db_updater
 {
 public:
 	using path = std::filesystem::path;

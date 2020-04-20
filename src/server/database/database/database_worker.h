@@ -22,8 +22,8 @@ private:
 
 	void worker_thread();
 
-	std::thread worker_thread_;
 	std::atomic<bool> cancelation_token_;
+	std::thread worker_thread_;
 
 	producer_consumer_queue<sql_operation*>* queue_;
 	mysql_connection* connection_;
