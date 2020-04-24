@@ -20,7 +20,7 @@ public:
     typedef storage_type::const_reference const_reference;
 
 public:
-    tokenizer(const std::string &src, char const sep, uint32_t vectorReserve = 0, bool keep_empty_strings = true);
+    tokenizer(const std::string &src, char const sep, uint32_t vector_reserve = 0, bool keep_empty_strings = true);
     ~tokenizer() { delete[] str_; }
 
     const_iterator begin() const { return storage_.begin(); }

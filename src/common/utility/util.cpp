@@ -9,13 +9,13 @@
 
 #include "util.h"
 
-tokenizer::tokenizer(const std::string &src, const char sep, uint32_t vectorReserve /*= 0*/, bool keep_empty_strings /*= true*/)
+tokenizer::tokenizer(const std::string &src, const char sep, uint32_t vector_reserve /*= 0*/, bool keep_empty_strings /*= true*/)
 {
     str_ = new char[src.length() + 1];
     memcpy(str_, src.c_str(), src.length() + 1);
 
-    if (vectorReserve)
-        storage_.reserve(vectorReserve);
+    if (vector_reserve)
+        storage_.reserve(vector_reserve);
 
     char* posold = str_;
     char* posnew = str_;

@@ -5,16 +5,21 @@
 #include <unistd.h>
 
 #include <cstdio>
+#include <iostream>
+#include <fstream>
 
 #include "db_update.h"
+#include "update_fetcher.h"
 #include "builtin_config.h"
 #include "database_env.h"
 #include "database_loader.h"
 #include "log.h"
 #include "revision.h"
+#include "start_process.h"
 
 namespace
 {
+/*
 std::string search_path(const std::string &filename, std::string path = "")
 {
 	if (path.empty())
@@ -42,6 +47,7 @@ std::string search_path(const std::string &filename, std::string path = "")
 	}
 	return result;
 }
+*/
 }
 
 std::string db_updater_util::get_corrected_mysql_executable()
@@ -57,7 +63,7 @@ bool db_updater_util::check_executable()
 	std::filesystem::path exe(get_corrected_mysql_executable());
 	if(!std::filesystem::exists(exe)) // 不存在
 	{
-		exe = Trinity::search_executable_in_path("mysql"); // ?????
+		exe = search_executable_in_path("mysql"); // ?????
 		if(!exe.empty() && std::filesystem::exists(exe))
 		{
 			// 纠正mysql cli的路径
@@ -130,7 +136,7 @@ bool db_updater<world_database_connection>::is_enabled(const uint32_t update_mas
 }
 
 template<>
-base_location::db_updater<world_database_world>::get_base_loaction_type()
+base_location db_updater<world_database_connection>::get_base_location_type()
 {
 	return LOCATION_DOWNLOAD;
 }
@@ -186,16 +192,16 @@ bool db_updater<hotfix_database_connection>::is_enabled(const uint32_t update_ma
 }
 
 template<>
-base_location::db_updater<hotfix_database_connection>::get_base_location_type()
+base_location db_updater<hotfix_database_connection>::get_base_location_type()
 {
 	return LOCATION_DOWNLOAD;
 }
 
 // ALL
 template<typename T>
-base_location::db_updater<T>::get_base_location_type()
+base_location db_updater<T>::get_base_location_type()
 {
-	return LOCATION_REPOITORY;
+	return LOCATION_REPOSITORY;
 }
 
 template<typename T>
@@ -206,7 +212,7 @@ bool db_updater<T>::create(database_worker_pool<T>& pool)
 	// 从控制台获取是否更新
 	std::string answer;
 	std::getline(std::cin, answer);
-	if(!answer.empty() && !(answer.substr(0, 1) == 'y'))
+	if(!answer.empty() && !(answer.substr(0, 1) == "y"))
 		return false;
 
 	LOG_INFO("sql.updates", "Creating database \"%s\"...", pool.get_connection_info()->database.c_str());
