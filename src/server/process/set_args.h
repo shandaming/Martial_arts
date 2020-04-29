@@ -5,6 +5,8 @@
 #ifndef PRO_SET_ARGS_H
 #define PRO_SET_ARGS_H
 
+#include "initializer.h"
+
 template<typename T>
 class set_args_ : public initializer_base
 {

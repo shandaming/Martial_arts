@@ -26,4 +26,6 @@ std::vector<std::string> split(const std::string& val, char c = ',',
  */
 bool wildcard_string_match(const std::string& str, const std::string& match);
 
+std::string join(const vector<std::string>& input, const std::string& separator);
+
 #endif

@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include <cstdio>
+#include <cctype>
 #include <iostream>
 #include <fstream>
 
@@ -16,6 +17,7 @@
 #include "log.h"
 #include "revision.h"
 #include "start_process.h"
+#include "config.h"
 
 namespace
 {
@@ -49,6 +51,8 @@ std::string search_path(const std::string &filename, std::string path = "")
 }
 */
 }
+
+namespace fs = std::filesystem;
 
 std::string db_updater_util::get_corrected_mysql_executable()
 {
@@ -268,33 +272,33 @@ bool db_updater<T>::update(database_worker_pool<T>& pool)
 
 	update_fetcher update_fetcher(source_directory, [&](const std::string& query)
 			{ db_updater<T>::apply(pool, query); },
-			[&](const fs::path& file) { db_updater<T>::apply_file(pool, file); },
+			[&](const path& file) { db_updater<T>::apply_file(pool, file); },
 			[&](const std::string& query)->query_result { return db_updater<T>::reirieve(pool, query); });
 
 	update_result result;
 	try
 	{
-		result = update_fetcher.update(CONGIF_MGR->getbool(), CONFIG_MGR->getbool(), CONFIG_MGR->get_bool(), CONFIG_MGR->getint());
+		result = update_fetcher.update(CONFIG_MGR->get_value_default("1", "1", true), CONFIG_MGR->get_value_default("1", "1", true), CONFIG_MGR->get_value_default("1", "1", false), CONFIG_MGR->get_value_default("1", "1", 3));
 	}
 	catch(update_exception&)
 	{
 		return false;
 	}
 
-	const std::string info = string_format("Containing "SZFNTD" new and "SZFNTD" archived updates.", result.recent, result.archived);
+	const std::string info = string_format("Containing %u new and %u archived updates.", result.recent, result.archived);
 
 	if(!result.updated)
-		LOG_INFO("sql.updates", ">> %s database is up-to-data! %s", db_update<T>::get_table_name().c_str(), info.c_str());
+		LOG_INFO("sql.updates", ">> %s database is up-to-data! %s", db_updater<T>::get_table_name().c_str(), info.c_str());
 	else
-		LOG_INFO("sql.updates", ">> Applied %s %s. %s", result.updated.c_str(), result.updated == 1 ? "query" : "queries", info.c_str());
+		LOG_INFO("sql.updates", ">> Applied %u %s. %s", result.updated, result.updated == 1 ? "query" : "queries", info.c_str());
 	return true;
 }
 
 template<typename T>
-bool db_update<T>::populate(database_worker_pool<T>& pool)
+bool db_updater<T>::populate(database_worker_pool<T>& pool)
 {
 	{
-		query_result = retrieve(pool, "show tables");
+		const query_result result = retrieve(pool, "show tables");
 		if(result && (result->get_row_count() > 0))
 			return true;
 	}
@@ -321,7 +325,7 @@ bool db_update<T>::populate(database_worker_pool<T>& pool)
 					LOG_ERROR("sql.updates", ">> Base file \"%s\" is missing. Try fixing it by cloning the source again.", base.generic_string().c_str());
 					break;
 				}
-			case LOCATION_DOWLOAD:
+			case LOCATION_DOWNLOAD:
 				{
 					const std::string filename = base.filename().generic_string();
 					const std::string workdir = fs::current_path().generic_string();
@@ -385,7 +389,7 @@ void db_updater<T>:: apply_file(database_worker_pool<T>& pool, const std::string
 	}
 	
 	// 检测是否通过IP或socket连接
-	if(!isdigit(port_or_socket))
+	if(!isdigit(port_or_socket[0]))
 	{
 		// 如果host =='.' 我们不能检测，因为开启socket会被命名为localhost
 		args.push_back("-P0");

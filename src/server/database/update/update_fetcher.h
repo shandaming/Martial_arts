@@ -14,7 +14,7 @@
 #include <memory>
 #include <filesystem>
 
-#include "query_result.h"
+#include "database_env_fwd.h"
 
 struct update_result
 {
@@ -51,7 +51,7 @@ private:
 	struct applied_file_entry // 应用文件条目
 	{
 		applied_file_entry(const std::string& name_, const std::string& hash_, state state_, uint64_t timestamp_) : 
-			name(name_), hash(hash_), state(state_), timestamp(timestamp_) {}
+			name(name_), hash(hash_), _state(state_), timestamp(timestamp_) {}
 
 		static inline state state_convert(const std::string& state)
 		{
@@ -63,11 +63,11 @@ private:
 			return (state == RELEASED) ? "RELEASED" : "ARCHIVED";
 		}
 
-		std::string get_state_as_string() const { return state_convert(state); }
+		std::string get_state_as_string() const { return state_convert(_state); }
 
 		const std::string& name;
 		const std::string& hash;
-		const state state;
+		const state _state;
 		const uint64_t timestamp;
 	};
 
@@ -109,8 +109,8 @@ private:
 	const std::unique_ptr<path> source_directory_;
 
 	const std::function<void(const std::string&)> apply_;
-	const std::functon<void(const path&)> apply_file_;
-	const std::function<query_result<const std::string&>> retrieve_;
+	const std::function<void(const path&)> apply_file_;
+	const std::function<query_result(const std::string&)> retrieve_;
 };
 
 #endif

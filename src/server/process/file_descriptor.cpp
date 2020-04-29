@@ -12,9 +12,7 @@ file_descriptor::file_descriptor(const std::string& path) : fd_(-1)
 file_descriptor::~file_descriptor() 
 {
 	if(close_on_exit_)
-	{
-		::close(fd_); 
-	}
+		close(); 
 }
 	
 file_descriptor::file_descriptor& operator=(const file_descriptor& fd) 
@@ -34,9 +32,8 @@ file_descriptor::file_descriptor& operator=(file_descriptor&& fd)
 bool file_descriptor::open_file(const std::string& path)
 {
 	if(fd_!= -1)
-	{
 		return true;
-	}
+
 	fd_ = ::open(path.c_str(), O_RDWR);
 	if(fd_ == -1)
 	{
@@ -50,6 +47,6 @@ void file_descriptor::close()
 {
 	if(fd_ > -1)
 	{
-		close(fd_);
+		::close(fd_);
 	}
 }

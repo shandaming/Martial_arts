@@ -79,3 +79,19 @@ bool wildcard_string_match(const std::string& str, const std::string& match)
 	}while(wild_matching && !matches && ++current < str.length());
 	return matches;
 }
+
+std::string join(const std::vector<std::string>& input, const std::string& separator)
+{
+	auto beg = input.begin();
+	std::string res;
+
+	if(beg != input.end())
+		res = *beg;
+
+	for(++beg; beg != input.end(); ++beg)
+	{
+		res += separator;
+		res += *beg;
+	}
+	return res;
+}
