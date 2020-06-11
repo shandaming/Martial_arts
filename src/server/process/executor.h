@@ -7,6 +7,8 @@
 
 #include <unistd.h>
 
+#include "child.h"
+
 template<typename F, typename T, typename... Args>
 void for_each(F&& f, T&& t, Args&&... args)
 {
@@ -125,7 +127,7 @@ template<typename... Args>
 child execute(Args&&... args)
 {
 	//return executor()(std::make_tuple(std::forword<Args>(args)...));
-return executor()(std::forword<Args>(args)...);
+return executor()(std::forward<Args>(args)...);
 }
 
 /*

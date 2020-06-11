@@ -33,6 +33,12 @@ private:
 		return const_cast<char*>(s.c_str());
 	}
 
+	template<typename T>
+	struct array_deleter
+	{
+		void operator()(T* const p) { delete[] p; }
+	};
+
 	std::shared_ptr<char*> args_;
 };
 

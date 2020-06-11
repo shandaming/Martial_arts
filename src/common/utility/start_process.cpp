@@ -14,6 +14,8 @@
 #include "file_descriptor.h"
 #include "executor.h"
 #include "set_args.h"
+#include "socket_operations.h"
+#include "message_buffer.h"
 
 namespace fs = std::filesystem;
 
@@ -56,6 +58,53 @@ template<typename T>
 auto make_log_sink(T&& callback)->log_sink<typename std::decay<T>::type>
 {
 	return { std::forward<T>(callback) };
+}
+
+std::string make_log_sink(int fd)
+{
+	std::error_code ec;
+	set_user_non_blocking(fd, ec);
+	if(ec)
+	{
+		LOG_ERROR("proc", "set_user_non_blocking failed. fd = %d", fd);
+		return;
+	}
+
+
+	message_buffer read_buffer;
+	int remaining_space = 0;
+	size_t bytes_transferred = 0;
+
+	while(1)
+	{
+		read_buffer.normalize();
+		read_buffer.ensure_free_space();
+		remaining_space = read_buffer.get_remaining_psace();
+
+		iovec vec;
+		vec.iov_base = read_buffer.get_write_pointer();
+		vec.iov_len = remaining_space;
+
+		if(non_blocking_read(fd, &vec, remaining_space, ec, bytes_read))
+			transferred_bytes += bytes_read;
+		if(ec)
+		{
+			LOG_ERROR("proc", "file description [%d] read filed. error %d:%s", fd, ec.value(), ec.message().c_str());
+			break;
+		}
+		else if(bytes_read == 0)
+			break;
+		else if(bytes_read < remaining_space)
+		{
+			read_buffer.write_complate(bytes_read);
+			break;
+		}
+		else
+			read_buffer.write_complate(bytes_read);
+	}
+	const std::string result(read_buffer.get_base_pointer(), get_buffer_size());
+
+	return !result;
 }
 
 template<typename T>
@@ -103,8 +152,14 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 				LOG_ERROR(logger, "%s", msg.c_str());
 			});
 
+	/*
 	copy(cout_fd, out_info);
 	copy(err_fd, out_error);
+	*/
+	const std::string log_info = make_log_sink(out_fd);
+	const std::string log_error = make_log_sink(err_fd);
+	LOG_INFO(logger, "%s", log_info.c_str());
+	LOG_ERROR(logger, "%s", log_error.c_str());
 
 	const int result = waiter(c);
 

@@ -15,11 +15,15 @@ address_v4::address_v4(const address_v4::bytes_type& bytes)
 
 address_v4::address_v4(address_v4::uint_type addr)
 {
+	static_assert(std::numeric_limits<uint_type>::max > 0xFFFFFFFF,
+			"address_v4 from unsigned integer");
+	/*
 	if((std::numeric_limits<uint_type>::max)() > 0xFFFFFFFF)
 	{
 		std::out_of_range ex("address_v4 from unsigned integer");
 		throw ex;
 	}
+	*/
 
 	addr_.s_addr = host_to_network_long(addr);
 }

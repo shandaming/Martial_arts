@@ -67,12 +67,16 @@ void socket::close()
 	if(!is_open())
 		return;
 
+	close_socket();
+	fd_ = -1;
+}
+
+void socket::close_socket()
+{
 	std::error_code ec;
 	close(fd_, ec);
 	if(ec)
 		LOG_ERROR("Networking", "close() failed. code[%d], message:%s", ec.code(), ec.message().c_str());
-
-	fd_ = -1;
 }
 
 bool socket::set_reuse_addr()

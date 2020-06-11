@@ -82,6 +82,8 @@ public:
 
 	bool is_open() const { return fd_ != invalid_socket; }
 private:
+	void close_socket();
+
 	int fd_;
 };
 
