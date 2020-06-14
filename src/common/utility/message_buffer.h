@@ -6,6 +6,7 @@
 #define MESSAGE_BUFFER_H
 
 #include <vector>
+#include <cstring>
 
 class message_buffer
 {
@@ -34,7 +35,7 @@ public:
 		return *this;
 	}
 
-	message_buffer(message_buffer&& right) : wpos_(right.wpos_), rpos_(right.rpos_), storage_(right.mov()) {}
+	message_buffer(message_buffer&& right) : wpos_(right.wpos_), rpos_(right.rpos_), storage_(right.move()) {}
 
 	message_buffer& operator=(message_buffer&& right)
 	{
@@ -77,7 +78,7 @@ public:
 		if(rpos_)
 		{
 			if(rpos_ != wpos_)
-				std::memove(get_base_pointer(), get_read_pointer(), get_active_size());
+				std::memmove(get_base_pointer(), get_read_pointer(), get_active_size());
 			wpos_ -= rpos_;
 			rpos_ = 0;
 		}

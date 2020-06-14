@@ -5,27 +5,27 @@
 #ifndef PRO_SET_ARGS_H
 #define PRO_SET_ARGS_H
 
+#include <algorithm>
+
 #include "initializer.h"
 
-template<typename T>
+template<typename Range>
 class set_args_ : public initializer_base
 {
 public:
-	explicit set_args_(const T& args)
+	explicit set_args_(const Range& args)
 	{
-		args_.reset(new char*[args.size() + 1], array_deleter);
+		args_.reset(new const char*[args.size() + 1], array_deleter<const char*>());
 		std::transform(args, args_.get(), c_str);
 		args_[args.size()] = 0;
 	}
 
-	template<typename T>
-	void on_exec_setup(T& e) const
+	template<typename PosixExecutor>
+	void on_exec_setup(PosixExecutor& e) const
 	{
-		e.cmd_line = args.get();
+		e.cmd_line = args_.get();
 		if(!e.exe && *args_[0])
-		{
 			e.exe = args_[0];
-		}
 	}
 private:
 	static char* c_str(const std::string& s)
@@ -39,13 +39,13 @@ private:
 		void operator()(T* const p) { delete[] p; }
 	};
 
-	std::shared_ptr<char*> args_;
+	std::unique_ptr<const char*[]> args_;
 };
 
-template<typename T>
-set_args_<T> set_args(const T& range)
+template<typename Range>
+set_args_<Range> set_args(const Range& range)
 {
-	return set_args_<T>(range);
+	return set_args_<Range>(range);
 }
 
 #endif

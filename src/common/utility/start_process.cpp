@@ -16,6 +16,8 @@
 #include "set_args.h"
 #include "socket_operations.h"
 #include "message_buffer.h"
+#include "log.h"
+#include "pipe.h"
 
 namespace fs = std::filesystem;
 
@@ -41,7 +43,7 @@ class log_sink
 {
 public:
 	typedef char char_type;
-	typedef sink_tag category;
+	//typedef sink_tag category;
 
 	log_sink(T callback) : callback_(std::move(callback)) {}
 
@@ -67,19 +69,20 @@ std::string make_log_sink(int fd)
 	if(ec)
 	{
 		LOG_ERROR("proc", "set_user_non_blocking failed. fd = %d", fd);
-		return;
+		return "";
 	}
 
 
 	message_buffer read_buffer;
 	int remaining_space = 0;
-	size_t bytes_transferred = 0;
+	size_t transferred_bytes = 0;
+	size_t bytes_read = 0;
 
 	while(1)
 	{
 		read_buffer.normalize();
 		read_buffer.ensure_free_space();
-		remaining_space = read_buffer.get_remaining_psace();
+		remaining_space = read_buffer.get_remaining_space();
 
 		iovec vec;
 		vec.iov_base = read_buffer.get_write_pointer();
@@ -96,15 +99,16 @@ std::string make_log_sink(int fd)
 			break;
 		else if(bytes_read < remaining_space)
 		{
-			read_buffer.write_complate(bytes_read);
+			read_buffer.write_completed(bytes_read);
 			break;
 		}
 		else
-			read_buffer.write_complate(bytes_read);
+			read_buffer.write_completed(bytes_read);
 	}
-	const std::string result(read_buffer.get_base_pointer(), get_buffer_size());
+	char* str_base = reinterpret_cast<char*>(read_buffer.get_base_pointer());
+	const std::string result(str_base, read_buffer.get_buffer_size());
 
-	return !result;
+	return result;
 }
 
 template<typename T>

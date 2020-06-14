@@ -6,6 +6,8 @@
 #define IP_SOCKET_TYPES_H
 
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <net/if.h>
 
 typedef int socket_type;
 typedef sockaddr socket_addr_type;
