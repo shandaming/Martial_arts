@@ -27,7 +27,7 @@ pro_pipe create_pipe()
 	int fds[2];
 	if(::pipe(fds) == -1)
 	{
-		PROCESS_THROW_LAST_SYSTEM_ERROR("pipe(2) failed.")
+		PROCESS_THROW_LAST_SYSTEM_ERROR("pipe(2) failed.");
 	}
 	return pro_pipe(fds[0], fds[1]);
 }

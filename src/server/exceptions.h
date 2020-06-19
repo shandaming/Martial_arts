@@ -7,8 +7,25 @@
 
 #include <exception>
 #include <string>
-#include <unistd.h>
-#include <cerrno>
+
+#include <system_error>
+
+#define PROCESS_THROW(EX) throw EX
+
+#define DO_STRINGIZE(x) #x
+
+#define STRINGIZE(x) DO_STRINGIZE(x)
+
+#define PROCESS_SOURCE_LOCATION \
+    "in file '" __FILE__ "', line " STRINGIZE(__LINE__) ": "
+
+#define PROCESS_THROW_LAST_SYSTEM_ERROR(what) \
+    PROCESS_THROW(std::system_error( \
+        std::error_code(errno, std::system_category()), \
+        PROCESS_SOURCE_LOCATION what))
+
+#define PROCESS_RETURN_LAST_SYSTEM_ERROR(ec) \
+    ec = std::error_code(errno, std::system_category())
 
 /*
  * Base class for all the errors encountered.
@@ -27,22 +44,5 @@ struct error : std::exception
 
 	std::string message;
 };
-
-#define PROCESS_THROW(EX) throw EX
-
-#define STRINGIZE(x) DO_STRINGIZE(x)
-
-#define DO_STRINGIZE(x) #x
-
-#define PROCESS_SOURCE_LOCATION \
-    "in file '" __FILE__ "', line " STRINGIZE(__LINE__) ": "
-
-#define PROCESS_THROW_LAST_SYSTEM_ERROR(what) \
-    PROCESS_THROW(std::system_error( \
-        std::system::error_code(errno, std::system::system_category()), \
-        PROCESS_SOURCE_LOCATION what))
-
-#define PROCESS_RETURN_LAST_SYSTEM_ERROR(ec) \
-    ec = std::system::error_code(errno, std::system::system_category())
 
 #endif

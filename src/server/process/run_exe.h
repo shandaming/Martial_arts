@@ -12,9 +12,9 @@
 class run_exe_ : public initializer_base
 {
 public:
-	explicit run_exe_(const std::string& s) : s_(s), cmd_line_(new char[2], array_deleter<char>())
+	explicit run_exe_(const std::string& s) : s_(s), cmd_line_(new const char*[2], array_deleter<const char*>())
 	{
-		cmd_line_[0] = const_cast<char*>(s_.c_str());
+		cmd_line_[0] = s_.c_str();
 		cmd_line_[1] = 0;
 	}
 
@@ -23,9 +23,7 @@ public:
 	{
 		e.exe = s_.c_str();
 		if(!e.cmd_line)
-		{
 			e.cmd_line = cmd_line_.get();
-		}
 	}
 private:
 	template<typename T>
@@ -35,7 +33,7 @@ private:
 	};
 
 	std::string s_;
-	std::shared_ptr<char> cmd_line_;
+	std::shared_ptr<const char*[]> cmd_line_;
 };
 
 run_exe_ run_exe(const char* s)
@@ -48,7 +46,7 @@ run_exe_ run_exe(const std::string& s)
 	return run_exe_(s);
 }
 
-using fs = std::filesystem;
+namespace fs = std::filesystem;
 
 run_exe_ run_exe(const fs::path& p)
 {

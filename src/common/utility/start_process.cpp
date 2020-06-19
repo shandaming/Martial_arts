@@ -18,6 +18,10 @@
 #include "message_buffer.h"
 #include "log.h"
 #include "pipe.h"
+#include "run_exe.h"
+#include "inherit_env.h"
+#include "bind_stdin.h"
+#include "bind_stdout.h"
 
 namespace fs = std::filesystem;
 
@@ -120,14 +124,14 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 	std::optional<file_descriptor> input_source;
 
 	if(!secure)
-		LOG_TRAGE(logger, "Starting process \"%s\" with arguments: \"%s\".",
+		LOG_TRACE(logger, "Starting process \"%s\" with arguments: \"%s\".",
 				executable.c_str(), join(args, " ").c_str());
 
 	child c = [&]
 		{
 			if(!input.empty())
 			{
-				intput_source = file_descriptor(input);
+				input_source = file_descriptor(input);
 				return execute(run_exe(fs::absolute(executable)), 
 						set_args(args), 
 						inherit_env(), 
