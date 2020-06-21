@@ -17,7 +17,7 @@ public:
 	template<typename T>
 	void on_exec_setup(T&) const
 	{
-		::dunp2(fd_, STDOUT_FILENO);
+		::dup2(fd_, STDOUT_FILENO);
 	}
 private:
 	int fd_;

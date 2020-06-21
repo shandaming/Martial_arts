@@ -136,14 +136,16 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 						set_args(args), 
 						inherit_env(), 
 						bind_stdin(*input_source), 
-						bind_stdout(file_se))
+						bind_stdout(file_descriptor(out_pipe.sink)),
+						bind_stderr(file_descriptor(err_pipe.sink)));
 			}
 			else
 			{
 				return execute(run_exe(fs::absolute(executable)),
 						set_args(args),
 						inherit_env(),
-						bind_stdout(file_descripto));
+						bind_stdout(file_descriptor(out_pipe.sink)),
+						bind_stderr(file_descriptor(err_pipe.sink)));
 			}
 		}
 
