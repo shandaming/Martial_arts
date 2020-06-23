@@ -22,6 +22,8 @@
 #include "inherit_env.h"
 #include "bind_stdin.h"
 #include "bind_stdout.h"
+#include "bind_stderr.h"
+#include "wait_for_exit.h"
 
 namespace fs = std::filesystem;
 
@@ -78,7 +80,7 @@ std::string make_log_sink(int fd)
 
 
 	message_buffer read_buffer;
-	int remaining_space = 0;
+	size_t remaining_space = 0;
 	size_t transferred_bytes = 0;
 	size_t bytes_read = 0;
 
@@ -147,10 +149,10 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 						bind_stdout(file_descriptor(out_pipe.sink)),
 						bind_stderr(file_descriptor(err_pipe.sink)));
 			}
-		}
+		};
 
-	file_descriptor out_fd(out_pipe.source, close_handle);
-	file_descriptor err_fd(err_pipe.source, close_handle);
+	file_descriptor out_fd(out_pipe.source);
+	file_descriptor err_fd(err_pipe.source);
 
 	auto out_info = make_log_sink([&](std::string msg)
 			{
@@ -181,6 +183,22 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 
 	return result;
 }
+}
+
+int start_process(std::string const& executable, std::vector<std::string> const& args,
+                 std::string const& logger, std::string input_file, bool secure)
+{
+    return create_child_process([](child& c) -> int
+    {
+        try
+        {
+            return wait_for_exit(c);
+        }
+        catch (...)
+        {
+            return EXIT_FAILURE;
+        }
+    }, executable, args, logger, input_file, secure);
 }
 
 inline fs::path search_path(const fs::path& filename, const std::vector<fs::path>& path = path())

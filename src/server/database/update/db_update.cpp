@@ -413,7 +413,7 @@ void db_updater<T>:: apply_file(database_worker_pool<T>& pool, const std::string
 		args.push_back(database);
 	}
 	// 调用一个不会泄露证书到日志里的mysql进程
-	const int ret = trinity::start_pocess(db_updater_util::get_corrected_mysql_executable(), args, 
+	const int ret = start_pocess(db_updater_util::get_corrected_mysql_executable(), args, 
 			"sql.updates", path.generic_string(), true);
 
 	if(ret != EXIT_SUCCESS)
