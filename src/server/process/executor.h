@@ -97,24 +97,24 @@ struct executor
 	child operator()(Args&&... seq)
 	{
 		//std::for_each(seq, call_on_fork_setup(*this)); // inherit_env有
-for_each(call_on_fork_setup(*this), std::forward<Args>(seq)...);
+		for_each(call_on_fork_setup(*this), std::forward<Args>(seq)...);
 		pid_t pid = ::fork();
 		if(pid == -1)
 		{
 			//std::for_each(seq, call_on_fork_error(*this)); // 都没有
-for_each(call_on_fork_error(*this), std::forward<Args>(seq)...);
+			for_each(call_on_fork_error(*this), std::forward<Args>(seq)...);
 		}
 		else if(pid == 0)
 		{
 			//std::for_each(seq, call_on_exec_setup(*this)); // 除inherit_env其他都有
-for_each(call_on_exec_setup(*this), std::forward<Args>(seq)...);
+			for_each(call_on_exec_setup(*this), std::forward<Args>(seq)...);
 			::execve(exe, cmd_line, env);
 			//std::for_each(seq, call_on_exec_error(*this)); // 都没有
-for_each(call_on_exec_error(*this), std::forward<Args>(seq)...);
+			for_each(call_on_exec_error(*this), std::forward<Args>(seq)...);
 			_exit(EXIT_FAILURE);
 		}
 		//std::for_each(seq, call_on_fork_success(*this)); // 都没有
-for_each(call_on_fork_success(*this), std::forward<Args>(seq)...);
+		for_each(call_on_fork_success(*this), std::forward<Args>(seq)...);
 		return child(pid);
 	}
 
@@ -127,7 +127,7 @@ template<typename... Args>
 child execute(Args&&... args)
 {
 	//return executor()(std::make_tuple(std::forword<Args>(args)...));
-return executor()(std::forward<Args>(args)...);
+	return executor()(std::forward<Args>(args)...);
 }
 
 /*

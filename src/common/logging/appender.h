@@ -27,7 +27,7 @@ public:
 	static const char* get_log_level_str(log_level level);
 	virtual void set_realm_id(uint32_t) { }
 private:
-	virtual void write_stream(const log_message*) = 0;
+	virtual void _write(const log_message*) = 0;
 
 	uint8_t id_;
 	std::string name_;

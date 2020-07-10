@@ -110,7 +110,7 @@ void appender_console::reset_color(bool stdout_stream)
 	fprintf((stdout_stream ? stdout : stderr), "\x1b[0m");
 }
 
-void appender_console::write_stream(const log_message* message)
+void appender_console::_write(const log_message* message)
 {
 	bool stdout_stream = !(message->level == LOG_LEVEL_ERROR || message->level == LOG_LEVEL_FATAL);
 

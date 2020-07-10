@@ -11,10 +11,11 @@
 #include <unordered_map>
 #include <vector>
 #include <cstdint>
-#include <memory>
 #include <filesystem>
 
 #include "database_env_fwd.h"
+
+namespace fs = std::filesystem;
 
 struct update_result
 {
@@ -30,11 +31,15 @@ struct update_result
 class update_fetcher
 {
 public:
-	using path = std::filesystem::path;
+	update_fetcher(const fs::path& update_directory, 
+			const std::function<void(const std::string&)>& apply, 
+			const std::function<void(const fs::path&)>& apply_file, 
+			const std::function<query_result(const std::string&)>& retrieve);
 
-	update_fetcher(const path& update_directory, const std::function<void(const std::string&)>& apply, const std::function<void(const path& path)>& apply_file, const std::function<query_result(const std::string&)>& retrieve);
-
-	update_result update(const bool redundancy_checks, const bool allow_rehash, const bool archived_redundancy, const int32_t clean_dead_references_max_count) const;
+	update_result update(const bool redundancy_checks, 
+			const bool allow_rehash, 
+			const bool archived_redundancy, 
+			const int32_t clean_dead_references_max_count) const;
 private:
 	enum update_mode
 	{
@@ -73,7 +78,7 @@ private:
 
 	struct directory_entry;
 
-	typedef std::pair<path, state> locale_file_entry;
+	typedef std::pair<fs::path, state> locale_file_entry;
 
 	struct path_compare
 	{
@@ -87,7 +92,7 @@ private:
 
 	locale_file_storage get_file_list() const;
 	// 第归查找更新sql文件存储到storage中
-	void fill_file_list_recursively(const path& path, locale_file_storage& storage, const state state, const uint32_t depth) const;
+	void fill_file_list_recursively(const fs::path& path, locale_file_storage& storage, const state state, const uint32_t depth) const;
 
 	// 从数据库里查询所有要更新的包含目录
 	directory_storage receive_include_directories() const;
@@ -95,10 +100,10 @@ private:
 	applied_file_storage receive_applied_files() const;
 
 	// 读取文件里的sql语句
-	std::string read_sql_update(const path& file) const;
+	std::string read_sql_update(const fs::path& file) const;
 
 	// 更新数据库
-	uint32_t apply(const path& path) const;
+	uint32_t apply(const fs::path& path) const;
 
 	void update_entry(const applied_file_entry& entry, const uint32_t speed = 0) const;
 	void rename_entry(const std::string& from, const std::string& to) const;
@@ -106,10 +111,10 @@ private:
 
 	void update_state(const std::string& name, const state state) const;
 
-	const std::unique_ptr<path> source_directory_;
+	const std::unique_ptr<fs::path> source_directory_;
 
 	const std::function<void(const std::string&)> apply_;
-	const std::function<void(const path&)> apply_file_;
+	const std::function<void(const fs::path&)> apply_file_;
 	const std::function<query_result(const std::string&)> retrieve_;
 };
 

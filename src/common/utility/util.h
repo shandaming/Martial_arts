@@ -38,4 +38,6 @@ private:
 
 long this_thread_id();
 
+std::string byte_array_to_hex_str(const uint8_t* bytes, uint32_t length, bool reverse = false);
+
 #endif

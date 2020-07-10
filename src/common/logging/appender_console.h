@@ -43,7 +43,7 @@ public:
 private:
 	void set_color(bool stdout_stream, color_types color);
 	void reset_color(bool stdout_stream);
-	void write_stream(const log_message* message) override;
+	void _write(const log_message* message) override;
 
 	bool colored_;
 	color_types colors_[NUM_ENABLED_LOG_LEVELS];

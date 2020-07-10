@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include <cstring>
+#include <sstream>
 
 #include "util.h"
 
@@ -50,5 +51,29 @@ inline long this_thread_id()
 	if(thread_id == 0)
 		thread_id = syscall(SYS_gettid);
 	return thread_id;
+}
+
+std::string byte_array_to_hex_str(const uint8_t* bytes, uint32_t length, bool reverse)
+{
+	int32_t init = 0;
+	int32_t end = length;
+	int8_t op = 1;
+
+	if(reverse)
+	{
+		init = length - 1;
+		end = -1;
+		op = -1;
+	}
+
+	std::ostringstream os;
+	for(int32_t i = init; i != end; i += op)
+	{
+		char buffer[4];
+		sprintf(buffer, "%02x", bytes[i]);
+		os << buffer;
+	}
+
+	return os.str();
 }
 

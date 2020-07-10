@@ -24,7 +24,7 @@ public:
 	appender_type get_type() const override { return type_index::value; }
 private:
 	void close_file();
-	void write_stream(const log_message* message) override;
+	void _write(const log_message* message) override;
 
 	FILE* logfile_;
 	std::string filename_;

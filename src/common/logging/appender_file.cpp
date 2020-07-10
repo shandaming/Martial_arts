@@ -46,7 +46,7 @@ appender_file::appender_file(uint8_t id, const std::string& name, log_level leve
 		logfile_ = open_file(filename_, mode, !strcmp(mode, "w") && backup_);
 }
 
-void appender_file::write_stream(const log_message* message)
+void appender_file::_write(const log_message* message)
 {
 	bool exceed_max_size = max_file_size_ > 0 && (file_size_.load() + message->size()) > 
 		max_file_size_;

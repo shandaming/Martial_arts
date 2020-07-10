@@ -30,7 +30,7 @@ void appender::write(log_message* message)
 		ss << ':' << message->thread_id << " ";
 
 	message->prefix = ss.str();
-	write_stream(message);
+	_write(message);
 }
 
 const char* appender::get_log_level_str(log_level level)

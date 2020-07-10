@@ -63,7 +63,7 @@ private:
 };
 
 template<typename T>
-auto make_log_sink(T&& callback)->log_sink<typename std::decay<T>::type>
+auto make_log_sink1(T&& callback)->log_sink<typename std::decay<T>::type>
 {
 	return { std::forward<T>(callback) };
 }
@@ -128,8 +128,28 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 	if(!secure)
 		LOG_TRACE(logger, "Starting process \"%s\" with arguments: \"%s\".",
 				executable.c_str(), join(args, " ").c_str());
-
-	child c = [&]
+#if 1
+	child c(1);
+			if(!input.empty())
+			{
+				input_source = file_descriptor(input);
+				c = execute(run_exe(fs::absolute(executable)), 
+						set_args(args), 
+						inherit_env(), 
+						bind_stdin(*input_source), 
+						bind_stdout(file_descriptor(out_pipe.sink)),
+						bind_stderr(file_descriptor(err_pipe.sink)));
+			}
+			else
+			{
+				c = execute(run_exe(fs::absolute(executable)),
+						set_args(args),
+						inherit_env(),
+						bind_stdout(file_descriptor(out_pipe.sink)),
+						bind_stderr(file_descriptor(err_pipe.sink)));
+			}
+#else
+	child c = [&]()->child
 		{
 			if(!input.empty())
 			{
@@ -150,10 +170,12 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 						bind_stderr(file_descriptor(err_pipe.sink)));
 			}
 		};
+#endif
 
 	file_descriptor out_fd(out_pipe.source);
 	file_descriptor err_fd(err_pipe.source);
 
+	/*
 	auto out_info = make_log_sink([&](std::string msg)
 			{
 				LOG_INFO(logger, "%s", msg.c_str());
@@ -163,6 +185,7 @@ int create_child_process(T waiter, const std::string& executable, const std::vec
 			{
 				LOG_ERROR(logger, "%s", msg.c_str());
 			});
+		*/
 
 	/*
 	copy(cout_fd, out_info);

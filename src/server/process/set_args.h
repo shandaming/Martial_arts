@@ -15,8 +15,8 @@ class set_args_ : public initializer_base
 public:
 	explicit set_args_(const Range& args)
 	{
-		args_.reset(new const char*[args.size() + 1], array_deleter<const char*>());
-		std::transform(args, args_.get(), c_str);
+		args_.reset(new char*[args.size() + 1]);
+		std::transform(args.begin(), args.end(), args_.get(), c_str);
 		args_[args.size()] = 0;
 	}
 
@@ -39,7 +39,7 @@ private:
 		void operator()(T* const p) { delete[] p; }
 	};
 
-	std::unique_ptr<const char*[]> args_;
+	std::unique_ptr<char*[]> args_;
 };
 
 template<typename Range>
