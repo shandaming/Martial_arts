@@ -3,6 +3,7 @@
 #include "appender_db.h"
 #include "database_env.h"
 #include "log_message.h"
+#include "database_env_fwd.h"
 #include "prepared_statement.h"
 
 appender_db::appender_db(uint8_t id, const std::string& name, log_level level, appender_flags, std::vector<const char*>)

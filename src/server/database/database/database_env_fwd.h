@@ -22,4 +22,17 @@ class sql_query_holder_base;
 typedef std::future<sql_query_holder_base*> query_result_holder_future;
 typedef std::promise<sql_query_holder_base*> query_result_holder_promise;
 
+class character_database_connection;
+class hotfix_database_connection;
+class login_database_connection;
+class world_database_connection;
+
+template<typename T>
+class prepared_statement;
+
+using character_database_prepared_statement = prepared_statement<character_database_connection>;
+using hotfix_database_prepared_statement = prepared_statement<hotfix_database_connection>;
+using login_database_prepared_statement = prepared_statement<login_database_connection>;
+using world_database_prepared_statement = prepared_statement<world_database_connection>;
+
 #endif

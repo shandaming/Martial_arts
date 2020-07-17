@@ -359,7 +359,7 @@ mysql_prepared_statement* mysql_connection::get_prepared_statement(uint32_t inde
 	return ret;
 }
 
-void mysql_connection::prepared_statement(uint32_t index, const char* sql, connection_flags flags)
+void mysql_connection::prepare_statement(uint32_t index, const char* sql, connection_flags flags)
 {
 	queries_.insert(prepared_statement_map::value_type(index, std::make_pair(sql, flags)));
 

@@ -5,7 +5,7 @@
 #ifndef NET_TCP_SOCKET_H
 #define NET_TCP_SOCKET_H
 
-#include "buffer.h"
+#include "message_buffer.h"
 #include "socket.h"
 #include "channel.h"
 

@@ -5,11 +5,23 @@
 #ifndef NET_NETWORK_THREAD_H
 #define NET_NETWORK_THREAD_H
 
+#include <vector>
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <memory>
+#include <algorithm>
+
+#include "errors.h"
+#include "log.h"
+
+#include "socket.h"
+
 template<typename SocketType>
 class network_thread
 {
 public:
-	network_thread() : connections_(0), stopped_(false), thread_(nullptr), {}
+	network_thread() : connections_(0), stopped_(false), thread_(nullptr) {}
 
 	virtual ~network_thread()
 	{
@@ -49,12 +61,12 @@ public:
 	{
 		std::lock_guard<std::mutex> lk(new_socket_lock_);
 
-		++connection_;
+		++connections_;
 		new_sockets_.push_back(sock);
 		socket_added(sock);
 	}
 
-	socket* get_socket_for_accept() { return accept_socket_; }
+	//socket* get_socket_for_accept() { return accept_socket_; }
 protected:
 	virtual void socket_added(std::shared_ptr<SocketType>) {}
 	virtual void socket_removed(std::shared_ptr<SocketType>) {}
@@ -71,7 +83,7 @@ protected:
 			if(!sock->is_open())
 			{
 				socket_removed(sock);
-				--connection_;
+				--connections_;
 			}
 			else
 				sockets_.push_back(sock);
@@ -97,7 +109,7 @@ protected:
 
 		// 定时器
 
-		add_new_socket();
+		add_new_sockets();
 
 		sockets_.erase(std::remove_if(sockets_.begin(), sockets_.end(),
 					[this](std::shared_ptr<SocketType> sock)
@@ -118,14 +130,14 @@ protected:
 private:
 	typedef std::vector<std::shared_ptr<SocketType>> socket_container;
 
-	std::atomi<int32_t> connection_;
-	std::atomi<bool> stopped_;
+	std::atomic<int32_t> connections_;
+	std::atomic<bool> stopped_;
 
 	std::thread* thread_;
 	socket_container sockets_;
 
 	std::mutex new_socket_lock_;
-	socket_continer new_sockets_;
+	socket_container new_sockets_;
 };
 
 #endif

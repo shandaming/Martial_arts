@@ -5,14 +5,14 @@
 #ifndef IP_ENDPOINT_H
 #define IP_ENDPOINT_H
 
-#include "addres.h"
+#include "address.h"
 
 class endpoint
 {
 public:
-	endpoint() ;
-	endpoint(int family, uint16_t port_num) ;
-	endpoint(const address& addr, uint16_t port_num) ;
+	endpoint();
+	endpoint(int family, uint16_t port_num);
+	endpoint(const address& addr, uint16_t port_num);
 	endpoint(const endpoint& other) : data_(other.data_) {}
 
 	endpoint& operator=(const endpoint& other) 
@@ -37,16 +37,16 @@ public:
 
 	std::size_t capacity() const { return sizeof(data_); }
 
-	uint16_t port() const ;
+	uint16_t port() const;
 
-	void port(uint16_t port_num) ;
+	void port(uint16_t port_num);
 
-	address address() const ;
+	address get_address() const;
 
-	void address(const address& addr) ;
+	void set_address(const address& addr);
 
-	friend bool operator==(const endpoint& e1, const endpoint& e2) ;
-	friend bool operator<(const endpoint& e1, const endpoint& e2) ;
+	friend bool operator==(const endpoint& e1, const endpoint& e2);
+	friend bool operator<(const endpoint& e1, const endpoint& e2);
 
 	bool is_v4() const 
 	{

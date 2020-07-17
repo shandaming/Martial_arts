@@ -9,6 +9,8 @@ void login_database_connection::do_prepare_statements()
 {
 	if(!reconnection_)
 		stmts_.resize(MAX_LOGINDATABASE_STATEMENTS);
+
+	prepare_statement(LOGIN_INS_LOG, "INSERT INTO logs (time, realm, type, level, string) VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 }
 
 login_database_connection::login_database_connection(mysql_connection_info& conn_info) : mysql_connection(conn_info) {}

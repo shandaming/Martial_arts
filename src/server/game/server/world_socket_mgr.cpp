@@ -2,7 +2,7 @@
  * Copyright (C) 2020
  */
 
-#include "world_tcp_connection.h"
+#include "world_socket_mgr.h"
 
 static void on_socket_accept(socket&& socket)
 {
@@ -21,7 +21,7 @@ world_socket_mgr& world_socket_mgr::instance()
 	return instance;
 }
 
-bool world_tcp_socket_mgr::start_world_network(const std::string& bind_ip, uint16_t port, uint16_t instance_port, int thread_count)
+bool world_socket_mgr::start_world_network(const std::string& bind_ip, uint16_t port, uint16_t instance_port, int thread_count)
 {
 	const int max_connection = MAX_LISTEN_CONNECTIONS;
 	LOG_DEBUG("misc", "Max allowed socket connection %d", max_connection);
@@ -42,7 +42,7 @@ bool world_tcp_socket_mgr::start_world_network(const std::string& bind_ip, uint1
 }
 
 void world_socket_mgr::on_socket_open(socket&& sock)
-{;
+{
 	if(socket_system_send_buffer_size_ >= 0)
 	{
 		if(!sock.set_option(send_buffer_size(socket_system_send_buffer_size_)))

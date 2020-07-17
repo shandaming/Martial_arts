@@ -89,7 +89,7 @@ void endpoint::port(uint16_t port_num)
 		data_.v6.sin6_port = host_to_network_short(port_num);
 }
 
-address endpoint::address() const 
+address endpoint::get_address() const 
 {
 	if(is_v4())
 		return address_v4(network_to_host_long(data_.v4.sin_addr.s_addr));
@@ -102,7 +102,7 @@ address endpoint::address() const
 	}
 }
 
-void endpoint::address(const address& addr) 
+void endpoint::set_address(const address& addr) 
 {
 	endpoint tmp_endpoint(addr, port());
 	data_ = tmp_endpoint.data_;

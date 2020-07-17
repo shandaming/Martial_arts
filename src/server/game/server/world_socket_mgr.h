@@ -5,12 +5,21 @@
 #ifndef S_WORLD_TCP_SOCKET_MGR_H
 #define S_WORLD_TCP_SOCKET_MGR_H
 
-class world_tcp_socket_mgr
+#include <string>
+#include <cstdint>
+
+#include "network_thread.h"
+#include "world_socket.h"
+
+class event_loop;
+class acceptor;
+
+class world_socket_mgr
 {
 public:
-	~world_tcp_socket_mgr();
+	~world_socket_mgr();
 
-	static world_tcp_socket_mgr& instance();
+	static world_socket_mgr& instance();
 
 	bool start_world_network(event_loop* loop, const std::string& bind_ip, uint16_t port, uint16_t instance_port, int netowrk_threads);
 
@@ -20,7 +29,7 @@ public:
 
 	size_t get_application_send_buffer_size() const { return socket_application_send_buffer_size_; }
 protected:
-	world_tcp_connection();
+	world_socket_mgr();
 
 	network_thread<world_socket>* create_thread() const override;
 private:
@@ -35,6 +44,6 @@ private:
 	bool tcp_no_delay_;
 };
 
-#define WORLD_TCP_SOCKET_MGR world_tcp_socket_mgr::instance();
+#define WORLD_SOCKET_MGR world_socket_mgr::instance();
 
 #endif

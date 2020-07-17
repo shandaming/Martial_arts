@@ -82,7 +82,7 @@ protected:
 
 	MYSQL* get_handle() { return mysql_; }
 	mysql_prepared_statement* get_prepared_statement(uint32_t index);
-	void prepared_statement(uint32_t index, const char* sql, connection_flags flag);
+	void prepare_statement(uint32_t index, const char* sql, connection_flags flag);
 
 	virtual void do_prepare_statements() = 0;
 

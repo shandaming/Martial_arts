@@ -9,7 +9,7 @@
 
 struct socket_option
 {
-	option(int level_, int optname_, int optval_, const std::string& desc) :
+	socket_option(int level_, int optname_, int optval_, const std::string& desc) :
 		level(level_), optname(optname_), optval(optval_), description(desc) {}
 
 	int level;
@@ -37,6 +37,7 @@ public:
 	socket& operator=(const socket& right) 
 	{
 		fd_ = right.fd_;
+		return *this;
 	}
 
 	socket(socket&& right) : fd_(right.fd_)
@@ -48,6 +49,7 @@ public:
 	{
 		fd_ = right.fd_;
 		right.fd_ = -1;
+		return *this;
 	}
 
 	~socket();

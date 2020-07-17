@@ -70,8 +70,6 @@ public:
 	static address_v6 any() { return address_v6(); }
 	static address_v6 loopback() ;
 private:
-	friend class basic_address_iterator<address_v6>;
-
 	in6_addr_type addr_;
 	uint64_t scope_id_;
 };

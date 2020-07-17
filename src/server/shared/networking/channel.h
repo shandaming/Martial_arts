@@ -8,6 +8,8 @@
 #include <functional>
 #include <memory>
 
+#include "timestamp.h"
+
 class event_loop;
 
 class channel

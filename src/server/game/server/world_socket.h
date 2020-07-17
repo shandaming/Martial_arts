@@ -5,7 +5,7 @@
 #ifndef S_WORLD_TCP_SOCKET_H
 #define S_WORLD_TCP_SOCKET_H
 
-#include <networking/tcp_socket.h>
+#include "tcp_socket.h"
 
 #pragma pack(push, 1)
 struct packet_header
@@ -20,7 +20,7 @@ struct packet_header
 class encryptable_packet;
 typedef struct z_stream_s z_stream;
 
-class world_tcp_socket : public tcp_socket<world_tcp_socket>
+class world_socket : public tcp_socket<world_socket>
 {
 	static const std::string server_connection_initialize;
 	static const std::string client_connection_initialize;
@@ -31,13 +31,13 @@ class world_tcp_socket : public tcp_socket<world_tcp_socket>
 	static constexpr uint8_t continue_session_seed[16];
 	static constexpr uint8_t encryption_key_seed[16];
 
-	typedef tcp_socket<world_tcp_socket> base_tcp_socket;
+	typedef tcp_socket<world_socket> base_tcp_socket;
 public:
-	world_tcp_socket(event_loop* loop, socket&& socket);
-	~world_tcp_socket();
+	world_socket(event_loop* loop, socket&& socket);
+	~world_socket();
 
-	world_tcp_socket(const world_tcp_socket&) = delete;
-	world_tcp_socket& operator=(const world_tcp_socket&) = delete;
+	world_socket(const world_socket&) = delete;
+	world_socket& operator=(const world_socket&) = delete;
 
 	void start() override;
 	bool update() override;

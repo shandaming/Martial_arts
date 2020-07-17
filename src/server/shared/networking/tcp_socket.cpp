@@ -4,8 +4,8 @@
 
 #include "tcp_socket.h"
 #include "event_loop.h"
-#include "common/weak.h"
-#include "logging/log.h"
+#include "weak.h"
+#include "log.h"
 
 tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
 	loop_(loop),
