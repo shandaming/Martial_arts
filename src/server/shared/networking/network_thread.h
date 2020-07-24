@@ -15,8 +15,6 @@
 #include "errors.h"
 #include "log.h"
 
-#include "socket.h"
-
 template<typename SocketType>
 class network_thread
 {

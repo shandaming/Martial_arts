@@ -7,7 +7,7 @@
 #include "weak.h"
 #include "log.h"
 
-tcp_socket::tcp_socket(event_loop* loop, socket&& sockfd) :
+tcp_socket::tcp_socket(event_loop* loop, tcp::socket&& sockfd) :
 	loop_(loop),
 	state_(kConnecting),
 	socket_(std::move(sockfd)),

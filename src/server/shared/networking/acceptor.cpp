@@ -79,13 +79,13 @@ void acceptor::handle_read()
 	loop_->assert_in_loop_thread();
 
 	std::error_code ec;
-	socket new_conn_socket;
+	tcp::socket new_conn_socket;
 
 	accept(new_conn_socket, peer_endpoint, ec);
 	if(!ec)
 	{
 		if(new_connection_callback_)
-			new_connection_callback(std::forward<socket>(new_conn_socket));
+			new_connection_callback(std::forward<tcp::socket>(new_conn_socket));
 		else
 			new_conn_socket.close();
 	}
@@ -138,7 +138,7 @@ void acceptor::listen(std::error_code& ec)
 	listen(accept_socket_, SOMAXCONN, ec);
 }
 
-std::error_code acceptor::accept(socket& peer, endpoint& peer_endpoint, std::error_code& ec)
+std::error_code acceptor::accept(tcp::socket& peer, endpoint& peer_endpoint, std::error_code& ec)
 {
 	if(peer.is_open())
 	{

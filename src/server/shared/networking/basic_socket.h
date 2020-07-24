@@ -2,8 +2,8 @@
  * Copyright (C) 2018
  */
 
-#ifndef NET_SOCKET_H
-#define NET_SOCKET_H
+#ifndef NET_BASIC_SOCKET_H
+#define NET_BASIC_SOCKET_H
 
 #include "endpoint.h"
 
@@ -27,32 +27,33 @@ struct option
 	static socket_option send_buffer_size(int size);
 };
 
-class socket
+template<typename Protocol>
+class basic_socket
 {
 public:
-	socket() : fd_(-1) {}
-	explicit socket(int sockfd) : fd_(-1) { open(sockfd); }
+	basic_socket() : fd_(-1) {}
+	explicit basic_socket(int sockfd) : fd_(-1) { open(sockfd); }
 
-	socket(const socket& right) : fd_(right.fd_) {}
-	socket& operator=(const socket& right) 
+	basic_socket(const basic_socket& right) : fd_(right.fd_) {}
+	basic_socket& operator=(const basic_socket& right) 
 	{
 		fd_ = right.fd_;
 		return *this;
 	}
 
-	socket(socket&& right) : fd_(right.fd_)
+	basic_socket(basic_socket&& right) : fd_(right.fd_)
 	{
 		right.fd_ = -1;
 	}
 
-	socket& operator=(socket&& right)
+	basic_socket& operator=(basic_socket&& right)
 	{
 		fd_ = right.fd_;
 		right.fd_ = -1;
 		return *this;
 	}
 
-	~socket();
+	~basic_socket();
 	
 	enum shutdown_type
 	{

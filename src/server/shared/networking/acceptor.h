@@ -5,7 +5,7 @@
 #ifndef NET_ACCEPTOR_H
 #define NET_ACCEPTOR_H
 
-#include "socket.h"
+#include "tcp.h"
 #include "channel.h"
 
 class event_loop;
@@ -13,7 +13,7 @@ class event_loop;
 class acceptor
 {
 public:
-	typedef std::function<void(socket&&)> new_connection_callback;
+	typedef std::function<void(tcp::socket&&)> new_connection_callback;
 
 	acceptor(event_loop* loop, const std::string& bind_ip, uint16_t port);
 	~acceptor();
@@ -32,10 +32,10 @@ private:
 	void bind(std::error_code& ec);
 	void listen(std::error_code& ec);
 	void handle_read();
-	std::error_code accept(socket& peer, endpoint& peer_endpoint, std::error_code& ec);
+	std::error_code accept(tcp::socket& peer, endpoint& peer_endpoint, std::error_code& ec);
 
 	event_loop* loop_;
-	socket accept_socket_;
+	tcp::socket accept_socket_;
 	channel accept_channel_;
 	new_connection_callback new_connection_callback_;
 

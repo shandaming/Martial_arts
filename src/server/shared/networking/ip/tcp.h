@@ -6,6 +6,7 @@
 #define NET_TCP
 
 #include "basic_endpoint.h"
+#include "basic_socket.h"
 
 class tcp
 {
@@ -20,7 +21,7 @@ public:
 	int protocol() const { return IPPROTO_TCP; }
 	int family() const { return family_; }
 
-	//typedef basic_stream_socket<tcp> socket;
+	typedef basic_socket<tcp> socket;
 	//typedef basic_socket_acceptor<tcp> acceptor;
 
 	friend bool operator==(const tcp& p1, const tcp& p2)

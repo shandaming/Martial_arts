@@ -5,8 +5,8 @@
 #ifndef S_WORLD_PACKET_H
 #define S_WORLD_PACKET_H
 
-#include "packets/byte_buffer.h"
-#include "protocol/opcode.h"
+#include "byte_buffer.h"
+#include "opcodes.h"
 
 class world_packet : public byte_buffer
 {
@@ -56,6 +56,6 @@ public:
 protected:
 	uint16_t opcode_;
 	connection_type connection_;
-}'
+};
 
 #endif

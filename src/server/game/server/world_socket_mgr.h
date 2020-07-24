@@ -25,7 +25,7 @@ public:
 
 	void stop_network() override;
 
-	void on_socket_open(socket& sock) override;
+	void on_socket_open(tcp::socket& sock) override;
 
 	size_t get_application_send_buffer_size() const { return socket_application_send_buffer_size_; }
 protected:

@@ -44,7 +44,7 @@ constexpr uint8_t world_socket::continue_session_seed[16] = {
 constexpr uint8_t world_socket::encryption_key_seed[16] = { 
 	0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
-world_socket::world_socket(event_loop* loop, socket&& socket) : 
+world_socket::world_socket(event_loop* loop, tcp::socket&& socket) : 
 	tcp_socket(loop, socket) 
 	type_(CONNECTION_TYPE_REALM), 
 	key_(0), over_speed_ping_(0),

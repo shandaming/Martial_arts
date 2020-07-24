@@ -3,6 +3,7 @@ INC_DIR = -I ./src	\
 		  -I ./src/common/cmdline	\
 		  -I ./src/common/configuration	\
 		  -I ./src/common/cryptography	\
+		  -I ./src/common/cryptography/authentication	\
 		  -I ./src/common/debugging	\
 		  -I ./src/common/logging	\
 		  -I ./src/common/serialization	\
@@ -29,6 +30,7 @@ ccsrc = $(wildcard src/*.cpp) \
 		$(wildcard src/common/cmdline/*.cpp) \
 		$(wildcard src/common/configuration/*.cpp) \
 		$(wildcard src/common/cryptograp/*.cpp) \
+		$(wildcard src/common/cryptograp/authentication/*.cpp) \
 		$(wildcard src/common/debugging/*.cpp) \
 		$(wildcard src/common/logging/*.cpp) \
 		$(wildcard src/common/serialization/*.cpp) \

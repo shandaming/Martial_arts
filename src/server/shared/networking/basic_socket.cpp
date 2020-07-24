@@ -33,12 +33,12 @@ socket_option option::send_buffer_size(int size)
 	return socket_option(SOL_SOCKET, SO_SNDBUF, size, "socket send buffer");
 }
 
-socket::~socket()
+basic_socket::~basic_socket()
 {
 	close();
 }
 
-void socket::open(int sockfd)
+void basic_socket::open(int sockfd)
 {
 	if(is_open())
 		close();
@@ -46,7 +46,7 @@ void socket::open(int sockfd)
 	fd_ = sockfd;
 }
 
-void socket::shutdown_write()
+void basic_socket::shutdown_write()
 {
 	if(!is_open())
 		return;
@@ -57,12 +57,12 @@ void socket::shutdown_write()
 		LOG_ERROR("Networking", "shutdown_write() failed. code[%d], message:%s", ec.code(), ec.message().c_str());
 }
 
-void socket::shutdown(shutdown_type type, std::error_code& ec)
+void basic_socket::shutdown(shutdown_type type, std::error_code& ec)
 {
 	shutdown(fd_, type, ec);	
 }
 
-void socket::close()
+void basic_socket::close()
 {
 	if(!is_open())
 		return;
@@ -71,7 +71,7 @@ void socket::close()
 	fd_ = -1;
 }
 
-void socket::close_socket()
+void basic_socket::close_socket()
 {
 	std::error_code ec;
 	close(fd_, ec);
@@ -79,7 +79,7 @@ void socket::close_socket()
 		LOG_ERROR("Networking", "close() failed. code[%d], message:%s", ec.code(), ec.message().c_str());
 }
 
-bool socket::set_reuse_addr()
+bool basic_socket::set_reuse_addr()
 {
 	std::error_code ec;
 	int optval;
@@ -92,7 +92,7 @@ bool socket::set_reuse_addr()
 	return true;
 }
 
-bool socket::set_reuse_port()
+bool basic_socket::set_reuse_port()
 {
 	std::error_code ec;
 #ifdef SO_REUSEPORT
@@ -107,7 +107,7 @@ bool socket::set_reuse_port()
 	return true;
 }
 
-bool socket::set_tcp_no_delay()
+bool basic_socket::set_tcp_no_delay()
 {
 	std::error_code ec;
 	int optval;
@@ -120,7 +120,7 @@ bool socket::set_tcp_no_delay()
 	return true;
 }
 
-bool socket::set_keep_alive()
+bool basic_socket::set_keep_alive()
 {
 	std::error_code ec
 	int optval;
@@ -133,7 +133,7 @@ bool socket::set_keep_alive()
 	return true;
 }
 
-bool socket::set_send_buffer_size(int size)
+bool basic_socket::set_send_buffer_size(int size)
 {
 	std::error_code ec;
 	setsockopt(fd_, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size), ec);
@@ -145,7 +145,7 @@ bool socket::set_send_buffer_size(int size)
 	return true;
 }
 
-bool socket::set_option(const socket_option& option)
+bool basic_socket::set_option(const socket_option& option)
 {
 	std::error_code ec;
 	int level = option.level;
@@ -163,7 +163,7 @@ bool socket::set_option(const socket_option& option)
 }
 
 
-endpoint socket::local_endpoint(std::error_code& ec)
+endpoint basic_socket::local_endpoint(std::error_code& ec)
 {
 	endpoint e;
 	socklen_t addrlen = e.caparity();
@@ -173,7 +173,7 @@ endpoint socket::local_endpoint(std::error_code& ec)
 	return e;
 }
 
-endpoint socket::remote_endpoint(std::error_code& ec)
+endpoint basic_socket::remote_endpoint(std::error_code& ec)
 {
 	endpoint e;
 	socklen_t addrlen = e.capacity();
@@ -183,4 +183,4 @@ endpoint socket::remote_endpoint(std::error_code& ec)
 	return e;
 }
 
-//bool socket::is_open() const { return fd_ != invalid_socket; }
+//bool basic_socket::is_open() const { return fd_ != invalid_socket; }

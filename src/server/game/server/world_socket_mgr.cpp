@@ -4,9 +4,9 @@
 
 #include "world_socket_mgr.h"
 
-static void on_socket_accept(socket&& socket)
+static void on_socket_accept(tcp::socket&& socket)
 {
-	WORLD_SOCKET_MGR.on_socket_open(std::forward<socket>(socket));
+	WORLD_SOCKET_MGR.on_socket_open(std::forward<tcp::socket>(socket));
 }
 
 world_socket_mgr::world_socket_mgr() : base_socket_mgr(), socket_system_send_buffer_size(-1), socket_application_send_buffer_size_(65536) {}
@@ -41,7 +41,7 @@ bool world_socket_mgr::start_world_network(const std::string& bind_ip, uint16_t 
 	acceptor->set_new_connection_callback(std::bind(on_socket_accept, this, _1)
 }
 
-void world_socket_mgr::on_socket_open(socket&& sock)
+void world_socket_mgr::on_socket_open(tcp::socket&& sock)
 {
 	if(socket_system_send_buffer_size_ >= 0)
 	{
@@ -55,5 +55,5 @@ void world_socket_mgr::on_socket_open(socket&& sock)
 			return;
 	}
 
-	base_socket_mgr::on_socket_open(std::forward<socket>(sock));
+	base_socket_mgr::on_socket_open(std::forward<tcp::socket>(sock));
 }

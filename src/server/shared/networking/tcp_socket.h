@@ -5,8 +5,11 @@
 #ifndef NET_TCP_SOCKET_H
 #define NET_TCP_SOCKET_H
 
+#include <queue>
+#include <atomic>
+
 #include "message_buffer.h"
-#include "socket.h"
+#include "tcp.h"
 #include "channel.h"
 
 #define READ_BLOCK_SIZE 4096
@@ -16,7 +19,7 @@ class event_loop;
 class tcp_socket : public std::enable_shared_from_this<tcp_socket>
 {
 public:
-	tcp_socket(event_loop* loop, socket&& sockfd);
+	tcp_socket(event_loop* loop, tcp::socket&& sockfd);
 	virtual ~tcp_socket();
 
 	tcp_socket(const tcp_socket&) = delete;
@@ -27,12 +30,12 @@ public:
 	bool disconnected() const { return state_ == kDisconnected; }
 
 	void set_tcp_no_delay(bool on);
-
+/*
 	void set_connection_callback(const Connection_callback& cb)
 	{
 		connection_callback_ = cb; 
 	}
-
+*/
 	void set_read_handler_callback(std::function<void(std::error_code&, size_t)> cb)
 	{
 		read_handler_callback_ = cb;
@@ -60,13 +63,13 @@ public:
 
 	message_buffer& get_read_buffer() { return read_buffer_; }
 protected:
-	virtual bool void on_close() {}
+	virtual void on_close() {}
 
 	virtual void read_handler() = 0;
 
 	bool sync_process_queue();
 
-	socket& underlying_stream() { return socket_; }
+	tcp::socket& underlying_stream() { return socket_; }
 private:
 	void read_handler_internal(std::error_code& ec, size_t transferred_bytes)
 	{
@@ -90,7 +93,7 @@ private:
 	event_loop* loop_;
 	StateE state_;  // FIXME: use atomic variable
 	// we don't expose those classes to client.
-	socket socket_;
+	tcp::socket socket_;
 	channel channel_;
 
 	address remote_address_;
@@ -100,8 +103,8 @@ private:
 	message_buffer read_buffer_;
 	std::queue<message_buffer> write_queue_;
 
-	std::atomi<bool> closed_;
-	std::atomi<bool> closing_;
+	std::atomic<bool> closed_;
+	std::atomic<bool> closing_;
 	bool iswriting_sync_;
 };
 

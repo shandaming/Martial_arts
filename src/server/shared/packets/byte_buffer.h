@@ -5,6 +5,26 @@
 #ifndef PACKETS_BYTE_BUFFER_H
 #define PACKETS_BYTE_BUFFER_H
 
+class byte_buffer_exception : public std::exception
+{
+public:
+	~byte_buffer_exception() noexcept { }
+
+	const char* what() const noexcept override { return msg_.c_str(); }
+protected:
+	std::string& message() { return msg_; }
+private:
+	std::string msg_;
+};
+
+class byte_buffer_position_exception : public byte_buffer_exception
+{
+public:
+	byte_buffer_position_exception(size_t pos, size_t size, size_t value_size);
+
+	~byte_buffer_position_exception() noexcept { }
+};
+
 class byte_buffer
 {
 public:
@@ -16,7 +36,7 @@ public:
 		storage_.reserve(default_size);
 	}
 
-	byte_buffer(size_t reserve) : rpos_(0), wpos_(0), bitpos_(initial_bit_pos), curbitpos_(0)
+	byte_buffer(size_t reserve) : rpos_(0), wpos_(0), bitpos_(initial_bit_pos), curbitval_(0)
 	{
 		storage_.reserve(reserve);
 	}
@@ -25,7 +45,7 @@ public:
 
 	virtual ~byte_buffer() {}
 
-	byte_buffer(const byte_buffer& buf) : rpos_(buf.rpos_), wpos_(buf.wpos_), bitpos_(buf.bitpos_), curbitval_(buf.curbitval), storage_(buf.storage_) {}
+	byte_buffer(const byte_buffer& buf) : rpos_(buf.rpos_), wpos_(buf.wpos_), bitpos_(buf.bitpos_), curbitval_(buf.curbitval_), storage_(buf.storage_) {}
 
 	byte_buffer& operator=(const byte_buffer& right)
 	{
@@ -35,7 +55,7 @@ public:
 			wpos_ = right.wpos_;
 			bitpos_ = right.bitpos_;
 			curbitval_ = right.curbitval_;
-			storage_ = right.storage;
+			storage_ = right.storage_;
 		}
 		return *this;
 	}
@@ -91,7 +111,7 @@ public:
 
 		bitpos_ = 0;
 
-		append((uint8_t*)&curbitval, sizeof(uint8_t));
+		append((uint8_t*)&curbitval_, sizeof(uint8_t));
 		curbitval_ = 0;
 	}
 
@@ -108,7 +128,7 @@ public:
 	{
 		--bitpos_;
 		if(bit)
-			curbitpos_ |= (1 << (bitpos_));
+			curbitval_ |= (1 << (bitpos_));
 
 		if(bitpos_ == 0)
 		{
@@ -124,7 +144,7 @@ public:
 		++bitpos_;
 		if(bitpos_ > 7)
 		{
-			curbitpos_ = read<uint8_t>();
+			curbitval_ = read<uint8_t>();
 			bitpos_ = 0;
 		}
 		return ((curbitval_ >> (7 - bitpos_)) & 1) != 0;
@@ -301,7 +321,7 @@ public:
 		while(rpos() < size()) // 防止数据包中错误的字符串格式崩溃
 		{
 			char c = read<char>();
-			iF(c == 0)
+			if(c == 0)
 				break;
 			value += c;
 		}
@@ -341,13 +361,13 @@ public:
 	}
 
 	// 返回最后写入位的位置
-	size_t bitwpos() const { return wpos_ ^ 8 + 8 - bitpos_; }
+	size_t bitwpos() const { return wpos_ * 8 + 8 - bitpos_; }
 
 	size_t bitwpos(size_t new_pos)
 	{
 		wpos_ = new_pos / 8;
 		bitpos_ = 8 - (new_pos % 8);
-		return wpos_ ^ 8 + 8 - bitpos_;
+		return wpos_ * 8 + 8 - bitpos_;
 	}
 
 	template<typename T>
@@ -461,7 +481,7 @@ public:
 
 	void resize(size_t newsize)
 	{
-		storage_.resize(nrwsize, 0);
+		storage_.resize(newsize, 0);
 		rpos_ = 0;
 		wpos_ = size();
 	}
@@ -535,7 +555,7 @@ public:
 
 	void append_packed_time(time_t time);
 
-	void put(size_t pos, const uint7_t* src, size_t cnt);
+	void put(size_t pos, const uint8_t* src, size_t cnt);
 
 	void print_storage() const;
 
@@ -570,7 +590,7 @@ inline void byte_buffer::read_skip<char*>()
 template<>
 inline void byte_buffer::read_skip<const char*>()
 {
-	read_skip(char*)();
+	read_skip<char*>();
 }
 
 template<>

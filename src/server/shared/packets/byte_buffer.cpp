@@ -4,6 +4,17 @@
 
 #include "byte_buffer.h"
 
+byte_buffer_position_exception::byte_buffer_position_exception(size_t pos, size_t size, size_t value_size)
+{
+    std::ostringstream ss;
+
+    ss << "Attempted to get value with size: "
+       << value_size << " in byte_buffer (pos: " << pos << " size: " << size
+       << ")";
+
+    message().assign(ss.str());
+}
+
 byte_buffer::byte_buffer(message_buffer&& buffer) : rpos_(0), wpos_(0), bitpos_(initial_bit_pos), curbitval_(0), storage_(buffer.move()) {}
 
 byte_buffer_position_exception::byte_buffer_position_exception(size_t pos, size_t size, size_t value_size)

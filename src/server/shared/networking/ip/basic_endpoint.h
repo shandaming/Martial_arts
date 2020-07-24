@@ -20,7 +20,7 @@ public:
 	basic_endpoint(const InternetProtocol& internet_protocol, uint16_t port_num) : 
 		impl_(internet_protocol.family(), port_num) {}
 
-	basic_endpoint(const boost::asio::ip::address& addr, uint16_t port_num) :
+	basic_endpoint(const address& addr, uint16_t port_num) :
 		impl_(addr, port_num) {}
 
 	basic_endpoint(const basic_endpoint& other) : impl_(other.impl_) {}
@@ -60,42 +60,42 @@ public:
 
 	void port(uint16_t port_num) { impl_.port(port_num); }
 
-	address address() const { return impl_.address(); }
+	address get_address() const { return impl_.get_address(); }
 
-	void address(const address& addr) { impl_.address(addr); }
+	void set_address(const address& addr) { impl_.set_address(addr); }
 
 	friend bool operator==(const basic_endpoint<InternetProtocol>& e1,
-      const basic_endpoint<InternetProtocol>& e2) 
+	const basic_endpoint<InternetProtocol>& e2) 
 	{
 		return e1.impl_ == e2.impl_;
 	}
 
 	friend bool operator!=(const basic_endpoint<InternetProtocol>& e1,
-      const basic_endpoint<InternetProtocol>& e2) 
+	const basic_endpoint<InternetProtocol>& e2) 
 	{
 		return !(e1 == e2);
 	}
 
 	friend bool operator<(const basic_endpoint<InternetProtocol>& e1,
-      const basic_endpoint<InternetProtocol>& e2) 
+	const basic_endpoint<InternetProtocol>& e2) 
 	{
 		return e1.impl_ < e2.impl_;
 	}
 
 	friend bool operator>(const basic_endpoint<InternetProtocol>& e1,
-      const basic_endpoint<InternetProtocol>& e2) 
+	const basic_endpoint<InternetProtocol>& e2) 
 	{
 		return e2.impl_ < e1.impl_;
 	}
 
 	friend bool operator<=(const basic_endpoint<InternetProtocol>& e1,
-      const basic_endpoint<InternetProtocol>& e2) 
+	const basic_endpoint<InternetProtocol>& e2) 
 	{
 		return !(e2 < e1);
 	}
 
 	friend bool operator>=(const basic_endpoint<InternetProtocol>& e1,
-      const basic_endpoint<InternetProtocol>& e2) 
+	const basic_endpoint<InternetProtocol>& e2) 
 	{
 		return !(e1 < e2);
 	}

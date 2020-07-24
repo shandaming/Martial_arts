@@ -6,7 +6,7 @@
 #define NET_TCP_SOCKET_MGR_H
 
 #include "acceptor.h"
-#include "logging/log.h"
+#include "log.h"
 
 template<typename SocketType>
 class tcp_socket_mgr
@@ -72,7 +72,7 @@ public:
 				threads[i].wait();
 	}
 
-	virtual void on_socket_open(socket&& socket)
+	virtual void on_socket_open(tcp::socket&& socket)
 	{
 		std::shared_ptr<SocketType> new_tcp_socket = std::make_shared<SocketType>(std::move(sock));
 		new_tcp_socket->start();
@@ -93,7 +93,7 @@ public:
 		return min;
 	}
 
-	std::pair<socket*, uint32_t> get_socket_for_accept()
+	std::pair<tcp::socket*, uint32_t> get_socket_for_accept()
 	{
 		uint32_t thread_index = select_thread_with_min_connection();
 		return std::pai(threads_[thread_index], get_socket_for_acceptor(), thread_index);
