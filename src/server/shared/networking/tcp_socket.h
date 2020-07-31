@@ -48,7 +48,7 @@ public:
 
 	virtual void start() = 0;
 
-	virtual void update();
+	virtual bool update();
 
 	void queue_packet(message_buffer&& buffer);
 
@@ -70,13 +70,13 @@ protected:
 	bool sync_process_queue();
 
 	tcp::socket& underlying_stream() { return socket_; }
-private:
+
 	void read_handler_internal(std::error_code& ec, size_t transferred_bytes)
 	{
 		if(!ec)
 			read_handler();
 	}
-
+private:
 	void write_handler_wrapper();
 
 	bool handle_queue();

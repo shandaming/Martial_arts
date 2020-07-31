@@ -6,13 +6,14 @@
 #define NET_TCP_SOCKET_MGR_H
 
 #include "acceptor.h"
+//#include "tcp.h"
 #include "log.h"
 
 template<typename SocketType>
-class tcp_socket_mgr
+class socket_mgr
 {
 public:
-	virtual ~tcp_socket_mgr()
+	virtual ~socket_mgr()
 	{
 		ASSERT(!threads_ && !acceptor_ && !thread_count_, "StopNetwork must be called prior to tcp_connection_mgr destruction.");
 	}
@@ -21,27 +22,26 @@ public:
 	{
 		ASSERT(thread_count_ > 0);
 
-		acceptor* acceptor = nullptr;
-		acceptor = new acceptor(loop, bind_ip, port);
+		acceptor* new_acceptor = new acceptor(event_loop, bind_ip, port);
 		if(!acceptor_)
 		{
 			LOG_ERROR("Network", "Exception caught in tcp_connection_mgr. start_network (%s:%d)", bind_ip.c_str(), port);
 			return false;
 		}
-		if(!acceptor->bind())
+		if(!new_acceptor->bind())
 		{
 			LOG_ERROR("Network", "start_network failed to bind socket acceptor.");
 			return false;
 		}
 
-		acceptor_ = acceptor;
+		acceptor_ = new_acceptor;
 		thread_count_ = thread_count;
 		threads_ = create_threads();
 
 		ASSERT(threads_);
 
 		for(int i = 0; i < thread_count_; ++i)
-			threads[i].start();
+			threads_[i].start();
 
 		return true;
 	}
@@ -53,7 +53,7 @@ public:
 		if(thread_count_ != 0)
 		{
 			for(int i = 0; i < thread_count_; ++i)
-				threads[i].stop();
+				threads_[i].stop();
 		}
 
 		wait();
@@ -69,10 +69,10 @@ public:
 	{
 		if(thread_count_ != 0)
 			for(int i = 0; i < thread_count_; ++i)
-				threads[i].wait();
+				threads_[i].wait();
 	}
 
-	virtual void on_socket_open(tcp::socket&& socket)
+	virtual void on_socket_open(tcp::socket&& sock)
 	{
 		std::shared_ptr<SocketType> new_tcp_socket = std::make_shared<SocketType>(std::move(sock));
 		new_tcp_socket->start();
@@ -93,13 +93,14 @@ public:
 		return min;
 	}
 
-	std::pair<tcp::socket*, uint32_t> get_socket_for_accept()
+	uint32_t get_socket_for_accept()
 	{
-		uint32_t thread_index = select_thread_with_min_connection();
-		return std::pai(threads_[thread_index], get_socket_for_acceptor(), thread_index);
+		return select_thread_with_min_connection();
 	}
-private:
-	tcp_socket_mgr() : acceptor_(nullptr), threads_(nullptr), thread_count_(0) {}
+protected:
+	socket_mgr() : acceptor_(nullptr), threads_(nullptr), thread_count_(0) {}
+
+	virtual network_thread<SocketType>* create_threads() const = 0;
 
 	acceptor* acceptor_;
 	network_thread<SocketType> threads_;

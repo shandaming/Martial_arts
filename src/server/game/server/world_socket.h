@@ -8,7 +8,8 @@
 #include "tcp_socket.h"
 #include "big_number.h"
 #include "world_packet_crypt.h"
-#include "database_env_fwd.h"
+//#include "database_env_fwd.h"
+#include "query_callback_processor.h"
 #include "mpsc_queue.h"
 
 #pragma pack(push, 1)
@@ -76,12 +77,12 @@ protected:
 private:
 	void set_read_handler_internal_callback()
 	{
-		set_read_handler_callback(std::bind(&world_socket::read_handler_internal, _1, _2, this);
+		set_read_handler_callback(std::bind(&world_socket::read_handler_internal, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
 	void set_initialize_handler_callback()
 	{
-		set_read_handler_callback(std::bind(&world_socket::initialize_handler, _1, _2, this);
+		set_read_handler_callback(std::bind(&world_socket::initialize_handler, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
 	void check_ip_callback(prepared_query_result result);
