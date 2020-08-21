@@ -14,7 +14,7 @@ public:
 	world_packet() : byte_buffer(0), opcode_(NULL_OPCODE), connection_(CONNECTION_TYPE_DEFAULT) {}
 	world_packet(uint16_t opcode, size_t res = 200, connection_type connection = CONNECTION_TYPE_DEFAULT) : byte_buffer(res), opcode_(opcode), connection_(connection) {}
 
-	world_packet(const world_packet& right) : byte_buffer(right), opcode_(right.opcode_), connection_(packet.connection_) {}
+	world_packet(const world_packet& right) : byte_buffer(right), opcode_(right.opcode_), connection_(right.connection_) {}
 
 	world_packet& operator=(const world_packet& right)
 	{
@@ -27,7 +27,7 @@ public:
 		return *this;
 	}
 
-	world_packet(world_packet&& packet) : byte_buffer(std::move(packet)), opcode_(packet.opcode), connection_(right.connection_) {}
+	world_packet(world_packet&& right) : byte_buffer(std::move(right)), opcode_(right.opcode_), connection_(right.connection_) {}
 
 	world_packet& operator=(world_packet&& right)
 	{

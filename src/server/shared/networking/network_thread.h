@@ -40,7 +40,7 @@ public:
 	{
 		if(thread_)
 			return false;
-		thread_ = new std::thread(&network_thread::run(), this);
+		thread_ = new std::thread(&network_thread::run, this);
 		return true;
 	}
 

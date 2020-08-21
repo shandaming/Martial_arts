@@ -12,6 +12,18 @@
 #include "query_callback_processor.h"
 #include "mpsc_queue.h"
 
+namespace world_packets
+{
+class server_packet;
+namespace auth
+{
+class auth_session;
+class auth_continued_session;
+class connect_to_failed;
+class ping;
+}
+}
+
 #pragma pack(push, 1)
 struct packet_header
 {
@@ -40,9 +52,9 @@ class world_socket : public tcp_socket//<world_socket>
 	static uint8_t continue_session_seed[16];
 	static uint8_t encryption_key_seed[16];
 
-	typedef tcp_socket/*<world_socket>*/ base_tcp_socket;
+	typedef tcp_socket/*<world_socket>*/ base_socket;
 public:
-	world_socket(event_loop* loop, tcp::socket&& socket);
+	world_socket(event_loop* loop, tcp::socket&& sock);
 	~world_socket();
 
 	world_socket(const world_socket&) = delete;
@@ -64,7 +76,7 @@ public:
 protected:
 	void on_close() override;
 	void read_handler() override;
-	bool read_handler_handler();
+	bool read_header_handler();
 
 	enum class read_data_handler_result
 	{

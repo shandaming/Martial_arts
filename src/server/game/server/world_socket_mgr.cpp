@@ -23,7 +23,7 @@ struct world_socket_thread : public network_thread<world_socket>
 	}
 };
 
-world_socket_mgr::world_socket_mgr() : base_socket_mgr(), socket_system_send_buffer_size(-1), socket_application_send_buffer_size_(65536) {}
+world_socket_mgr::world_socket_mgr() : base_socket_mgr(), socket_system_send_buffer_size_(-1), socket_application_send_buffer_size_(65536) {}
 
 world_socket_mgr::~world_socket_mgr()
 {
@@ -52,7 +52,7 @@ bool world_socket_mgr::start_world_network(event_loop* event_loop, const std::st
 	if(!base_socket_mgr::start_network(event_loop, bind_ip, port, thread_count))
 		return false;
 
-	acceptor_->set_new_connection_callback(std::bind(on_socket_accept, this, _1);
+	acceptor_->set_new_connection_callback(std::bind(&on_socket_accept, std::placeholders::_1));
 
 	//sScriptMgr->OnNetworkStart();
 }
@@ -61,13 +61,13 @@ void world_socket_mgr::on_socket_open(tcp::socket&& sock)
 {
 	if(socket_system_send_buffer_size_ >= 0)
 	{
-		if(!sock.set_option(send_buffer_size(socket_system_send_buffer_size_)))
+		if(!sock.set_option(option::send_buffer_size(socket_system_send_buffer_size_)))
 			return;
 	}
 
 	if(tcp_no_delay_)
 	{
-		if(!sock.set_option(tcp_no_delay()))
+		if(!sock.set_option(option::tcp_no_delay()))
 			return;
 	}
 

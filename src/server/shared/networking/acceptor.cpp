@@ -13,9 +13,9 @@ acceptor::acceptor(Event_loop* loop, const std::string& bind_ip, uint16_t port, 
 	loop_(loop),
 	endpoint_(make_address(bind_ip), port),
 	is_open_(false),
-	idle_fd_(open("/dev/null", O_RDONLY | O_CLOEXEC))
+	//idle_fd_(open("/dev/null", O_RDONLY | O_CLOEXEC))
 {
-	assert(idle_fd_ >= 0);
+	//assert(idle_fd_ >= 0);
 }
 
 acceptor::~acceptor()
@@ -79,13 +79,13 @@ void acceptor::handle_read()
 	loop_->assert_in_loop_thread();
 
 	std::error_code ec;
-	tcp::socket new_conn_socket;
+	tcp::socket new_conn_sock;
 
-	accept(new_conn_socket, peer_endpoint, ec);
+	accept(new_conn_sock, peer_endpoint, ec);
 	if(!ec)
 	{
 		if(new_connection_callback_)
-			new_connection_callback(std::forward<tcp::socket>(new_conn_socket));
+			new_connection_callback(std::forward<tcp::socket>(new_conn_sock));
 		else
 			new_conn_socket.close();
 	}
@@ -96,10 +96,10 @@ void acceptor::handle_read()
 		// By Marc Lehmann, author of libev.
 		if (ec.code() == EMFILE)
 		{
-			close(idle_fd_);
-			idle_fd_ = accept(accept_socket_, NULL, NULL);
-			close(idle_fd_);
-			idle_fd_ = open("/dev/null", O_RDONLY | O_CLOEXEC);
+			//close(idle_fd_);
+			//idle_fd_ = accept(accept_socket_, NULL, NULL);
+			//close(idle_fd_);
+			//idle_fd_ = open("/dev/null", O_RDONLY | O_CLOEXEC);
 		}
 
 		LOG_ERROR("Networking", "accept() failed. error %d: %s", ec.value(), ec.message().c_str());
@@ -122,7 +122,7 @@ void acceptor::close()
 {
 	accept_channel_.disable_all();
 	accept_channel_.remove();
-	close(idle_fd_);
+	//close(idle_fd_);
 
 	accept_socket_.close();
 	is_open_ = false;
@@ -135,7 +135,7 @@ void acceptor::bind(std::error_code& ec)
 
 void acceptor::listen(std::error_code& ec)
 {
-	listen(accept_socket_, SOMAXCONN, ec);
+	listen(accept_socket_, MAX_LISTEN_CONNECTIONS, ec);
 }
 
 std::error_code acceptor::accept(tcp::socket& peer, endpoint& peer_endpoint, std::error_code& ec)

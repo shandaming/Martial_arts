@@ -6,7 +6,7 @@
 #define NET_TCP_SOCKET_MGR_H
 
 #include "acceptor.h"
-//#include "tcp.h"
+#include "event_loop_threadpool.h"
 #include "log.h"
 
 template<typename SocketType>
@@ -15,6 +15,12 @@ class socket_mgr
 public:
 	virtual ~socket_mgr()
 	{
+		if(acceptor_)
+		{
+			delete acceptor_;
+			acceptor_ = nullptr;
+		}
+
 		ASSERT(!threads_ && !acceptor_ && !thread_count_, "StopNetwork must be called prior to tcp_connection_mgr destruction.");
 	}
 
@@ -22,8 +28,16 @@ public:
 	{
 		ASSERT(thread_count_ > 0);
 
+		threadpool_ = std::make_unique<event_loop_threadpool>(event_loop, thread_count);
+		if(!threadpool_)
+		{
+			LOG_ERROR("Network", "create thread pool failed.");
+			return false;
+		}
+		threadpool_->start();
+
 		acceptor* new_acceptor = new acceptor(event_loop, bind_ip, port);
-		if(!acceptor_)
+		if(!new_acceptor)
 		{
 			LOG_ERROR("Network", "Exception caught in tcp_connection_mgr. start_network (%s:%d)", bind_ip.c_str(), port);
 			return false;
@@ -40,7 +54,7 @@ public:
 
 		ASSERT(threads_);
 
-		for(int i = 0; i < thread_count_; ++i)
+		for(int32_t i = 0; i < thread_count_; ++i)
 			threads_[i].start();
 
 		return true;
@@ -74,7 +88,8 @@ public:
 
 	virtual void on_socket_open(tcp::socket&& sock)
 	{
-		std::shared_ptr<SocketType> new_tcp_socket = std::make_shared<SocketType>(std::move(sock));
+		event_loop* io_loop = threadpool_->get_next_loop();
+		std::shared_ptr<SocketType> new_tcp_socket = std::make_shared<SocketType>(io_loop, std::move(sock));
 		new_tcp_socket->start();
 
 		uint32_t thread_index = select_thread_with_min_connection();
@@ -103,8 +118,9 @@ protected:
 	virtual network_thread<SocketType>* create_threads() const = 0;
 
 	acceptor* acceptor_;
-	network_thread<SocketType> threads_;
+	network_thread<SocketType>* threads_;
 	int32_t thread_count_;
+	std::unique_ptr<event_loop_threadpool> threadpool_;
 };
 
 #endif

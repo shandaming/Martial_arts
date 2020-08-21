@@ -10,9 +10,9 @@
 class event_loop_threadpool
 {
 public:
-	event_loop_threadpool(event_loop* baseLoop);
+	event_loop_threadpool(event_loop* baseLoop, uint32_t thread_count);
 	~event_loop_threadpool();
-	void set_thread_num(size_t num_threads) { num_threads_ = num_threads; }
+
 	void start();
 
   // valid after calling start()
@@ -28,7 +28,7 @@ public:
 private:
 	event_loop* base_loop_;
 	bool started_;
-	size_t num_threads_;
+	uint32_t thread_count_;
 	int next_;
 	std::vector<std::unique_ptr<event_loop_thread>> threads_;
 	std::vector<event_loop*> loops_;

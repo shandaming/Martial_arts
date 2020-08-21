@@ -21,7 +21,7 @@ public:
 	virtual const world_packet* write() = 0;
 	virtual void read() = 0;
 
-	const world_packet* get_raw_packet() const { return world_packet_; }
+	const world_packet* get_raw_packet() const { return &world_packet_; }
 	size_t get_size() const { return world_packet_.size(); }
 	connection_type get_connection() const { return world_packet_.get_connection(); }
 protected:
@@ -35,7 +35,6 @@ struct server_packet : public packet
 	void read() override final;
 	void clear() { world_packet_.clear(); }
 	world_packet&& move() { return std::move(world_packet_); }
-	void shrink_to_fit() { world_packet_.shrink_to_fit(); }
 
 	opcode_server get_opcode() const { return opcode_server(world_packet_.get_opcode()); }
 };

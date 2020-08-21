@@ -10,6 +10,7 @@
 enum login_database_statements : uint32_t
 {
 	LOGIN_SEL_REALMLIST,
+	LOGIN_SEL_IP_INFO,
 	LOGIN_INS_LOG,
 
 	MAX_LOGINDATABASE_STATEMENTS

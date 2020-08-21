@@ -7,26 +7,33 @@
 
 enum connection_type : int8_t
 {
-	CONNECTION_TYPE_REALM = 0,
-	CONNECTION_TYPE_INSTANCE = 1,
+	CONNECTION_TYPE_REALM		= 0,
+	CONNECTION_TYPE_INSTANCE	= 1,
 	MAX_CONNECTION_TYPES,
 
-	CONNECTION_TYPE_DEFAULT = -1
+	CONNECTION_TYPE_DEFAULT		= -1
 };
 
 enum opcode_misc : uint16_t
 {
-	MAX_OPCODE = 0x3fff,
-	MAX_OPCODE_HANDLES = (MAX_OPCODE + 1),
-	UNKNOWN_OPCODE = 0xffff,
-	NULL_OPCODE = 0xba00
+	MAX_OPCODE					= 0x3fff,
+	NUM_OPCODE_HANDLES			= (MAX_OPCODE + 1),
+	UNKNOWN_OPCODE				= 0xffff,
+	NULL_OPCODE					= 0xba00
 };
 
 enum opcode_client : uint16_t
-{};
+{
+	CMSG_AUTH_SESSION			= 0x3765,
+	CMSG_PING					= 0x3768
+};
 
 enum opcode_server : uint16_t
-{};
+{
+	SMSG_QUEST_GIVER_STATUS		= 0x2A9A,
+	SMSG_AUTH_CHALLENGE			= 0x3048,
+	SMSG_PONG					= 0x304E
+};
 
 inline bool is_instance_only_opcode(uint32_t opcode)
 {

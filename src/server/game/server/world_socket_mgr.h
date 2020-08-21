@@ -17,6 +17,7 @@ class acceptor;
 
 class world_socket_mgr : public socket_mgr<world_socket>
 {
+	typedef socket_mgr<world_socket> base_socket_mgr;
 public:
 	~world_socket_mgr();
 
@@ -45,6 +46,6 @@ private:
 	bool tcp_no_delay_;
 };
 
-#define WORLD_SOCKET_MGR world_socket_mgr::instance();
+#define WORLD_SOCKET_MGR world_socket_mgr::instance()
 
 #endif

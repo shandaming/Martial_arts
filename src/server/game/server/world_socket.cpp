@@ -5,6 +5,12 @@
 #include <zlib.h>
 
 #include "world_socket.h"
+#include "world_packet.h"
+#include "database_env.h"
+#include "authentication_packets.h"
+#include "world.h"
+#include "errors.h"
+#include "log.h"
 
 #pragma pack(push, 1)
 
@@ -33,19 +39,19 @@ const std::string world_socket::server_connection_initialize(
 		"WORLD OF WARCRAFT CONNECTION - SERVER TO CLIENT - V2");
 const std::string world_socket::client_connection_initialize(
 		"WORLD OF WARCRAFT CONNECTION - CLIENT TO SERVER - V2");
-constexpr uint32_t world_socket::min_size_for_compression = 0x400;
+uint32_t world_socket::min_size_for_compression = 0x400;
 
-constexpr uint8_t world_socket::auth_check_seed[16] = {
+uint8_t world_socket::auth_check_seed[16] = {
 	0xC5, 0xC6, 0x98, 0x95, 0x76, 0x3F, 0x1D, 0xCD, 0xB6, 0xA1, 0x37, 0x28, 0xB3, 0x12, 0xFF, 0x8A };
-constexpr uint8_t world_socket::session_key_seed[16] = { 
+uint8_t world_socket::session_key_seed[16] = { 
 	0x58, 0xCB, 0xCF, 0x40, 0xFE, 0x2E, 0xCE, 0xA6, 0x5A, 0x90, 0xB8, 0x01, 0x68, 0x6C, 0x28, 0x0B };
-constexpr uint8_t world_socket::continue_session_seed[16] = { 
+uint8_t world_socket::continue_session_seed[16] = { 
 	0x16, 0xAD, 0x0C, 0xD4, 0x46, 0xF9, 0x4F, 0xB2, 0xEF, 0x7D, 0xEA, 0x2A, 0x17, 0x66, 0x4D, 0x2F };
-constexpr uint8_t world_socket::encryption_key_seed[16] = { 
+uint8_t world_socket::encryption_key_seed[16] = { 
 	0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
-world_socket::world_socket(event_loop* loop, tcp::socket&& socket) : 
-	tcp_socket(loop, socket) 
+world_socket::world_socket(event_loop* loop, tcp::socket&& sock) : 
+	tcp_socket(loop, std::forward<tcp::socket>(sock)), 
 	type_(CONNECTION_TYPE_REALM), 
 	key_(0), over_speed_ping_(0),
 	world_session_(nullptr), 
@@ -59,9 +65,9 @@ world_socket::world_socket(event_loop* loop, tcp::socket&& socket) :
 
 world_socket::~world_socket()
 {
-	if(cmpression_stream_)
+	if(compression_stream_)
 	{
-		deftate_end(compression_stream_);
+		deflateEnd(compression_stream_);
 		delete compression_stream_;
 	}
 }
@@ -82,8 +88,8 @@ void world_socket::check_ip_callback(prepared_query_result result)
 		bool banned = false;
 		do
 		{
-			field* fields = result->Fetch();
-			if (fields[0].GetUInt64() != 0)
+			field* fields = result->fetch();
+			if (fields[0].get_uint64() != 0)
 				banned = true;
 
 		}while (result->next_row());
@@ -111,7 +117,7 @@ void world_socket::check_ip_callback(prepared_query_result result)
 	queue_packet(std::move(initializer));
 }
 
-void world_socket::initialize_handler(std::error_code error, size_t transfered_bytes)
+void world_socket::initialize_handler(std::error_code& error, size_t transfered_bytes)
 {
 	if(error)
 	{
@@ -163,7 +169,7 @@ void world_socket::initialize_handler(std::error_code error, size_t transfered_b
 			compression_stream_->opaque = (voidpf)NULL;
 			compression_stream_->avail_in = 0;
 			compression_stream_->next_in = NULL;
-			int32_t z_res = deflateInit2(compression_stream_, sWorld->getIntConfig(CONFIG_COMPRESSION), 
+			int32_t z_res = deflateInit2(compression_stream_, WORLD->getIntConfig(CONFIG_COMPRESSION), 
 					Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
 			if (z_res != Z_OK)
 			{
@@ -173,7 +179,7 @@ void world_socket::initialize_handler(std::error_code error, size_t transfered_b
 				return;
 			}
 
-			packet_buffer_.Reset();
+			packet_buffer_.reset();
 			handle_send_auth_session();
 			//AsyncRead();
 			set_read_handler_internal_callback();
@@ -194,7 +200,7 @@ bool world_socket::update()
 	{
 		uint32_t packet_size = queued->size();
 		if(packet_size > min_size_for_compression && queued->needs_encryption())
-            		packet_size = compress_bound(packet_size) + sizeof(compressed_world_packet);
+            		packet_size = compressBound(packet_size) + sizeof(compressed_world_packet);
 
         	if(buffer.get_remaining_space() < packet_size + sizeof(packet_header))
         	{
@@ -217,7 +223,7 @@ bool world_socket::update()
     	if(buffer.get_active_size() > 0)
         	queue_packet(std::move(buffer));
 
-    	if(!BaseSocket::update())
+    	if(!base_socket::update())
         	return false;
 
     	query_processor_.process_ready_queries();
@@ -230,10 +236,10 @@ void world_socket::handle_send_auth_session()
 	big_number dos_challenge;
 	dos_challenge.set_rand(32 * 8);
 
-	world_packets::Auth::AuthChallenge challenge;
-	memcpy(challenge.Challenge.data(), server_challenge_.as_byte_array(16).get(), 16);
-	memcpy(challenge.DosChallenge.data(), dos_challenge.as_byte_array(32).get(), 32);
-	challenge.DosZeroBits = 1;
+	world_packets::auth::auth_challenge challenge;
+	memcpy(challenge.challenge.data(), server_challenge_.as_byte_array(16).get(), 16);
+	memcpy(challenge.dos_challenge.data(), dos_challenge.as_byte_array(32).get(), 32);
+	challenge.dos_zero_bits = 1;
 
 	send_packet_and_log_opcode(*challenge.write());
 }
@@ -296,7 +302,7 @@ void world_socket::read_handler()
 
         	// just received fresh new payload
         	read_data_handler_result result = read_data_handler();
-        	header_buffer_.Reset();
+        	header_buffer_.reset();
         	if(result != read_data_handler_result::ok)
         	{
             		if(result != read_data_handler_result::waiting_for_query)
@@ -329,7 +335,7 @@ bool world_socket::read_header_handler()
     	{
 		LOG_ERROR("network", "world_socket::read_header_handler(): "
 				"client %s sent malformed packet (size: %u)",
-            	get_remote_ip_address().to_string().c_str(), header->Size);
+            	get_remote_ip_address().to_string().c_str(), header->size);
         	return false;
     	}
 
@@ -341,15 +347,15 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
 {
 	packet_header* header = reinterpret_cast<packet_header*>(header_buffer_.get_read_pointer());
 
-    	if(!auth_crypt_.DecryptRecv(packet_buffer_.get_read_pointer(), header->size, header->tag))
+    	if(!auth_crypt_.decrypt_recv(packet_buffer_.get_read_pointer(), header->size, header->tag))
     	{
         	LOG_ERROR("network", "world_socket::read_header_handler(): "
 				"client %s failed to decrypt packet (size: %u)",
-            	get_remote_ip_address().to_string().c_str(), header->Size);
+            	get_remote_ip_address().to_string().c_str(), header->size);
         	return read_data_handler_result::error;
     	}
 
-    	world_packet packet(std::move(packet_buffer_), GetConnectionType());
+    	world_packet packet(std::move(packet_buffer_), get_connection_type());
     	opcode_client opcode = packet.read<opcode_client>();
     	if(uint32_t(opcode) >= uint32_t(NUM_OPCODE_HANDLERS))
     	{

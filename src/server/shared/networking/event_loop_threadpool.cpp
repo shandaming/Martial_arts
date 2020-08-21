@@ -4,10 +4,10 @@
 
 #include "event_loop_threadpool.h"
 
-event_loop_threadpool::event_loop_threadpool(event_loop* base_loop) : 
+event_loop_threadpool::event_loop_threadpool(event_loop* base_loop, uint32_t thread_count) : 
 	base_loop_(base_loop),
 	started_(false),
-	num_threads_(0),
+	thread_count_(thread_count),
 	next_(0) {}
 
 event_loop_threadpool::~event_loop_threadpool()
@@ -22,7 +22,7 @@ void event_loop_threadpool::start()
 
 	started_ = true;
 
-	for (size_t i = 0; i < num_threads_; ++i)
+	for (size_t i = 0; i < thread_count_; ++i)
 	{
 		std::unique_ptr<event_loop_thread> event_loop_thread = std::make_unique<event_loop_thread>();
 		threads_.push_back(std::move(event_loop_thread));

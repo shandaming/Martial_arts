@@ -22,13 +22,12 @@ public:
 
 	bool bind();
 	bool is_open() const { return is_open_; }
-	
+	void close();
 private:
 	acceptor(const acceptor&) = delete;
 	acceptor& operator=(const acceptor&) = delete;
 
 	int open(std::error_code& ec);
-	void close();
 	void bind(std::error_code& ec);
 	void listen(std::error_code& ec);
 	void handle_read();

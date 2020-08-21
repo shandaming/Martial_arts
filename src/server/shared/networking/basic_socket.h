@@ -7,6 +7,8 @@
 
 #include "endpoint.h"
 
+#define MAX_LISTEN_CONNECTIONS SOMAXCONN
+
 struct socket_option
 {
 	socket_option(int level_, int optname_, int optval_, const std::string& desc) :

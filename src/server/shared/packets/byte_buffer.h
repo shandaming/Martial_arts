@@ -423,7 +423,7 @@ public:
 		read_packed_uint64(read<uint8_t>(), guid);
 	}
 
-	void read_packed_uint64(uint8 mask, uint64& value)
+	void read_packed_uint64(uint8_t mask, uint64_t& value)
 	{
 		for(uint32_t i = 0; i < 8; ++i)
 		{

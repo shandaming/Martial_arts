@@ -11,6 +11,12 @@
 #include "world_database.h"
 #include "hotfix_database.h"
 
+#include "field.h"
+#include "prepared_statement.h"
+#include "query_callback.h"
+#include "query_result.h"
+#include "transaction.h"
+
 extern database_worker_pool<world_database_connection> world_database;
 extern database_worker_pool<character_database_connection> character_database;
 extern database_worker_pool<login_database_connection> login_database;

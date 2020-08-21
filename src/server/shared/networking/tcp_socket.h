@@ -59,7 +59,7 @@ public:
 
 	void close_socket();
 
-	void delayed_close_tcp_socket() { closing_ = true; }
+	void delayed_close_socket() { closing_ = true; }
 
 	message_buffer& get_read_buffer() { return read_buffer_; }
 protected:
