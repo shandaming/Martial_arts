@@ -6,9 +6,11 @@
 
 #include "world_socket.h"
 #include "world_packet.h"
+#include "world_session.h"
 #include "database_env.h"
 #include "authentication_packets.h"
 #include "world.h"
+#include "packet_log.h"
 #include "errors.h"
 #include "log.h"
 
@@ -169,7 +171,7 @@ void world_socket::initialize_handler(std::error_code& error, size_t transfered_
 			compression_stream_->opaque = (voidpf)NULL;
 			compression_stream_->avail_in = 0;
 			compression_stream_->next_in = NULL;
-			int32_t z_res = deflateInit2(compression_stream_, WORLD->getIntConfig(CONFIG_COMPRESSION), 
+			int32_t z_res = deflateInit2(compression_stream_, WORLD->get_int_configs(CONFIG_COMPRESSION), 
 					Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
 			if (z_res != Z_OK)
 			{
@@ -367,9 +369,9 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
 
     	packet.set_opcode(opcode);
 
-    	if(sPacketLog->can_log_packet())
-        	sPacketLog->log_packet(packet, CLIENT_TO_SERVER, get_remote_ip_address(), get_remote_port(), 
-				GetConnectionType());
+    	if(PACKET_LOG->can_log_packet())
+        	PACKET_LOG->log_packet(packet, CLIENT_TO_SERVER, get_remote_ip_address(), get_remote_port(), 
+				get_connection_type());
 
     	std::unique_lock<std::mutex> lock(world_session_lock_, std::defer_lock);
 
@@ -378,8 +380,8 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
 		case CMSG_PING:
         	{
             		log_opcode_text(opcode, lock);
-            		world_packets::Auth::Ping ping(std::move(packet));
-            		if(!ping.ReadNoThrow())
+            		world_packets::auth::ping ping(std::move(packet));
+            		if(!ping.read_no_throw())
             		{
                 		LOG_ERROR("network", "world_socket::read_data_handler(): "
 						"client %s sent malformed CMSG_PING", get_remote_ip_address().to_string().c_str());
@@ -397,17 +399,17 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
                 		// locking just to safely log offending user is probably overkill but we are disconnecting him anyway
                 		if(lock.try_lock())
                     			LOG_ERROR("network", "world_socket::ProcessIncoming: "
-							"received duplicate CMSG_AUTH_SESSION from %s", world_session_->GetPlayerInfo().c_str());
+							"received duplicate CMSG_AUTH_SESSION from %s", world_session_->get_player_info().c_str());
                 		return read_data_handler_result::error;
             		}
 
-            		std::shared_ptr<world_packets::Auth::AuthSession> authSession = std::make_shared<world_packets::Auth::AuthSession>(std::move(packet));
-            		if(!authSession->ReadNoThrow())
+            		std::shared_ptr<world_packets::auth::auth_session> auth_session = std::make_shared<world_packets::auth::auth_session>(std::move(packet));
+            		if(!auth_session->read_no_throw())
             		{
                 		LOG_ERROR("network", "world_socket::read_data_handler(): client %s sent malformed CMSG_AUTH_SESSION", get_remote_ip_address().to_string().c_str());
                 		return read_data_handler_result::error;
             		}
-            		HandleAuthSession(authSession);
+            		handle_auth_session(auth_session);
             		return read_data_handler_result::waiting_for_query;
         	}
         	case CMSG_AUTH_CONTINUED_SESSION:
@@ -417,17 +419,17 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
             		{
                 		// locking just to safely log offending user is probably overkill but we are disconnecting him anyway
                 		if(lock.try_lock())
-                    			LOG_ERROR("network", "world_socket::ProcessIncoming: received duplicate CMSG_AUTH_CONTINUED_SESSION from %s", world_session_->GetPlayerInfo().c_str());
+                    			LOG_ERROR("network", "world_socket::ProcessIncoming: received duplicate CMSG_AUTH_CONTINUED_SESSION from %s", world_session_->get_player_info().c_str());
                 		return read_data_handler_result::error;
             		}
 
-            		std::shared_ptr<world_packets::Auth::AuthContinuedSession> authSession = std::make_shared<world_packets::Auth::AuthContinuedSession>(std::move(packet));
-            		if(!authSession->ReadNoThrow())
+            		std::shared_ptr<world_packets::auth::auth_continued_session> auth_session = std::make_shared<world_packets::auth::auth_continued_session>(std::move(packet));
+            		if(!auth_session->read_no_throw())
             		{
                 		LOG_ERROR("network", "world_socket::read_data_handler(): client %s sent malformed CMSG_AUTH_CONTINUED_SESSION", get_remote_ip_address().to_string().c_str());
                 		return read_data_handler_result::error;
             		}
-            		HandleAuthContinuedSession(authSession);
+            		handle_auth_continued_session(auth_session);
             		return read_data_handler_result::waiting_for_query;
         	}
         	case CMSG_KEEP_ALIVE:
@@ -439,20 +441,20 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
             		break;
         	case CMSG_ENABLE_NAGLE:
             		log_opcode_text(opcode, lock);
-            		SetNoDelay(false);
+            		set_no_delay(false);
             		break;
         	case CMSG_CONNECT_TO_FAILED:
         	{
             		lock.lock();
 
             		log_opcode_text(opcode, lock);
-            		world_packets::Auth::ConnectToFailed connectToFailed(std::move(packet));
-            		if(!connectToFailed.ReadNoThrow())
+            		world_packets::auth::connect_to_failed connect_to_failed(std::move(packet));
+            		if(!connect_to_failed.read_no_throw())
             		{
                 		LOG_ERROR("network", "world_socket::read_data_handler(): client %s sent malformed CMSG_CONNECT_TO_FAILED", get_remote_ip_address().to_string().c_str());
                 		return read_data_handler_result::error;
             		}
-            		HandleConnectToFailed(connectToFailed);
+            		handle_connect_to_failed(connect_to_failed);
             		break;
         	}
         	case CMSG_ENABLE_ENCRYPTION_ACK:
@@ -471,16 +473,16 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
                 		return read_data_handler_result::error;
             		}
 
-            		OpcodeHandler const* handler = opcodeTable[opcode];
+            		opcode_handler const* handler = opcode_table[opcode];
             		if(!handler)
             		{
-                		LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", get_opcode_name_for_logging(static_cast<OpcodeClient>(packet.get_opcode())).c_str(), world_session_->GetPlayerInfo().c_str());
+                		LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", get_opcode_name_for_logging(static_cast<opcode_client>(packet.get_opcode())).c_str(), world_session_->get_player_info().c_str());
                 		break;
             		}
 
             		// Our Idle timer will reset on any non PING opcodes.
             		// Catches people idling on the login screen and any lingering ingame connections.
-            		world_session_->ResetTimeOutTime();
+            		world_session_->reset_timeout_time();
 
             		// Copy the packet to the heap before enqueuing
             		world_session_->queue_packet(new world_packet(std::move(packet)));
@@ -863,102 +865,293 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
     AsyncRead();
 }
 
-void world_socket::LoadSessionPermissionsCallback(prepared_query_result result)
+void world_socket::handle_auth_session(std::shared_ptr<world_packets::auth::auth_session> auth_session)
 {
-    // RBAC must be loaded before adding session to check for skip queue permission
-    world_session_->GetRBACData()->LoadFromDBCallback(result);
+	login_database_prepared_statement* stmt = login_database.get_prepared_statement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
+	stmt->set_int32(0, int32_t(realm.id.realm));
+	stmt->set_string(1, auth_session->realm_join_ticket);
 
-    send_packet_and_log_opcode(*world_packets::Auth::EnableEncryption(encrypt_key_, true).write());
+	query_processor_.add_query(login_database.async_query(stmt).with_prepared_callback(std::bind(&world_socket::handle_auth_session_callback, this, auth_session, std::placeholders::_1)));
 }
 
-void world_socket::HandleAuthContinuedSession(std::shared_ptr<world_packets::Auth::AuthContinuedSession> authSession)
+void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::auth::auth_session> session, prepared_query_result result)
 {
-    world_session::ConnectToKey key;
-    key.Raw = authSession->Key;
+	if(!result)
+	{
+		LOG_ERROR("network", "World_socket::handle_auth_session: Sent Auth Response (unknown account).");
+		delayed_close_socket();
+		return;
+	}
 
-    type_ = ConnectionType(key.Fields.ConnectionType);
+	const realm_build_info* build_info = REALM_LIST->get_build_info(realm.build);
+	if(!build_info)
+	{
+		send_auth_response_error(ERROR_BAD_VERSION);
+		LOG_ERROR("network", "world_socket::handle_auth_session: Missing auth seed for realm build %u (%s).", realm.build, get_remote_ip_address().to_string().c_str());
+		return;
+	}
+
+	account_info account(result->fetch());
+
+	std::string address = get_remote_ip_address().to_string();
+
+	sha256_hash digest_key_hash;
+	digest_key_hash.update_data(account.game.key_data.data(), account.game.key_data.size());
+	if(account.game.os == "Win64")
+		digest_key_hash.update_data(build_info->win64_auth_seed.data(), build_info->win64_auth_seed.size());
+	else if(account.game.os == "Mc64")
+		digest_key_hash.update_data(build_info->mac64_auth_seed.data(), build_info->mac64_auth_seed.size());
+
+	digest_key_hash.finalize();
+
+	hmac_sha256 hmac(digest_key_hash.get_length(), digest_key_hash.get_digest());
+	hmac.update_data(auth_session->local_challenge.data(), auth_session->local_challenge.size());
+	hmac.update_data(server_challenge_.as_byte_array(16).get(), 16);
+	hmac.update_data(auth_check_seed, 16);
+	hmac.finalize();
+
+	if(memcmp(hmac.get_digest(), auth_session->digest.data(), auth_session->digest.size()) != 0)
+	{
+		LOG_ERROR("network", "world_socket::handle_auth_session: Authentication failed for account: %u ('%s') address: %s", account.game.id, auth_session->realm_join_ticket.c_str(), address.c_str());
+		delayed_close_socket();
+		return;
+	}
+
+	sha256_hash key_data;
+	key_data.update_data(account.game.key_data.data(), account.game.key_data.size());
+	key_data.finalize();
+
+	hmac_sha256 session_key_hmac(key_data.get_length(), key_data.get_digest());
+	session_key_hmac.update_data(server_challenge_.as_byte_array(16).get(), 16);
+	session_key_hmac.update_data(auth_session->local_challenge.data(), auth_session->local_challenge.size());
+	session_key_hmac.update_data(session_key_seed, 16);
+	session_key_hmac.finalize();
+
+	uint8_t session_key[40];
+	session_key_generator<sha256_hash> session_key_generator(session_key_hmac.get_digest(), session_key_hmac.get_length());
+	session_key_generator.generate(session_key, 40);
+
+	session_key_.set_binary(session_key, 40);
+
+	hmac_sha256 encrypt_key_gen(40, session_key);
+	encrypt_key_gen.update_data(auth_session->local_challenge.data(), auth_session->local_challenge.size());
+	encrypt_key_gen.update_data(server_challenge.as_byte_array(16).get(), 16);
+	encrypt_key_gen.update_data(encryption_key_seed, 16);
+	encrypt_key_gen.finalize();
+
+	memcpy(encrypt_key_, encrypt_key_gen.get_digest(), 16);
+
+	login_database_prepared_statement* stmt = login_database.get_prepared_statement(LOGIN_UPD_LAST_ATTEMPT_IP);
+	stmt->set_string(0, address);
+	stmt->set_string(1, auth_session->realm_join_ticket);
+	login_database.execute(stmt);
+
+	stmt = login_database.get_prepared_statement(LOGIN_UPD_ACCOUNT_INFO_CONTINUED_SESSION);
+	stmt->set_string(0, session_key_.as_hex_str());
+	stmt->set_uint32(1, account.game.id);
+	login_database.execute(stmt);
+
+	if(WORLD->is_closed())
+	{
+		send_auth_response_error(ERROR_DENIED);
+		LOG_ERROR("network", "world_socket::handle_auth_session: World closed, denying client (%s).", get_remote_ip_address().to_string().c_str());
+		delayed_close_socket();
+		return;
+	}
+
+	if(auth_session->realm_id != realm.id.realm)
+	{
+		send_auth_response_error(ERROR_DENIED);
+		LOG_ERROR("network", "world_socket::handle_auth_session: Client %s requested connection with realm id %u but this realm has id %u set in config.", get_remote_ip_address().to_string().c_str(), auth_session->realm_id, realm.id.realm);
+		delayed_close_socket();
+		return;
+	}
+
+	bool warden_active = WORLD->get_bool_config(CONFIG_WAROEN_ENABLED);
+	if(warden_active && account.game.os != "Win" && account.game.os != "Win64" && account.game.os != "Mc64")
+	{
+		send_auth_response_error(ERROR_DENIED);
+		LOG_ERROR("network", "world_socket::handle_auth_session: Client %s attempted to log in using invalid client OS (%s)", address.c_str(), account.game.os.c_str());
+		delayed_close_socket();
+		return;
+	}
+
+	if(const ip_location_record* location = IP_LOCATION->get_location_record(address))
+		ip_contry_ = location->country_code;
+
+	if(account.battle_net.is_locked_to_ip)
+	{
+		if(account.battle_net.last_ip != address)
+		{
+			send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
+			LOG_DEBUG("network", "worlk_socket::handle_auth_session: Sent Auth Response (Account IP differs. Original IP: %s, new IP: %s).", account.battle_net.last_ip.c_str(), address.c_str());
+			SCRIPT_MGR->on_failed_account_login(account.game.id);
+			delayed_close_socket();
+			return;
+		}
+	}
+	else if(!account.battle_net.lock_country.empty() &&
+			account.battle_net.lock_country != "00" &&
+			!ip_country_.empty())
+	{
+		if(account.battle_net.lock_country != ip_country_)
+		{
+			send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
+			LOG_DEBUG("network", "world_socket::handle_auth_session: Sent Auth Response (Account country differs. Original country: %s new country: %s).", account.battle_net.lock_country.c_str(), ip_country_.c_str());
+			SCRIPT_MGR->on_failed_account_login(account.game.id);
+			delayed_close_socket();
+			return;
+		}
+	}
+
+	int64_t mutetime = account.game.mute_time;
+
+	if(mutetime < 0)
+	{
+		mutetime = time(NULL) + llabs(mutetime);
+
+		stmt = login_database.get_prepared_statement(LOGIN_UPD_MUTE_TIME_LOGIN);
+		stmt->set_int64(0, mutetime);
+		stmt->set_uint32(1, account.game.id);
+		login_database.execute(stmt);
+	}
+
+	if(account.is_banned())
+	{
+		send_auth_response_error(ERROR_GAME_ACCOUNT_BANNED);
+		LOG_ERROR("network", "world_socket::handle_auth_session: Sent Auth Response (Account banned).");
+		SCRIPT_MGR->on_failed_account_login(account.game.id);
+		delayed_close_socket();
+		return;
+	}
+
+	account_types allowed_account_type = WORLD->get_player_security_limit();
+	LOG_DEBUG("network", "Allowed Level: %u Player Level %u", allowed_account_type, account.game.security);
+	if(allowed_account_type > SEC_PLAYER && account.game.security < allowed_account_type)
+	{
+		send_auth_response_error(ERROR_SERVER_IS_PRIVATE);
+		LOG_DEBUG("network", "world_socket::handle_auth_session: User tries to login but his security level is not enough");
+		SCRIPT_MGR->on_failed_account_login(account.game.id);
+		delayed_close_socket();
+		return;
+	}
+
+	LOG_DEBUG("network", "world_socket::handle_auth_session: Client '%s' authenticated successfully from %s.", auth_session->realm_join_ticket.c_str(), address.c_str());
+
+	stmt = login_database.get_prepared_statement(LOGIN_UPD_LAST_IP);
+	stmt->set_string(0, address);
+	stmt->set_string(1, auth_session->realm_join_ticket);
+
+	login_database.execute(stmt);
+
+	SCRIPT_MGR->on_account_login(account.game.id);
+
+	authed_ = true;
+	world_session_ = new world_session(account.game.id, std::move(auth_session->realm_join_ticket), account.battle_net.id, shared_from_this(), account.game.security, account.game.expansion, mutetime, account.game.os, account.battle_net.locale, account.game.recruiter, account.game.is_rectuiter);
+
+	if(warden_active)
+		world_session_->init_warden(&session_key_);
+
+	query_processor.add_query(world_session->load_permissions_async().with_prepared_callback(std::bind(&world_socket::load_session_permissions_callback, this, std::placeholders::_1)));
+	async_read();
+}
+
+void world_socket::load_session_permissions_callback(prepared_query_result result)
+{
+    // RBAC must be loaded before adding session to check for skip queue permission
+    world_session_->get_rbac_data()->load_from_db_callback(result);
+
+    send_packet_and_log_opcode(*world_packets::auth::enable_encryption(encrypt_key_, true).write());
+}
+
+void world_socket::handle_auth_continued_session(std::shared_ptr<world_packets::auth::auth_continued_session> auth_session)
+{
+    world_session::connect_to_key key;
+    key.raw = auth_session->key;
+
+    type_ = connection_type(key.fields.connection_type);
     if (type_ != CONNECTION_TYPE_INSTANCE)
     {
-        SendAuthResponseError(ERROR_DENIED);
+        send_auth_response_error(ERROR_DENIED);
         delayed_close_socket();
         return;
     }
 
-    uint32_t accountId = uint32_t(key.Fields.AccountId);
-    LoginDatabasePreparedStatement* stmt = login_database.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_CONTINUED_SESSION);
-    stmt->setUInt32(0, accountId);
+    uint32_t account_id = uint32_t(key.fields.account_id);
+    login_database_prepared_statement* stmt = login_database.get_prepared_statement(LOGIN_SEL_ACCOUNT_INFO_CONTINUED_SESSION);
+    stmt->set_uint32(0, account_id);
 
-    query_processor_.AddQuery(login_database.async_query(stmt).with_prepared_callback(std::bind(&world_socket::HandleAuthContinuedSessionCallback, this, authSession, std::placeholders::_1)));
+    query_processor_.add_query(login_database.async_query(stmt).with_prepared_callback(std::bind(&world_socket::handle_auth_continued_session_callback, this, auth_session, std::placeholders::_1)));
 }
 
-void world_socket::HandleAuthContinuedSessionCallback(std::shared_ptr<world_packets::Auth::AuthContinuedSession> authSession, prepared_query_result result)
+void world_socket::handle_auth_continued_session_callback(std::shared_ptr<world_packets::auth::auth_continued_session> auth_session, prepared_query_result result)
 {
     if (!result)
     {
-        SendAuthResponseError(ERROR_DENIED);
+        send_auth_response_error(ERROR_DENIED);
         delayed_close_socket();
         return;
     }
 
-    world_session::ConnectToKey key;
-    key_ = key.Raw = authSession->Key;
+    world_session::connect_to_key key;
+    key_ = key.raw = auth_session->key;
 
-    uint32_t accountId = uint32_t(key.Fields.AccountId);
-    field* fields = result->Fetch();
-    std::string login = fields[0].GetString();
-    _sessionKey.SetHexStr(fields[1].GetCString());
+    uint32_t account_id = uint32_t(key.fields.account_id);
+    field* fields = result->fetch();
+    std::string login = fields[0].get_string();
+    session_key_.set_hex_str(fields[1].get_cstring());
 
-    HmacSha256 hmac(40, _sessionKey.as_byte_array(40).get());
-    hmac.UpdateData(reinterpret_cast<uint8_t const*>(&authSession->Key), sizeof(authSession->Key));
-    hmac.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
-    hmac.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
-    hmac.UpdateData(continue_session_seed, 16);
-    hmac.Finalize();
+    hmac_sha256 hmac(40, session_key_.as_byte_array(40).get());
+    hmac.update_data(reinterpret_cast<uint8_t const*>(&auth_session->Key), sizeof(auth_session->Key));
+    hmac.update_data(auth_session->local_challenge.data(), auth_session->local_challenge.size());
+    hmac.update_data(server_challenge_.as_byte_array(16).get(), 16);
+    hmac.update_data(continue_session_seed, 16);
+    hmac.finalize();
 
-    if (memcmp(hmac.GetDigest(), authSession->Digest.data(), authSession->Digest.size()))
+    if (memcmp(hmac.get_digest(), auth_session->digest.data(), auth_session->digest.size()))
     {
-        LOG_ERROR("network", "world_socket::HandleAuthContinuedSession: Authentication failed for account: %u ('%s') address: %s", accountId, login.c_str(), get_remote_ip_address().to_string().c_str());
+        LOG_ERROR("network", "world_socket::handle_auth_continued_session: Authentication failed for account: %u ('%s') address: %s", account_id, login.c_str(), get_remote_ip_address().to_string().c_str());
         delayed_close_socket();
         return;
     }
 
-    HmacSha256 encryptKeyGen(40, _sessionKey.as_byte_array(40).get());
-    encryptKeyGen.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
-    encryptKeyGen.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
-    encryptKeyGen.UpdateData(encryption_key_seed, 16);
-    encryptKeyGen.Finalize();
+    hmac_sha256 encrypt_key_gen(40, session_key_.as_byte_array(40).get());
+    encrypt_key_gen.update_data(auth_session->local_challenge.data(), auth_session->local_challenge.size());
+    encrypt_key_gen._update_data(server_challenge_.as_byte_array(16).get(), 16);
+    encrypt_key_gen.update_data(encryption_key_seed, 16);
+    encrypt_key_gen.finalize();
 
     // only first 16 bytes of the hmac are used
-    memcpy(encrypt_key_, encryptKeyGen.GetDigest(), 16);
+    memcpy(encrypt_key_, encrypt_key_gen.get_digest(), 16);
 
-    send_packet_and_log_opcode(*world_packets::Auth::EnableEncryption(encrypt_key_, true).write());
-    AsyncRead();
+    send_packet_and_log_opcode(*world_packets::auth::enable_encryption(encrypt_key_, true).write());
+    async_read();
 }
 
-void world_socket::HandleConnectToFailed(world_packets::Auth::ConnectToFailed& connectToFailed)
+void world_socket::handle_connect_to_failed(world_packets::auth::connect_to_failed& connect_to_failed)
 {
     if (world_session_)
     {
-        if (world_session_->PlayerLoading())
+        if (world_session_->player_loading())
         {
-            switch (connectToFailed.Serial)
+            switch (connect_to_failed.serial)
             {
-                case world_packets::Auth::ConnectToSerial::WorldAttempt1:
-                    world_session_->SendConnectToInstance(world_packets::Auth::ConnectToSerial::WorldAttempt2);
+                case world_packets::auth::connect_to_serial::world_attempt1:
+                    world_session_->send_connect_to_instance(world_packets::auth::connect_to_serial::world_attempt2);
                     break;
-                case world_packets::Auth::ConnectToSerial::WorldAttempt2:
-                    world_session_->SendConnectToInstance(world_packets::Auth::ConnectToSerial::WorldAttempt3);
+                case world_packets::auth::connect_to_serial::world_attempt2:
+                    world_session_->send_connect_to_instance(world_packets::auth::connect_to_serial::world_attempt3);
                     break;
-                case world_packets::Auth::ConnectToSerial::WorldAttempt3:
-                    world_session_->SendConnectToInstance(world_packets::Auth::ConnectToSerial::WorldAttempt4);
+                case world_packets::auth::connect_to_serial::world_attempt3:
+                    world_session_->send_connect_to_instance(world_packets::auth::_connect_to_serial::world_attempt4);
                     break;
-                case world_packets::Auth::ConnectToSerial::WorldAttempt4:
-                    world_session_->SendConnectToInstance(world_packets::Auth::ConnectToSerial::WorldAttempt5);
+                case world_packets::auth::connect_to_serial::world_attempt4:
+                    world_session_->send_connect_to_instance(world_packets::auth::connect_to_serial::world_attempt5);
                     break;
-                case world_packets::Auth::ConnectToSerial::WorldAttempt5:
+                case world_packets::auth::connect_to_serial::world_attempt5:
                 {
-                    LOG_ERROR("network", "%s failed to connect 5 times to world socket, aborting login", world_session_->GetPlayerInfo().c_str());
-                    world_session_->AbortLogin(world_packets::Character::LoginFailureReason::NoWorld);
+                    LOG_ERROR("network", "%s failed to connect 5 times to world socket, aborting login", world_session_->get_player_info().c_str());
+                    world_session_->abort_login(world_packets::character::login_failure_reason::no_world);
                     break;
                 }
                 default:
@@ -975,21 +1168,21 @@ void world_socket::HandleConnectToFailed(world_packets::Auth::ConnectToFailed& c
 
 void world_socket::handle_enable_encryption_ack()
 {
-    auth_crypt_.Init(encrypt_key_);
+    auth_crypt_.init(encrypt_key_);
     if (type_ == CONNECTION_TYPE_REALM)
-        sWorld->AddSession(world_session_);
+        WORLD->add_session(world_session_);
     else
-        sWorld->AddInstanceSocket(shared_from_this(), key_);
+        WORLD->add_instance_socket(shared_from_this(), key_);
 }
 
-void world_socket::SendAuthResponseError(uint32_t code)
+void world_socket::send_auth_response_error(uint32_t code)
 {
-    world_packets::Auth::AuthResponse response;
-    response.Result = code;
+    world_packets::auth::auth_response response;
+    response.result = code;
     send_packet_and_log_opcode(*response.write());
 }
 
-bool world_socket::handle_ping(world_packets::Auth::Ping& ping)
+bool world_socket::handle_ping(world_packets::auth::ping& ping)
 {
     using namespace std::chrono;
 

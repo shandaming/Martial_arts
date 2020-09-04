@@ -91,7 +91,7 @@ public:
 
 	void unlock()
 	{
-		this->mutex_->unlock();
+		this->mutex_.unlock();
 	}
 
 	void pop_front()

@@ -5,6 +5,8 @@
 #ifndef PR_PACKET_LOG_H
 #define PR_PACKET_LOG_H
 
+//#include <mutex>
+
 enum direction
 {
 	CLIENT_TO_SERVER,
@@ -27,8 +29,10 @@ private:
 	~packet_log();
 
 	std::mutex log_packet_lock_;
-	std::once_flag_initialize_flag_;
+	std::once_flag initialize_flag_;
 	FILE* file_;
 };
+
+#define PACKET_LOG packet_log::instance()
 
 #endif

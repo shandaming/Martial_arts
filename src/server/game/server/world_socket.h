@@ -28,7 +28,7 @@ class ping;
 struct packet_header
 {
 	uint32_t size;
-	uint8_t* tag[12];
+	uint8_t tag[12];
 
 	bool is_valid_size() const { return size < 0x10000; }
 };
@@ -106,7 +106,14 @@ private:
 	uint32_t compress_packet(uint8_t* buffer, const world_packet& ppacket);
 
 	void handle_send_auth_session();
-	void handle_auth_session(std::shared_ptr<world_packet>);
+	void handle_auth_session(std::shared_ptr<world_packets::auth::auth_session> auth_session);
+	void handle_auth_session_callback(std::shared_ptr<world_packets::auth::auth_session> auth_session, prepared_query_result result);
+	void handle_auth_continued_session(std::shared_ptr<world_packets::auth::auth_continued_session> auth_session, prepared_query_result result);
+	void handle_auth_continued_session_callback(std::shared_ptr<world_packets::auth::auth_continued_session> auth_session, prepared_query_result result);
+	void load_session_permissions_callback(prepared_query_result result);
+	void handle_connect_to_failed(world_packets::auth::connect_to_failed& connect_to_failed);
+	bool handle_ping(world_packets::auth::ping& ping);
+	void handle_enable_encryption_ack();
 
 	connection_type type_;
 	uint64_t key_;

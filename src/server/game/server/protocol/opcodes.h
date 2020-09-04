@@ -17,21 +17,28 @@ enum connection_type : int8_t
 enum opcode_misc : uint16_t
 {
 	MAX_OPCODE					= 0x3fff,
-	NUM_OPCODE_HANDLES			= (MAX_OPCODE + 1),
+	NUM_OPCODE_HANDLERS			= (MAX_OPCODE + 1),
 	UNKNOWN_OPCODE				= 0xffff,
 	NULL_OPCODE					= 0xba00
 };
 
 enum opcode_client : uint16_t
 {
+	CMSG_AUTH_CONTINUED_SESSION	= 0x3766,
 	CMSG_AUTH_SESSION			= 0x3765,
+	CMSG_CONNECT_TO_FAILED		= 0x35D4,
 	CMSG_PING					= 0x3768
 };
 
 enum opcode_server : uint16_t
 {
-	SMSG_QUEST_GIVER_STATUS		= 0x2A9A,
 	SMSG_AUTH_CHALLENGE			= 0x3048,
+	SMSG_AUTH_RESPONSE			= 0x256D,
+	SMSG_ENABLE_ENCRYPTION		= 0x3049,
+	SMSG_QUEST_GIVER_STATUS		= 0x2A9A,
+	SMSG_RESUME_COMMS			= 0x304B,
+	SMSG_WAIT_QUEUE_FINISH		= 0x256F,
+	SMSG_WAIT_QUEUE_UPDATE		= 0x256E,
 	SMSG_PONG					= 0x304E
 };
 
@@ -118,8 +125,8 @@ private:
 
 	void validate_and_set_server_opcode(opcode_server opcode, const char* name, session_status status, connection_type conn_index);
 
-	client_opcode_handler* internal_table_client_[NUM_OPCODE_HANDLES];
-	server_opcode_handler* internal_table_server_[NUM_OPCODE_HANDLES];
+	client_opcode_handler* internal_table_client_[NUM_OPCODE_HANDLERS];
+	server_opcode_handler* internal_table_server_[NUM_OPCODE_HANDLERS];
 };
 
 std::string get_opcode_name_for_logging(opcode_client opcode);

@@ -18,6 +18,7 @@ INC_DIR = -I ./src	\
 		  -I ./src/server/database/logging	\
 		  -I ./src/server/database/update	\
 		  -I ./src/server/game/world	\
+		  -I ./src/server/game/globals	\
 		  -I ./src/server/game/server	\
 		  -I ./src/server/game/server/protocol	\
 		  -I ./src/server/game/server/packets	\
@@ -44,6 +45,7 @@ ccsrc = $(wildcard src/*.cpp) \
 		$(wildcard src/server/database/update/*.cpp) \
 		$(wildcard src/server/database/logging/*.cpp) \
 		$(wildcard src/server/game/world/*.cpp) \
+		$(wildcard src/server/game/globals/*.cpp) \
 		$(wildcard src/server/game/server/*.cpp) \
 		$(wildcard src/server/game/server/protocol/*.cpp) \
 		$(wildcard src/server/game/server/packets/*.cpp) \
