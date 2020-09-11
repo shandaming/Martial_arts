@@ -29,7 +29,7 @@ public:
 	bool connected() const { return state_ == kConnected; }
 	bool disconnected() const { return state_ == kDisconnected; }
 
-	void set_tcp_no_delay(bool on);
+	void set_no_delay(bool enable);
 /*
 	void set_connection_callback(const Connection_callback& cb)
 	{

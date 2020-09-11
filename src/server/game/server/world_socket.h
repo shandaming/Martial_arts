@@ -108,7 +108,7 @@ private:
 	void handle_send_auth_session();
 	void handle_auth_session(std::shared_ptr<world_packets::auth::auth_session> auth_session);
 	void handle_auth_session_callback(std::shared_ptr<world_packets::auth::auth_session> auth_session, prepared_query_result result);
-	void handle_auth_continued_session(std::shared_ptr<world_packets::auth::auth_continued_session> auth_session, prepared_query_result result);
+	void handle_auth_continued_session(std::shared_ptr<world_packets::auth::auth_continued_session> auth_session);
 	void handle_auth_continued_session_callback(std::shared_ptr<world_packets::auth::auth_continued_session> auth_session, prepared_query_result result);
 	void load_session_permissions_callback(prepared_query_result result);
 	void handle_connect_to_failed(world_packets::auth::connect_to_failed& connect_to_failed);

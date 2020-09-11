@@ -60,9 +60,10 @@ const char* tcp_socket::state_to_string() const
 	}
 }
 
-void tcp_socket::set_tcp_no_delay(bool on)
+void tcp_socket::set_no_delay(bool enable)
 {
-	socket_->set_tcp_no_delay();
+	socket_->set_option(option::tcp_no_delay(enable));
+	//socket_->set_no_delay();
 }
 
 void tcp_socket::connect_established()

@@ -22,7 +22,7 @@ struct socket_option
 
 struct option
 {
-	static socket_option tcp_no_delay();
+	static socket_option tcp_no_delay(bool enable);
 	static socket_option reuse_address();
 	static socket_option reuse_port();
 	static socket_option keep_alive();
@@ -69,12 +69,14 @@ public:
 	void shutdown(shutdown_type type, std::error_code& ec);
 	void close();
 
+/*
 	bool set_reuse_addr();
 	bool set_reuse_port();
 
-	bool set_tcp_no_delay();
+	bool set_no_delay(bool enable);
 	bool set_keep_alive();
 	bool set_send_buffer_size();
+*/
 
 	bool set_option(const socket_option& option);
 

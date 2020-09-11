@@ -8,9 +8,9 @@
 #include "socket_operations.h"
 #include "log.h"
 
-socket_option option::tcp_no_delay() 
+socket_option option::tcp_no_delay(bool enable)
 {
-	return socket_option(IPPROTO_TCP, TCP_NODELAY, 1, "tcp no delay");
+	return socket_option(IPPROTO_TCP, TCP_NODELAY, enable ? 1 : 0, "tcp no delay");
 }
 
 socket_option option::reuse_address() 
@@ -79,6 +79,7 @@ void basic_socket::close_socket()
 		LOG_ERROR("Networking", "close() failed. code[%d], message:%s", ec.code(), ec.message().c_str());
 }
 
+/*
 bool basic_socket::set_reuse_addr()
 {
 	std::error_code ec;
@@ -107,10 +108,10 @@ bool basic_socket::set_reuse_port()
 	return true;
 }
 
-bool basic_socket::set_tcp_no_delay()
+bool basic_socket::set_no_delay(bool enable)
 {
 	std::error_code ec;
-	int optval;
+	int optval = enable ? 1 : 0;
 	setsockopt(fd_, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval), ec);
 	if(ec)
 	{
@@ -144,6 +145,7 @@ bool basic_socket::set_send_buffer_size(int size)
 	}
 	return true;
 }
+*/
 
 bool basic_socket::set_option(const socket_option& option)
 {
