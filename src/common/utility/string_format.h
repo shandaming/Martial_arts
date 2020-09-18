@@ -11,13 +11,13 @@
 #include "define.h"
 
 template<typename... Args>
-inline std::string string_format(const std::string& fmt, Args&&... args)
+inline std::string string_format(const char* fmt, Args&&... args)
 {
-	int size = snprintf(nullptr, 0, fmt.c_str(), std::forward<Args>(args)...);
+	int size = snprintf(nullptr, 0, fmt, std::forward<Args>(args)...);
 	std::string buffer;
 	buffer.reserve(size + 1);
 	buffer.resize(size);
-	snprintf(&buffer[0], size + 1, fmt.c_str(), std::forward<Args>(args)...);
+	snprintf(&buffer[0], size + 1, fmt, std::forward<Args>(args)...);
 	return buffer;
 };
 

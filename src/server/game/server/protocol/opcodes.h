@@ -134,6 +134,8 @@ private:
 	server_opcode_handler* internal_table_server_[NUM_OPCODE_HANDLERS];
 };
 
+extern opcode_table opcode_table;
+
 std::string get_opcode_name_for_logging(opcode_client opcode);
 std::string get_opcode_name_for_logging(opcode_server opcode);
 

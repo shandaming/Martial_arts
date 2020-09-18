@@ -17,3 +17,13 @@ std::string world_session::get_player_info() const
 
 	return os.str();
 }
+
+void world_session::queue_packet(world_packet* new_packet)
+{
+	recv_queue_.add(new_packet);
+}
+
+void world_session::reset_timeout_time()
+{
+	timeout_time = int32_t(WORLD->get_int_config(CONFIG_SOCKET_TIMEOUTTIME));
+}

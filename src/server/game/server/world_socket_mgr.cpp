@@ -67,7 +67,7 @@ void world_socket_mgr::on_socket_open(tcp::socket&& sock)
 
 	if(tcp_no_delay_)
 	{
-		if(!sock.set_option(option::tcp_no_delay()))
+		if(!sock.set_option(option::tcp_no_delay(true)))
 			return;
 	}
 

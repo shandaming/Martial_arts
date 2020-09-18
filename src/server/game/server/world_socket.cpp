@@ -473,7 +473,7 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
                 		return read_data_handler_result::error;
             		}
 
-            		opcode_handler const* handler = opcode_table[opcode];
+            		const opcode_handler* handler = opcode_table[opcode];
             		if(!handler)
             		{
                 		LOG_ERROR("network.opcode", "No defined handler for opcode %s sent by %s", get_opcode_name_for_logging(static_cast<opcode_client>(packet.get_opcode())).c_str(), world_session_->get_player_info().c_str());
@@ -493,22 +493,22 @@ world_socket::read_data_handler_result world_socket::read_data_handler()
     	return read_data_handler_result::ok;
 }
 
-void world_socket::log_opcode_text(OpcodeClient opcode, std::unique_lock<std::mutex> const& guard) const
+void world_socket::log_opcode_text(opcode_client opcode, std::unique_lock<std::mutex> const& guard) const
 {
     if (!guard)
     {
-        TC_LOG_TRACE("network.opcode", "C->S: %s %s", get_remote_ip_address().to_string().c_str(), get_opcode_name_for_logging(opcode).c_str());
+        LOG_TRACE("network.opcode", "C->S: %s %s", get_remote_ip_address().to_string().c_str(), get_opcode_name_for_logging(opcode).c_str());
     }
     else
     {
-        TC_LOG_TRACE("network.opcode", "C->S: %s %s", (world_session_ ? world_session_->GetPlayerInfo() : get_remote_ip_address().to_string()).c_str(),
+        LOG_TRACE("network.opcode", "C->S: %s %s", (world_session_ ? world_session_->GetPlayerInfo() : get_remote_ip_address().to_string()).c_str(),
             get_opcode_name_for_logging(opcode).c_str());
     }
 }
 
 void world_socket::send_packet_and_log_opcode(world_packet const& packet)
 {
-    TC_LOG_TRACE("network.opcode", "S->C: %s %s", get_remote_ip_address().to_string().c_str(), get_opcode_name_for_logging(static_cast<opcode_server>(packet.get_opcode())).c_str());
+    LOG_TRACE("network.opcode", "S->C: %s %s", get_remote_ip_address().to_string().c_str(), get_opcode_name_for_logging(static_cast<opcode_server>(packet.get_opcode())).c_str());
     send_packet(packet);
 }
 
