@@ -1,0 +1,21 @@
+/*
+ * Copyright (C) 2020
+ */
+
+#ifndef _REALM_H
+#define _REALM_H
+
+enum realm_flags
+{
+	REALM_FLAG_NONE				 = 0x00,
+	REALM_FLAG_VERSION_MISMATCH	 = 0x01,
+	REALM_FLAG_OFFLINE			 = 0x02,
+	REALM_FLAG_SPECIFYBUILD		 = 0x04,
+	REALM_FLAG_UNK1				 = 0x08,
+	REALM_FLAG_UNK2				 = 0x10,
+	REALM_FLAG_RECOMMENDED		 = 0x20,
+	REALM_FLAG_NEW				 = 0x40,
+	REALM_FLAG_FULL				 = 0x80
+};
+
+#endif

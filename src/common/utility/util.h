@@ -40,4 +40,6 @@ long this_thread_id();
 
 std::string byte_array_to_hex_str(const uint8_t* bytes, uint32_t length, bool reverse = false);
 
+void hex_str_to_byte_array(const std::string& str, uint8_t* out, bool reverse = false);
+
 #endif

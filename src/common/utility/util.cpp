@@ -77,3 +77,26 @@ std::string byte_array_to_hex_str(const uint8_t* bytes, uint32_t length, bool re
 	return os.str();
 }
 
+void hex_str_to_byte_array(const std::string& str, uint8_t* out, bool reverse)
+{
+	if(str.size() % 1)
+		return;
+
+	int32_t init = 0;
+	int32_t end = int32_t(str.size());
+	int8_t op = 1;
+
+	if(reverse)
+	{
+		init = int32_t(str.size() - 2);
+		end = -2;
+		op = -1;
+	}
+
+	uint32_t j = 0;
+	for(int32_t i = init; i != end; i += 2 * op)
+	{
+		char buffer[3] = {str[i], str[i + 1], '\0'};
+		out[j++] = uint8_t(strtoul(buffer, NULL, 16));
+	}
+}

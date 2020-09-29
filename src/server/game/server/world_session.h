@@ -6,7 +6,7 @@
 #define _WORLD_SESSION_H
 
 #include "common.h"
-#include "lock_queue.h"
+#include "locked_queue.h"
 #include "packet.h"
 #include "query_callback_processor.h"
 

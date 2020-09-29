@@ -13,6 +13,7 @@
 #include "packet_log.h"
 #include "errors.h"
 #include "log.h"
+#include "util.h"
 
 #pragma pack(push, 1)
 
@@ -98,7 +99,7 @@ void world_socket::check_ip_callback(prepared_query_result result)
 
 		if(banned)
 		{
-			LOG_ERROR("network", "world_socket::check_ip_callback: Sent Auth Response "
+			LOG_ERROR("network", "world_socket::check_ip_callback: Sent auth Response "
 					"(IP %s banned).",
 					get_remote_ip_address().to_string().c_str());
 			delayed_close_socket();
@@ -501,7 +502,7 @@ void world_socket::log_opcode_text(opcode_client opcode, std::unique_lock<std::m
     }
     else
     {
-        LOG_TRACE("network.opcode", "C->S: %s %s", (world_session_ ? world_session_->GetPlayerInfo() : get_remote_ip_address().to_string()).c_str(),
+        LOG_TRACE("network.opcode", "C->S: %s %s", (world_session_ ? world_session_->get_player_info() : get_remote_ip_address().to_string()).c_str(),
             get_opcode_name_for_logging(opcode).c_str());
     }
 }
@@ -517,10 +518,10 @@ void world_socket::send_packet(world_packet const& packet)
     if (!is_open())
         return;
 
-    if (sPacketLog->can_log_packet())
-        sPacketLog->log_packet(packet, SERVER_TO_CLIENT, get_remote_ip_address(), get_remote_port(), GetConnectionType());
+    if (PACKET_LOG->can_log_packet())
+        PACKET_LOG->log_packet(packet, SERVER_TO_CLIENT, get_remote_ip_address(), get_remote_port(), get_connection_type());
 
-    buffer_queue_.enqueue(new encryptable_packet(packet, auth_crypt_.IsInitialized()));
+    buffer_queue_.enqueue(new encryptable_packet(packet, auth_crypt_.is_initialized()));
 }
 
 void world_socket::write_packet_to_buffer(encryptable_packet const& packet, message_buffer& buffer)
@@ -537,16 +538,16 @@ void world_socket::write_packet_to_buffer(encryptable_packet const& packet, mess
     if (packet_size > min_size_for_compression && packet.needs_encryption())
     {
         compressed_world_packet cmp;
-        cmp.UncompressedSize = packet_size + 2;
-        cmp.UncompressedAdler = adler32(adler32(0x9827D8F1, (Bytef*)&opcode, 2), packet.contents(), packet_size);
+        cmp.uncompressed_size = packet_size + 2;
+        cmp.uncompressed_adler = adler32(adler32(0x9827D8F1, (Bytef*)&opcode, 2), packet.contents(), packet_size);
 
         // Reserve space for compression info - uncompressed size and checksums
         uint8_t* compressionInfo = buffer.get_write_pointer();
         buffer.write_completed(sizeof(compressed_world_packet));
 
-        uint32_t compressedSize = CompressPacket(buffer.get_write_pointer(), packet);
+        uint32_t compressedSize = compress_packet(buffer.get_write_pointer(), packet);
 
-        cmp.CompressedAdler = adler32(0x9827D8F1, buffer.get_write_pointer(), compressedSize);
+        cmp.compressed_adler = adler32(0x9827D8F1, buffer.get_write_pointer(), compressedSize);
 
         memcpy(compressionInfo, &cmp, sizeof(compressed_world_packet));
         buffer.write_completed(compressedSize);
@@ -561,13 +562,13 @@ void world_socket::write_packet_to_buffer(encryptable_packet const& packet, mess
     packet_size += 2 /*opcode*/;
 
     packet_header header;
-    header.Size = packet_size;
-    auth_crypt_.EncryptSend(data_pos, header.Size, header.Tag);
+    header.size = packet_size;
+    auth_crypt_.encrypt_send(data_pos, header.size, header.tag);
 
     memcpy(header_pos, &header, sizeof(packet_header));
 }
 
-uint32_t world_socket::CompressPacket(uint8_t* buffer, world_packet const& packet)
+uint32_t world_socket::compress_packet(uint8_t* buffer, world_packet const& packet)
 {
     uint32_t opcode = packet.get_opcode();
     uint32_t bufferSize = deflateBound(compression_stream_, packet.size() + sizeof(uint16_t));
@@ -605,7 +606,7 @@ struct AccountInfo
         bool IsLockedToIP;
         std::string LastIP;
         std::string LockCountry;
-        LocaleConstant Locale;
+        locale_constant locale;
         bool IsBanned;
 
     } BattleNet;
@@ -613,13 +614,13 @@ struct AccountInfo
     struct
     {
         uint32_t Id;
-        std::array<uint8_t, 64> KeyData;
+        std::array<uint8_t, 64> key_data;
         uint8_t Expansion;
         int64 MuteTime;
         uint32_t Recruiter;
         std::string OS;
         bool IsRectuiter;
-        AccountTypes Security;
+        account_types Security;
         bool IsBanned;
     } Game;
 
@@ -634,103 +635,103 @@ struct AccountInfo
         // FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.id AND aa.RealmID IN (-1, ?)
         // LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
         // WHERE a.username = ? ORDER BY aa.RealmID DESC LIMIT 1
-        Game.Id = fields[0].GetUInt32();
-        HexStrToByteArray(fields[1].GetString(), Game.KeyData.data());
-        BattleNet.LastIP = fields[2].GetString();
-        BattleNet.IsLockedToIP = fields[3].GetBool();
-        BattleNet.LockCountry = fields[4].GetString();
-        Game.Expansion = fields[5].GetUInt8();
-        Game.MuteTime = fields[6].GetInt64();
-        BattleNet.Locale = LocaleConstant(fields[7].GetUInt8());
-        Game.Recruiter = fields[8].GetUInt32();
-        Game.OS = fields[9].GetString();
-        BattleNet.Id = fields[10].GetUInt32();
-        Game.Security = AccountTypes(fields[11].GetUInt8());
-        BattleNet.IsBanned = fields[12].GetUInt32() != 0;
-        Game.IsBanned = fields[13].GetUInt32() != 0;
-        Game.IsRectuiter = fields[14].GetUInt32() != 0;
+        Game.Id = fields[0].get_uint32();
+        hex_str_to_byte_array(fields[1].get_string(), Game.key_data.data());
+        BattleNet.LastIP = fields[2].get_string();
+        BattleNet.IsLockedToIP = fields[3].get_bool();
+        BattleNet.LockCountry = fields[4].get_string();
+        Game.Expansion = fields[5].get_uint8();
+        Game.MuteTime = fields[6].get_int64();
+        BattleNet.locale = locale_constant(fields[7].get_uint8());
+        Game.Recruiter = fields[8].get_uint32();
+        Game.OS = fields[9].get_string();
+        BattleNet.Id = fields[10].get_uint32();
+        Game.Security = account_types(fields[11].get_uint8());
+        BattleNet.IsBanned = fields[12].get_uint32() != 0;
+        Game.IsBanned = fields[13].get_uint32() != 0;
+        Game.IsRectuiter = fields[14].get_uint32() != 0;
 
-        if (BattleNet.Locale >= TOTAL_LOCALES)
-            BattleNet.Locale = LOCALE_enUS;
+        if (BattleNet.locale >= TOTAL_LOCALES)
+            BattleNet.locale = LOCALE_enUS;
     }
 };
 
-void world_socket::HandleAuthSession(std::shared_ptr<world_packets::Auth::AuthSession> authSession)
+void world_socket::handle_auth_session(std::shared_ptr<world_packets::auth::auth_session> auth_session)
 {
     // Get the account information from the auth database
-    LoginDatabasePreparedStatement* stmt = login_database.GetPreparedStatement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
-    stmt->setInt32(0, int32(realm.Id.Realm));
-    stmt->setString(1, authSession->RealmJoinTicket);
+    login_database_prepared_statement* stmt = login_database.get_prepared_statement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
+    stmt->set_int32(0, int32(realm.Id.Realm));
+    stmt->set_string(1, auth_session->realm_join_ticket);
 
-    query_processor_.AddQuery(login_database.async_query(stmt).with_prepared_callback(std::bind(&world_socket::HandleAuthSessionCallback, this, authSession, std::placeholders::_1)));
+    query_processor_.add_query(login_database.async_query(stmt).with_prepared_callback(std::bind(&world_socket::handle_auth_session_callback, this, auth_session, std::placeholders::_1)));
 }
 
-void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth::AuthSession> authSession, prepared_query_result result)
+void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::auth::auth_session> auth_session, prepared_query_result result)
 {
     // Stop if the account is not found
     if (!result)
     {
         // We can not log here, as we do not know the account. Thus, no accountId.
-        LOG_ERROR("network", "world_socket::HandleAuthSession: Sent Auth Response (unknown account).");
+        LOG_ERROR("network", "world_socket::handle_auth_session: Sent auth Response (unknown account).");
         delayed_close_socket();
         return;
     }
 
-    RealmBuildInfo const* buildInfo = sRealmList->GetBuildInfo(realm.Build);
-    if (!buildInfo)
+    realm_build_info const* build_info = sRealmList->GetBuildInfo(realm.Build);
+    if (!build_info)
     {
-        SendAuthResponseError(ERROR_BAD_VERSION);
-        LOG_ERROR("network", "world_socket::HandleAuthSession: Missing auth seed for realm build %u (%s).", realm.Build, get_remote_ip_address().to_string().c_str());
+        send_auth_response_error(ERROR_BAD_VERSION);
+        LOG_ERROR("network", "world_socket::handle_auth_session: Missing auth seed for realm build %u (%s).", realm.Build, get_remote_ip_address().to_string().c_str());
         delayed_close_socket();
         return;
     }
 
-    AccountInfo account(result->Fetch());
+    AccountInfo account(result->fetch());
 
     // For hook purposes, we get Remoteaddress at this point.
     std::string address = get_remote_ip_address().to_string();
 
     SHA256Hash digestKeyHash;
-    digestKeyHash.UpdateData(account.Game.KeyData.data(), account.Game.KeyData.size());
+    digestKeyHash.UpdateData(account.Game.key_data.data(), account.Game.key_data.size());
     if (account.Game.OS == "Wn64")
-        digestKeyHash.UpdateData(buildInfo->Win64AuthSeed.data(), buildInfo->Win64AuthSeed.size());
+        digestKeyHash.UpdateData(build_info->Win64authSeed.data(), build_info->Win64authSeed.size());
     else if (account.Game.OS == "Mc64")
-        digestKeyHash.UpdateData(buildInfo->Mac64AuthSeed.data(), buildInfo->Mac64AuthSeed.size());
+        digestKeyHash.UpdateData(build_info->Mac64authSeed.data(), build_info->Mac64authSeed.size());
 
     digestKeyHash.Finalize();
 
     HmacSha256 hmac(digestKeyHash.GetLength(), digestKeyHash.GetDigest());
-    hmac.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
+    hmac.UpdateData(auth_session->local_challenge.data(), auth_session->local_challenge.size());
     hmac.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
     hmac.UpdateData(auth_check_seed, 16);
     hmac.Finalize();
 
     // Check that Key and account name are the same on client and server
-    if (memcmp(hmac.GetDigest(), authSession->Digest.data(), authSession->Digest.size()) != 0)
+    if (memcmp(hmac.GetDigest(), auth_session->digest.data(), auth_session->digest.size()) != 0)
     {
-        LOG_ERROR("network", "world_socket::HandleAuthSession: Authentication failed for account: %u ('%s') address: %s", account.Game.Id, authSession->RealmJoinTicket.c_str(), address.c_str());
+        LOG_ERROR("network", "world_socket::handle_auth_session: authentication failed for account: %u ('%s') address: %s", account.Game.Id, auth_session->realm_join_ticket.c_str(), address.c_str());
         delayed_close_socket();
         return;
     }
 
     SHA256Hash keyData;
-    keyData.UpdateData(account.Game.KeyData.data(), account.Game.KeyData.size());
+    keyData.UpdateData(account.Game.key_data.data(), account.Game.key_data.size());
     keyData.Finalize();
 
-    HmacSha256 sessionKeyHmac(keyData.GetLength(), keyData.GetDigest());
-    sessionKeyHmac.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
-    sessionKeyHmac.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
-    sessionKeyHmac.UpdateData(session_key_seed, 16);
-    sessionKeyHmac.Finalize();
+    HmacSha256 session_key_hmac(keyData.GetLength(), keyData.GetDigest());
+    session_key_hmac.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
+    session_key_hmac.UpdateData(auth_session->local_challenge.data(), auth_session->local_challenge.size());
+    session_key_hmac.UpdateData(session_key_seed, 16);
+    session_key_hmac.Finalize();
 
     uint8_t sessionKey[40];
-    SessionKeyGenerator<SHA256Hash> sessionKeyGenerator(sessionKeyHmac.GetDigest(), sessionKeyHmac.GetLength());
+    session_key_generator<SHA256Hash> sessionKeyGenerator(session_key_hmac.GetDigest(), session_key_hmac.GetLength());
     sessionKeyGenerator.Generate(sessionKey, 40);
 
     _sessionKey.SetBinary(sessionKey, 40);
 
     HmacSha256 encryptKeyGen(40, sessionKey);
-    encryptKeyGen.UpdateData(authSession->LocalChallenge.data(), authSession->LocalChallenge.size());
+    encryptKeyGen.UpdateData(auth_session->local_challenge.data(), auth_session->local_challenge.size());
     encryptKeyGen.UpdateData(server_challenge_.as_byte_array(16).get(), 16);
     encryptKeyGen.UpdateData(encryption_key_seed, 16);
     encryptKeyGen.Finalize();
@@ -739,31 +740,31 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
     memcpy(encrypt_key_, encryptKeyGen.GetDigest(), 16);
 
     // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
-    LoginDatabasePreparedStatement* stmt = login_database.GetPreparedStatement(LOGIN_UPD_LAST_ATTEMPT_IP);
-    stmt->setString(0, address);
-    stmt->setString(1, authSession->RealmJoinTicket);
+    login_database_prepared_statement* stmt = login_database.get_prepared_statement(LOGIN_UPD_LAST_ATTEMPT_IP);
+    stmt->set_string(0, address);
+    stmt->set_string(1, auth_session->realm_join_ticket);
     login_database.Execute(stmt);
     // This also allows to check for possible "hack" attempts on account
 
-    stmt = login_database.GetPreparedStatement(LOGIN_UPD_ACCOUNT_INFO_CONTINUED_SESSION);
-    stmt->setString(0, _sessionKey.AsHexStr());
+    stmt = login_database.get_prepared_statement(LOGIN_UPD_ACCOUNT_INFO_CONTINUED_SESSION);
+    stmt->set_string(0, _sessionKey.AsHexStr());
     stmt->setUInt32(1, account.Game.Id);
     login_database.Execute(stmt);
 
     // First reject the connection if packet contains invalid data or realm state doesn't allow logging in
     if (sWorld->IsClosed())
     {
-        SendAuthResponseError(ERROR_DENIED);
-        LOG_ERROR("network", "world_socket::HandleAuthSession: World closed, denying client (%s).", get_remote_ip_address().to_string().c_str());
+        send_auth_response_error(ERROR_DENIED);
+        LOG_ERROR("network", "world_socket::handle_auth_session: World closed, denying client (%s).", get_remote_ip_address().to_string().c_str());
         delayed_close_socket();
         return;
     }
 
-    if (authSession->RealmID != realm.Id.Realm)
+    if (auth_session->RealmID != realm.Id.Realm)
     {
-        SendAuthResponseError(ERROR_DENIED);
-        LOG_ERROR("network", "world_socket::HandleAuthSession: Client %s requested connecting with realm id %u but this realm has id %u set in config.",
-            get_remote_ip_address().to_string().c_str(), authSession->RealmID, realm.Id.Realm);
+        send_auth_response_error(ERROR_DENIED);
+        LOG_ERROR("network", "world_socket::handle_auth_session: Client %s requested connecting with realm id %u but this realm has id %u set in config.",
+            get_remote_ip_address().to_string().c_str(), auth_session->RealmID, realm.Id.Realm);
         delayed_close_socket();
         return;
     }
@@ -772,8 +773,8 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
     bool wardenActive = sWorld->getBoolConfig(CONFIG_WARDEN_ENABLED);
     if (wardenActive && account.Game.OS != "Win" && account.Game.OS != "Wn64" && account.Game.OS != "Mc64")
     {
-        SendAuthResponseError(ERROR_DENIED);
-        LOG_ERROR("network", "world_socket::HandleAuthSession: Client %s attempted to log in using invalid client OS (%s).", address.c_str(), account.Game.OS.c_str());
+        send_auth_response_error(ERROR_DENIED);
+        LOG_ERROR("network", "world_socket::handle_auth_session: Client %s attempted to log in using invalid client OS (%s).", address.c_str(), account.Game.OS.c_str());
         delayed_close_socket();
         return;
     }
@@ -786,8 +787,8 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
     {
         if (account.BattleNet.LastIP != address)
         {
-            SendAuthResponseError(ERROR_RISK_ACCOUNT_LOCKED);
-            TC_LOG_DEBUG("network", "world_socket::HandleAuthSession: Sent Auth Response (Account IP differs. Original IP: %s, new IP: %s).", account.BattleNet.LastIP.c_str(), address.c_str());
+            send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
+            TC_LOG_DEBUG("network", "world_socket::handle_auth_session: Sent auth Response (Account IP differs. Original IP: %s, new IP: %s).", account.BattleNet.LastIP.c_str(), address.c_str());
             // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
             sScriptMgr->OnFailedAccountLogin(account.Game.Id);
             delayed_close_socket();
@@ -798,8 +799,8 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
     {
         if (account.BattleNet.LockCountry != _ipCountry)
         {
-            SendAuthResponseError(ERROR_RISK_ACCOUNT_LOCKED);
-            TC_LOG_DEBUG("network", "world_socket::HandleAuthSession: Sent Auth Response (Account country differs. Original country: %s, new country: %s).", account.BattleNet.LockCountry.c_str(), _ipCountry.c_str());
+            send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
+            TC_LOG_DEBUG("network", "world_socket::handle_auth_session: Sent auth Response (Account country differs. Original country: %s, new country: %s).", account.BattleNet.LockCountry.c_str(), _ipCountry.c_str());
             // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
             sScriptMgr->OnFailedAccountLogin(account.Game.Id);
             delayed_close_socket();
@@ -813,7 +814,7 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
     {
         mutetime = time(NULL) + llabs(mutetime);
 
-        stmt = login_database.GetPreparedStatement(LOGIN_UPD_MUTE_TIME_LOGIN);
+        stmt = login_database.get_prepared_statement(LOGIN_UPD_MUTE_TIME_LOGIN);
         stmt->setInt64(0, mutetime);
         stmt->setUInt32(1, account.Game.Id);
         login_database.Execute(stmt);
@@ -821,32 +822,32 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
 
     if (account.IsBanned())
     {
-        SendAuthResponseError(ERROR_GAME_ACCOUNT_BANNED);
-        LOG_ERROR("network", "world_socket::HandleAuthSession: Sent Auth Response (Account banned).");
+        send_auth_response_error(ERROR_GAME_ACCOUNT_BANNED);
+        LOG_ERROR("network", "world_socket::handle_auth_session: Sent auth Response (Account banned).");
         sScriptMgr->OnFailedAccountLogin(account.Game.Id);
         delayed_close_socket();
         return;
     }
 
     // Check locked state for server
-    AccountTypes allowedAccountType = sWorld->GetPlayerSecurityLimit();
+    account_types allowedAccountType = sWorld->GetPlayerSecurityLimit();
     TC_LOG_DEBUG("network", "Allowed Level: %u Player Level %u", allowedAccountType, account.Game.Security);
     if (allowedAccountType > SEC_PLAYER && account.Game.Security < allowedAccountType)
     {
-        SendAuthResponseError(ERROR_SERVER_IS_PRIVATE);
-        TC_LOG_DEBUG("network", "world_socket::HandleAuthSession: User tries to login but his security level is not enough");
+        send_auth_response_error(ERROR_SERVER_IS_PRIVATE);
+        TC_LOG_DEBUG("network", "world_socket::handle_auth_session: User tries to login but his security level is not enough");
         sScriptMgr->OnFailedAccountLogin(account.Game.Id);
         delayed_close_socket();
         return;
     }
 
-    TC_LOG_DEBUG("network", "world_socket::HandleAuthSession: Client '%s' authenticated successfully from %s.", authSession->RealmJoinTicket.c_str(), address.c_str());
+    TC_LOG_DEBUG("network", "world_socket::handle_auth_session: Client '%s' authenticated successfully from %s.", auth_session->realm_join_ticket.c_str(), address.c_str());
 
     // update the last_ip in the database as it was successful for login
-    stmt = login_database.GetPreparedStatement(LOGIN_UPD_LAST_IP);
+    stmt = login_database.get_prepared_statement(LOGIN_UPD_LAST_IP);
 
-    stmt->setString(0, address);
-    stmt->setString(1, authSession->RealmJoinTicket);
+    stmt->set_string(0, address);
+    stmt->set_string(1, auth_session->realm_join_ticket);
 
     login_database.Execute(stmt);
 
@@ -854,14 +855,14 @@ void world_socket::HandleAuthSessionCallback(std::shared_ptr<world_packets::Auth
     sScriptMgr->OnAccountLogin(account.Game.Id);
 
     authed_ = true;
-    world_session_ = new world_session(account.Game.Id, std::move(authSession->RealmJoinTicket), account.BattleNet.Id, shared_from_this(), account.Game.Security,
-        account.Game.Expansion, mutetime, account.Game.OS, account.BattleNet.Locale, account.Game.Recruiter, account.Game.IsRectuiter);
+    world_session_ = new world_session(account.Game.Id, std::move(auth_session->realm_join_ticket), account.BattleNet.Id, shared_from_this(), account.Game.Security,
+        account.Game.Expansion, mutetime, account.Game.OS, account.BattleNet.locale, account.Game.Recruiter, account.Game.IsRectuiter);
 
     // Initialize Warden system only if it is enabled by config
     if (wardenActive)
         world_session_->InitWarden(&_sessionKey);
 
-    query_processor_.AddQuery(world_session_->LoadPermissionsAsync().with_prepared_callback(std::bind(&world_socket::LoadSessionPermissionsCallback, this, std::placeholders::_1)));
+    query_processor_.add_query(world_session_->LoadPermissionsAsync().with_prepared_callback(std::bind(&world_socket::LoadSessionPermissionsCallback, this, std::placeholders::_1)));
     AsyncRead();
 }
 
@@ -878,7 +879,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
 {
 	if(!result)
 	{
-		LOG_ERROR("network", "World_socket::handle_auth_session: Sent Auth Response (unknown account).");
+		LOG_ERROR("network", "World_socket::handle_auth_session: Sent auth Response (unknown account).");
 		delayed_close_socket();
 		return;
 	}
@@ -912,7 +913,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
 
 	if(memcmp(hmac.get_digest(), auth_session->digest.data(), auth_session->digest.size()) != 0)
 	{
-		LOG_ERROR("network", "world_socket::handle_auth_session: Authentication failed for account: %u ('%s') address: %s", account.game.id, auth_session->realm_join_ticket.c_str(), address.c_str());
+		LOG_ERROR("network", "world_socket::handle_auth_session: authentication failed for account: %u ('%s') address: %s", account.game.id, auth_session->realm_join_ticket.c_str(), address.c_str());
 		delayed_close_socket();
 		return;
 	}
@@ -984,7 +985,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
 		if(account.battle_net.last_ip != address)
 		{
 			send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
-			LOG_DEBUG("network", "worlk_socket::handle_auth_session: Sent Auth Response (Account IP differs. Original IP: %s, new IP: %s).", account.battle_net.last_ip.c_str(), address.c_str());
+			LOG_DEBUG("network", "worlk_socket::handle_auth_session: Sent auth Response (Account IP differs. Original IP: %s, new IP: %s).", account.battle_net.last_ip.c_str(), address.c_str());
 			SCRIPT_MGR->on_failed_account_login(account.game.id);
 			delayed_close_socket();
 			return;
@@ -997,7 +998,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
 		if(account.battle_net.lock_country != ip_country_)
 		{
 			send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
-			LOG_DEBUG("network", "world_socket::handle_auth_session: Sent Auth Response (Account country differs. Original country: %s new country: %s).", account.battle_net.lock_country.c_str(), ip_country_.c_str());
+			LOG_DEBUG("network", "world_socket::handle_auth_session: Sent auth Response (Account country differs. Original country: %s new country: %s).", account.battle_net.lock_country.c_str(), ip_country_.c_str());
 			SCRIPT_MGR->on_failed_account_login(account.game.id);
 			delayed_close_socket();
 			return;
@@ -1019,7 +1020,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
 	if(account.is_banned())
 	{
 		send_auth_response_error(ERROR_GAME_ACCOUNT_BANNED);
-		LOG_ERROR("network", "world_socket::handle_auth_session: Sent Auth Response (Account banned).");
+		LOG_ERROR("network", "world_socket::handle_auth_session: Sent auth Response (Account banned).");
 		SCRIPT_MGR->on_failed_account_login(account.game.id);
 		delayed_close_socket();
 		return;
@@ -1110,7 +1111,7 @@ void world_socket::handle_auth_continued_session_callback(std::shared_ptr<world_
 
     if (memcmp(hmac.get_digest(), auth_session->digest.data(), auth_session->digest.size()))
     {
-        LOG_ERROR("network", "world_socket::handle_auth_continued_session: Authentication failed for account: %u ('%s') address: %s", account_id, login.c_str(), get_remote_ip_address().to_string().c_str());
+        LOG_ERROR("network", "world_socket::handle_auth_continued_session: authentication failed for account: %u ('%s') address: %s", account_id, login.c_str(), get_remote_ip_address().to_string().c_str());
         delayed_close_socket();
         return;
     }
@@ -1161,7 +1162,7 @@ void world_socket::handle_connect_to_failed(world_packets::auth::connect_to_fail
         //else
         //{
         //    transfer_aborted when/if we get map node redirection
-        //    send_packet_and_log_opcode(*world_packets::Auth::ResumeComms().write());
+        //    send_packet_and_log_opcode(*world_packets::auth::ResumeComms().write());
         //}
     }
 }
@@ -1209,7 +1210,7 @@ bool world_socket::handle_ping(world_packets::auth::ping& ping)
                 if (world_session_ && !world_session_->HasPermission(rbac::RBAC_PERM_SKIP_CHECK_OVERSPEED_PING))
                 {
                     LOG_ERROR("network", "world_socket::handle_ping: %s kicked for over-speed pings (address: %s)",
-                        world_session_->GetPlayerInfo().c_str(), get_remote_ip_address().to_string().c_str());
+                        world_session_->get_player_info().c_str(), get_remote_ip_address().to_string().c_str());
 
                     return false;
                 }
@@ -1234,6 +1235,6 @@ bool world_socket::handle_ping(world_packets::auth::ping& ping)
         }
     }
 
-    send_packet_and_log_opcode(*world_packets::Auth::Pong(ping.Serial).write());
+    send_packet_and_log_opcode(*world_packets::auth::Pong(ping.Serial).write());
     return true;
 }
