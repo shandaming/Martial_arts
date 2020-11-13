@@ -13,10 +13,10 @@
 #include <list>
 #include <memory>
 
-#include "timer.h"
 #include "database_env_fwd.h"
-#include "query_callback_processor.h"
 #include "locked_queue.h"
+#include "query_callback_processor.h"
+#include "timer.h"
 
 enum world_bool_configs
 {
@@ -43,6 +43,9 @@ class player;
 class world_packet;
 class world_session;
 class world_socket;
+struct realm;
+
+extern struct realm realm;
 
 typedef std::unordered_map<uint32_t, world_session*> session_map;
 

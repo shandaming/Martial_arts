@@ -88,6 +88,9 @@ struct opcode_handler
 	session_status status;
 };
 
+class world_session;
+class world_packet;
+
 struct client_opcode_handler : public opcode_handler
 {
 	client_opcode_handler(const char* name, session_status status, packet_processing processing) :

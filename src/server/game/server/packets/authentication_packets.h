@@ -5,8 +5,11 @@
 #ifndef _AUTHENTICATION_PACKET_H
 #define _AUTHENTICATION_PACKET_H
 
-#include "packet.h"
+#include <array>
+#include <optional>
+
 #include "opcodes.h"
+#include "packet.h"
 
 struct character_template;
 struct race_class_availability;

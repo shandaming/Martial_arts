@@ -4,16 +4,17 @@
 
 #include <zlib.h>
 
+#include "authentication_packets.h"
+#include "database_env.h"
+#include "errors.h"
+#include "log.h"
+#include "packet_log.h"
+#include "realm_list.h"
+#include "util.h"
 #include "world_socket.h"
 #include "world_packet.h"
 #include "world_session.h"
-#include "database_env.h"
-#include "authentication_packets.h"
 #include "world.h"
-#include "packet_log.h"
-#include "errors.h"
-#include "log.h"
-#include "util.h"
 
 #pragma pack(push, 1)
 
@@ -660,7 +661,7 @@ void world_socket::handle_auth_session(std::shared_ptr<world_packets::auth::auth
 {
     // Get the account information from the auth database
     login_database_prepared_statement* stmt = login_database.get_prepared_statement(LOGIN_SEL_ACCOUNT_INFO_BY_NAME);
-    stmt->set_int32(0, int32(realm.Id.Realm));
+    stmt->set_int32(0, int32(realm.id.realm));
     stmt->set_string(1, auth_session->realm_join_ticket);
 
     query_processor_.add_query(login_database.async_query(stmt).with_prepared_callback(std::bind(&world_socket::handle_auth_session_callback, this, auth_session, std::placeholders::_1)));

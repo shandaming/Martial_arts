@@ -3,6 +3,7 @@
  */
 
 #include "byte_buffer.h"
+#include "message_buffer.h"
 
 byte_buffer_position_exception::byte_buffer_position_exception(size_t pos, size_t size, size_t value_size)
 {

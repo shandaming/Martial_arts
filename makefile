@@ -26,6 +26,7 @@ INC_DIR = -I ./src	\
 		  -I ./src/server/shared/networking	\
 		  -I ./src/server/shared/networking/ip	\
 		  -I ./src/server/shared/packets	\
+		  -I ./src/server/shared/realm	\
 		  -I ./src/server/worldserver
 
 csrc = $(wildcard src/*.c)
@@ -53,6 +54,7 @@ ccsrc = $(wildcard src/*.cpp) \
 		$(wildcard src/server/shared/networking/*.cpp) \
 		$(wildcard src/server/shared/networking/ip/*.cpp) \
 		$(wildcard src/server/shared/packets/*.cpp) \
+		$(wildcard src/server/shared/realm/*.cpp) \
 		$(wildcard src/server/worldserver/*.cpp)
 
 dep = $(obj:.o=.d)

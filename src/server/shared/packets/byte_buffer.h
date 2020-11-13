@@ -5,6 +5,11 @@
 #ifndef PACKETS_BYTE_BUFFER_H
 #define PACKETS_BYTE_BUFFER_H
 
+#include <cstring>
+#include <exception>
+#include <string>
+#include <vector>
+
 class byte_buffer_exception : public std::exception
 {
 public:
@@ -24,6 +29,8 @@ public:
 
 	~byte_buffer_position_exception() noexcept { }
 };
+
+class message_buffer;
 
 class byte_buffer
 {
