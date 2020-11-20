@@ -48,7 +48,7 @@ private:
 	void load_build_info();
 	void update_realms(const std::error_code& ec);
 	void update_realm(realm& realm, const battlenet::realm_handle& id, 
-			uint32_t build, const std::string& name, address&& address, 
+			uint32_t build, const std::string& name, address&& addr, 
 			address&& local_addr, address&& local_submask, uint16_t port, 
 			uint8_t icon, realm_flags flag, uint8_t timezone, 
 			account_types allowed_security_level, float population);
