@@ -5,6 +5,7 @@ INC_DIR = -I ./src	\
 		  -I ./src/common/cryptography	\
 		  -I ./src/common/cryptography/authentication	\
 		  -I ./src/common/debugging	\
+		  -I ./src/common/ip_location	\
 		  -I ./src/common/logging	\
 		  -I ./src/common/serialization	\
 		  -I ./src/common/threading	\
@@ -38,6 +39,7 @@ ccsrc = $(wildcard src/*.cpp) \
 		$(wildcard src/common/cryptograp/*.cpp) \
 		$(wildcard src/common/cryptograp/authentication/*.cpp) \
 		$(wildcard src/common/debugging/*.cpp) \
+		$(wildcard src/common/ip_location/*.cpp) \
 		$(wildcard src/common/logging/*.cpp) \
 		$(wildcard src/common/serialization/*.cpp) \
 		$(wildcard src/common/threading/*.cpp) \

@@ -9,6 +9,7 @@
 #include "database_env.h"
 #include "errors.h"
 #include "hmac_hash.h"
+#include "ip_location.h"
 #include "log.h"
 #include "packet_log.h"
 #include "realm_list.h"
@@ -776,7 +777,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
     }
 
     // Must be done before world_session is created
-    bool wardenActive = WORLD->getBoolConfig(CONFIG_WARDEN_ENABLED);
+    bool wardenActive = WORLD->get_bool_config(CONFIG_WARDEN_ENABLED);
     if (wardenActive && account.game.OS != "Win" && account.game.OS != "Wn64" && account.game.OS != "Mc64")
     {
         send_auth_response_error(ERROR_DENIED);
@@ -796,7 +797,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
             send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
             LOG_DEBUG("network", "world_socket::handle_auth_session: Sent auth Response (Account IP differs. Original IP: %s, new IP: %s).", account.battle_net.last_ip.c_str(), address.c_str());
             // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
-            SCRIPT_MGR->OnFailedAccountLogin(account.game.id);
+            SCRIPT_MGR->on_failed_account_login(account.game.id);
             delayed_close_socket();
             return;
         }
@@ -808,7 +809,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
             send_auth_response_error(ERROR_RISK_ACCOUNT_LOCKED);
             LOG_DEBUG("network", "world_socket::handle_auth_session: Sent auth Response (Account country differs. Original country: %s, new country: %s).", account.battle_net.lock_country.c_str(), _ipCountry.c_str());
             // We could log on hook only instead of an additional db log, however action logger is config based. Better keep DB logging as well
-            SCRIPT_MGR->OnFailedAccountLogin(account.game.id);
+            SCRIPT_MGR->on_failed_account_login(account.game.id);
             delayed_close_socket();
             return;
         }
@@ -830,7 +831,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
     {
         send_auth_response_error(ERROR_GAME_ACCOUNT_BANNED);
         LOG_ERROR("network", "world_socket::handle_auth_session: Sent auth Response (Account banned).");
-        SCRIPT_MGR->OnFailedAccountLogin(account.game.id);
+        SCRIPT_MGR->on_failed_account_login(account.game.id);
         delayed_close_socket();
         return;
     }
@@ -842,7 +843,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
     {
         send_auth_response_error(ERROR_SERVER_IS_PRIVATE);
         LOG_DEBUG("network", "world_socket::handle_auth_session: User tries to login but his security level is not enough");
-        SCRIPT_MGR->OnFailedAccountLogin(account.game.id);
+        SCRIPT_MGR->on_failed_account_login(account.game.id);
         delayed_close_socket();
         return;
     }
@@ -858,7 +859,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
     login_database.execute(stmt);
 
     // At this point, we can safely hook a successful login
-    SCRIPT_MGR->OnAccountLogin(account.game.id);
+    SCRIPT_MGR->on_account_login(account.game.id);
 
     authed_ = true;
     world_session_ = new world_session(account.game.id, std::move(auth_session->realm_join_ticket), account.battle_net.id, shared_from_this(), account.game.security,
@@ -868,7 +869,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
     if (wardenActive)
         world_session_->InitWarden(&session_key_);
 
-    query_processor_.add_query(world_session_->LoadPermissionsAsync().with_prepared_callback(std::bind(&world_socket::LoadSessionPermissionsCallback, this, std::placeholders::_1)));
+    query_processor_.add_query(world_session_->LoadPermissionsAsync().with_prepared_callback(std::bind(&world_socket::load_session_permissions_callback, this, std::placeholders::_1)));
     AsyncRead();
 }
 
@@ -1124,7 +1125,7 @@ void world_socket::handle_auth_continued_session_callback(std::shared_ptr<world_
 
     hmac_sha256 encrypt_key_gen(40, session_key_.as_byte_array(40).get());
     encrypt_key_gen.update_data(auth_session->local_challenge.data(), auth_session->local_challenge.size());
-    encrypt_key_gen._update_data(server_challenge_.as_byte_array(16).get(), 16);
+    encrypt_key_gen_.update_data(server_challenge_.as_byte_array(16).get(), 16);
     encrypt_key_gen.update_data(encryption_key_seed, 16);
     encrypt_key_gen.finalize();
 

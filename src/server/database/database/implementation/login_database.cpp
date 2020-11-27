@@ -21,6 +21,8 @@ prepare_statement(LOGIN_SEL_ACCOUNT_INFO_CONTINUED_SESSION, "SELECT username, se
 
 prepare_statement(LOGIN_UPD_MUTE_TIME_LOGIN, "UPDATE account SET mutetime = ? WHERE id = ?", CONNECTION_ASYNC);
 
+prepare_statement(LOGIN_UPD_LAST_IP, "UPDATE account SET last_ip = ? WHERE username = ?", CONNECTION_ASYNC);
+
 prepare_statement(LOGIN_UPD_LAST_ATTEMPT_IP, "UPDATE account SET last_attempt_ip = ? WHERE username = ?", CONNECTION_ASYNC);
 }
 

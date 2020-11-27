@@ -20,6 +20,8 @@
 
 enum world_bool_configs
 {
+	CONFIG_WARDEN_ENABLED,
+
 	BOOL_CONFIG_VALUE_COUNT
 };
 
@@ -69,6 +71,17 @@ public:
 		return index < INT_CONFIG_VALUE_COUNT ? int_configs_[index] : 0;
 	}
 
+	void set_bool_config(world_bool_configs index, bool val)
+	{
+		if(index < BOOL_CONFIG_VALUE_COUNT)
+			bool_configs_[index] = val;
+	}
+
+	bool get_bool_config(world_bool_configs index) const
+	{
+		return index < BOOL_CONFIG_VALUE_COUNT ? bool_configs_[index] : 0;
+	}
+
 	bool is_closed() const;
 	void set_closed(bool val);
 
@@ -86,6 +99,7 @@ private:
 	disconnect_map disconnects_;
 
 	uint32_t int_configs_[INT_CONFIG_VALUE_COUNT];
+	bool bool_configs_[BOOL_CONFIG_VALUE_COUNT];
 
 	locked_queue<world_session*> add_sess_queue_;
 
