@@ -61,7 +61,7 @@ void ip_location_store::load()
 
 		std::transform(country_code.begin(), country_code.end(), country_code.begin(), ::tolower);
 
-		ip_location_store_.emplace_back(uint32_t(atoul(ip_from.c_str())), uint32_t(atoul(ip_to.c_str())), std::move(country_code), std::move(country_name));
+		ip_location_store_.emplace_back(uint32_t(std::stoul(ip_from.c_str())), uint32_t(std::stoul(ip_to.c_str())), std::move(country_code), std::move(country_name));
 	}
 
 	std::sort(ip_location_store_.begin(), ip_location_store_.end(), [](const ip_location_record& a, const ip_location_record& b) { return a.ip_from < b.ip_from; });
@@ -69,7 +69,7 @@ void ip_location_store::load()
 
 	database_file.close();
 
-	LOG_INFO("server.loading", ">> loaded %u ip location entries.", ip_location_store_.siz());
+	LOG_INFO("server.loading", ">> loaded %u ip location entries.", ip_location_store_.size());
 }
 
 const ip_location_record* ip_location_store::get_location_record(const std::string& ip_address) const

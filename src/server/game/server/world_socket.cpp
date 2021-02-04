@@ -786,7 +786,7 @@ void world_socket::handle_auth_session_callback(std::shared_ptr<world_packets::a
         return;
     }
 
-    if (IpLocationRecord const* location = sIPLocation->GetLocationRecord(address))
+    if (ip_location_record const* location = sIPLocation->GetLocationRecord(address))
         _ipCountry = location->CountryCode;
 
     ///- Re-check ip locking (same check as in auth).
