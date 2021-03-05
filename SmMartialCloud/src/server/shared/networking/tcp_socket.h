@@ -15,8 +15,9 @@
 #define READ_BLOCK_SIZE 4096
 
 class event_loop;
+class world_socket;
 
-class tcp_socket : public std::enable_shared_from_this<tcp_socket>
+class tcp_socket : public std::enable_shared_from_this<world_socket>
 {
 public:
 	tcp_socket(event_loop* loop, tcp::socket&& sockfd);
