@@ -2,65 +2,55 @@
  * Copyright (C) 2017 by Shan Daming <shandaming@hotmail.com>
  */
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef SDL2_WINDOW_H
+#define SDL2_WINDOW_H
 
 #include <string>
 #include "surface.h"
 
-class Window
+struct window_size
 {
-	public:
-		Window(const std::string& title, int x, int y, int w, int h, 
+	int width;
+	int height;
+};
+
+struct point;
+struct SDL_Color;
+
+class window
+{
+public:
+	window(const std::string& title, point& coordinate, window_size& size, 
 				uint32_t window_flags, uint32_t render_flags);
 
-		~Window();
+	~window();
 
-		Window(const Window&) = delete;
-		Window operator=(const Window&) = delete;
+	window(const window&) = delete;
+	window operator=(const window&) = delete;
 
-		void set_size(int w, int h);
+	window_size get_size();
+	window_size get_renderer_output_size();
+	uint32_t get_flags();
+	int get_display_index();
 
-		SDL_Point get_size();
+	void center_on_screen();
+	void maximize();
+	void restore();
+	void to_window();
+	void full_screen();
+	void fill_color(SDL_Color& color);
+	void render();
 
-		SDL_Point get_output_size();
+	void set_title(const std::string& title);
+	void set_icon(Surface& icon);
+	void set_minimum_size(window_size& minimum_size);
+	void set_size(window_size& size);
 
-		void center();
-
-		void maximize();
-
-		void restore();
-
-		void to_window();
-
-		void full_screen();
-
-		// Clears the contents of the winodw with a given color
-		void fill(uint8_t r, uint8_t b, uint8_t g, uint8_t a = 0);
-
-		void render();
-
-		void set_title(const std::string& title);
-
-		void set_icon(Surface& icon);
-
-		uint32_t get_flags();
-
-		void set_minimum_size(int min_w, int min_h);
-
-		int get_display_index();
-
-		// Gets the renderer info for this window
-		const SDL_RendererInfo& get_renderer_info() const
-		{
-			return info_;
-		}
-
-		operator SDL_Window*();
-		operator SDL_Renderer*();
-	private:
-		SDL_Window* window_;
-		SDL_RendererInfo info_;
+	operator SDL_Window*();
+	operator SDL_Renderer*();
+private:
+	SDL_Window* window_;
+	uint32_t pixel_format_;
 };
 
 #endif

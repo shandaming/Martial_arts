@@ -2,139 +2,142 @@
  * Copyright (C) 2017 by Shan Daming <shandaming@hotmail.com>
  */
 
-#include "window.h"
-#include "exception.h"
-#include "renderer_utils.h"
+#include <SDL2/SDL_pixels.h>
 
-Window::Window(const std::string& title, int x, int y, int w, int h,
+#include "window.h"
+#include "point.h"
+#include "sdl2_exception.h"
+
+window::window(const std::string& title, point& coordinate, window_size& size,
 		uint32_t window_flags, uint32_t render_flags) : 
-		window_(SDL_CreateWindow(title.c_str(), x, y, w, h, window_flags)),
-		info_()
+		window_(SDL_CreateWindow(title.c_str(), coordinate.x, coordinate.y, size.width, size.height, window_flags)),
+		pixel_format_(SDL_PIXELFORMAT_UNKNOWN)
 {
 	if(!window_)
-		throw Exception("Failed to create a SDL_Window object.", true);
+		throw sdl2_exception("Failed to create a SDL_Window object.");
+
+#if SDL_VERSION_ATLEAST(2, 0, 10)
+	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "0"); // 故事模式需要关闭渲染批处理
+#endif
 
 	if(!SDL_CreateRenderer(window_, -1, render_flags))
-		throw Exception("Failed to create a SDL_Renderer object.", true);
+		throw sdl2_exception("Failed to create a SDL_Renderer object.");
 
+	SDL_RendererInfo info;
 	if(SDL_GetRendererInfo(*this, &info) != 0)
-		throw Exception("Failed to retrieve the information of the \
-				renderer.", true);
+		throw sdl2_exception("Failed to retrieve the information of the \
+				renderer.");
 
 	if(info.num_texture_formats == 0)
-		throw Exception("The renderer has no texture information \
-				available.\n", false);
-
-	if(!(info_.flags & SDL_RENDERER_TARGETTEXTURE))
-		throw Exception("Render-to-texture not supported or enabled!", 
-				false);
+		throw sdl2_exception("The renderer has no texture information \
+				available.");
 
 	SDL_SetRenderDrawBlendMode(*this, SDL_BLENDMODE_BLEND);
-	
-	// In fullscreen mode, do not minimize on focus loss.
-	// Minimizing was reported as bug #1609 with blocker priority.
+
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 
-	fill(0, 0, 0);
+	pixel_format_ = info.texture_formats[0];
+
+	fill_color(0, 0, 0);
 	render();
 }
 
-Window::~Window()
+window::~window()
 {
 	if(window_)
 		SDL_DestroyWindow(window_);
 }
 
-void Window::set_size(int w, int h)
+void window::set_size(window_size& size)
 {
-	SDL_SetWindowSize(window_, w, h);
+	SDL_SetWindowSize(window_, size.width, size.height);
 }
 
-SDL_Point Window::get_size()
+window_size window::get_size()
 {
-	SDL_Point res;
-	SDL_GetWindowSize(*this, &res.x, &res.y);
+	window_size size;
+	SDL_GetWindowSize(*this, &size.width, &size.height);
 
-	return res;
+	return size;
 }
 
-SDL_Point Window::get_output_size()
+window_size window::get_renderer_output_size()
 {
-	SDL_Point res;
-	SDL_GetRendererOutputSize(*this, &res.x, &res.y);
+	window_size size;
+	SDL_GetRendererOutputSize(*this, &size.width, &size.height);
 
-	return res;
+	return size;
 }
 
-void Window::center()
+void window::center_on_screen()
 {
 	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED,
 			SDL_WINDOWPOS_CENTERED);
 }
 
-void Window::maximize()
+void window::maximize()
 {
 	SDL_MaximizeWindow(window_);
 }
 
-void Window::to_window()
-{
-	SDL_SetWindowFullscreen(window_, 0);
-}
-
-void Window::restore()
+void window::restore()
 {
 	SDL_RestoreWindow(window_);
 }
 
-void Window::full_screen()
+void window::to_window()
+{
+	SDL_SetWindowFullscreen(window_, 0);
+}
+
+void window::full_screen()
 {
 	SDL_SetWindowFullscreen(window_, SDL_WINDOW_FULLSCREEN_DESKTOP);
 }
 
-void Window::fill(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+void window::fill_color(SDL_Color& color)
 {
-	set_draw_color(*this, r, g, b, a);
+	set_draw_color(*this, color.r, color.g, color.b, color.a);
 	if(SDL_RenderClear(*this) != 0)
-		throw Exception("Failed to clear the SDL_Renderer object.", true);
+		throw sdl2_exception("Failed to clear the SDL_Renderer object.");
 }
 
-void Window::render()
+void window::render()
 {
 	SDL_RenderPresent(*this);
 }
 
-void Window::set_title(const std::string& title)
+void window::set_title(const std::string& title)
 {
 	SDL_SetWindowTitle(window_, title.c_str());
 }
 
-void Window::set_icon(Surface& icon)
+void window::set_icon(Surface& icon)
 {
 	SDL_SetWindowIcon(window_, icon);
 }
 
-uint32_t Window::get_flags()
+uint32_t window::get_flags()
 {
 	return SDL_GetWindowFlags(window_);
 }
 
-void Window::set_minimum_size(int min_w, int min_h)
+void window::set_minimum_size(window_size& minimum_size)
 {
-	SDL_SetWindowMinimumSize(window_, min_w, min_h);
+	SDL_SetWindowMinimumSize(window_, minimum_size.width, minimum_size.height);
 }
 
-int Window::get_display_index()
+int window::get_display_index()
 {
 	return SDL_GetWindowDisplayIndex(window_);
 }
 
-Window::operator SDL_Window*()
+window::operator SDL_Window*()
 {
 	return window_;
 }
 
-Window::operator SDL_Renderer*()
+window::operator SDL_Renderer*()
 {
 	return SDL_GetRenderer(window_);
 }

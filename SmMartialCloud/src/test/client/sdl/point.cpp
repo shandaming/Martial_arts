@@ -4,12 +4,7 @@
 
 #include <tuple>
 
-#include "point.hpp"
-
-point::operator SDL_Point() const
-{
-	return {x, y};
-}
+#include "point.h"
 
 bool point::operator==(const point& p) const
 {
