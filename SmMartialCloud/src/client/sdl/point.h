@@ -5,7 +5,7 @@
 #ifndef _SDL2_POINT_H
 #define _SDL2_POINT_H
 
-#include <iosfwd>
+#include <ostream>
 
 #include <SDL2/SDL.h>
 

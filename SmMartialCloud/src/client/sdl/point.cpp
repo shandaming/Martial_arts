@@ -4,12 +4,7 @@
 
 #include <tuple>
 
-#include "point.hpp"
-
-point::operator SDL_Point() const
-{
-	return {x, y};
-}
+#include "point.h"
 
 bool point::operator==(const point& p) const
 {
@@ -53,6 +48,11 @@ point& point::operator-=(const point& p)
 	x -= p.x;
 	y -= p.y;
 	return *this;
+}
+
+point::operator SDL_Point() const
+{
+	return {x, y};
 }
 
 std::ostream& operator<<(std::ostream& stream, const point& p)

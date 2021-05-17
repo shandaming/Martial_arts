@@ -3,7 +3,6 @@
  */
 
 #include <gtest/gtest.h>
-#include "./client/sdl/point_test.h"
 /*
 致命断言	        非致命断言	        验证
 ASSERT_EQ(val1, val2);	EXPECT_EQ(val1, val2);	val1 == val2

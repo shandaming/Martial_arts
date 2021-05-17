@@ -1,5 +1,4 @@
-#ifndef _POINT_TEST_H
-#define _POINT_TEST_H
+#include <gtest/gtest.h>
 
 #include "point.h"
 
@@ -53,5 +52,3 @@ TEST(pointTest, PointValueMinus)
 
 	ASSERT_EQ(p1 - p2, point(4, -6));
 }
-
-#endif

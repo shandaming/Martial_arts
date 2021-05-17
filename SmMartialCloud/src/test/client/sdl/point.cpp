@@ -50,6 +50,11 @@ point& point::operator-=(const point& p)
 	return *this;
 }
 
+point::operator SDL_Point() const
+{
+	return {x, y};
+}
+
 std::ostream& operator<<(std::ostream& stream, const point& p)
 {
 	stream << p.x << ',' << p.y;
