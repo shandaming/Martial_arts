@@ -135,7 +135,18 @@ void tcp_socket::handle_read()
 			read_buffer_.write_complate(bytes_read);
 	}
 
-	read_handler_callback_(ec, tranferred_bytes);
+struct socket_bytes_read 
+{
+	socket_bytes_read(std::shared_ptr<tcp_socket> sock_, std::error_code&& ec_, size_t tranferred_bytes_) :
+	sock(sock_), ec(std::move(ec)), tranferred_bytes(tranferred_bytes_)
+
+	std::shared_ptr<tcp_socket> sock;
+	std::error_code ec;
+	size_t tranferred_bytes;
+};
+
+	//read_handler_callback_(ec, tranferred_bytes);
+	push(std::unique_ptr<socket_bytes_read>(this, ec, tranferred_bytes));
 }
 
 void tcp_socket::write_handler_wrapper()

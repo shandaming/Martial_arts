@@ -15,11 +15,8 @@ public:
 
 	void start();
 
-  // valid after calling start()
-  /// round-robin
 	event_loop* get_next_loop();
 
-  /// with the same hash code, it will always return the same event_loop
 	event_loop* get_loop_for_hash(size_t hash_code);
 
 	std::vector<event_loop*> get_all_loops();

@@ -10,10 +10,7 @@ event_loop_threadpool::event_loop_threadpool(event_loop* base_loop, uint32_t thr
 	thread_count_(thread_count),
 	next_(0) {}
 
-event_loop_threadpool::~event_loop_threadpool()
-{
-  // Don't delete loop, it's stack variable
-}
+event_loop_threadpool::~event_loop_threadpool() {}
 
 void event_loop_threadpool::start()
 {
@@ -24,7 +21,9 @@ void event_loop_threadpool::start()
 
 	for (size_t i = 0; i < thread_count_; ++i)
 	{
-		std::unique_ptr<event_loop_thread> event_loop_thread = std::make_unique<event_loop_thread>();
+		std::unique_ptr<event_loop_thread> event_loop_thread = 
+			std::make_unique<event_loop_thread>(new event_loop);
+
 		threads_.push_back(std::move(event_loop_thread));
 		loops_.push_back(threads_[i]->start_loop());
 	}

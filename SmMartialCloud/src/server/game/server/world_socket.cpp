@@ -61,7 +61,7 @@ uint8_t world_socket::encryption_key_seed[16] = {
 	0xE9, 0x75, 0x3C, 0x50, 0x90, 0x93, 0x61, 0xDA, 0x3B, 0x07, 0xEE, 0xFA, 0xFF, 0x9D, 0x41, 0xB8 };
 
 world_socket::world_socket(event_loop* loop, tcp::socket&& sock) : 
-	tcp_socket(loop, std::forward<tcp::socket>(sock)), 
+	tcp_socket(loop, std::forward<tcp::socket>(sock)), // 注册epool读事件
 	type_(CONNECTION_TYPE_REALM), 
 	key_(0), over_speed_ping_(0),
 	world_session_(nullptr), 
@@ -116,6 +116,7 @@ void world_socket::check_ip_callback(prepared_query_result result)
 
 	packet_buffer_.resize(client_connection_initialize.length() + 1);
 
+	// 注册epoll读取事件
 	//AsyncReadWithCallback(&world_socket::initialize_handler);
 	set_initialize_handler_callback();
 
