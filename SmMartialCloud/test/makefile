@@ -1,4 +1,4 @@
-SRC_DIRS := ./src
+SRC_DIRS := .
 
 # Find all the C and C++ files we want to compile
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c)
@@ -37,7 +37,7 @@ else ifeq ($(debug), true)
 	CXXFLAGS += $(GCC_RELEASE_FLAGS)
 endif
 
-LDFLAGS := -lstdc++fs
+LDFLAGS := -lstdc++fs -lgtest
 PROGRAMS := service
 
 $(PROGRAMS): $(OBJS)

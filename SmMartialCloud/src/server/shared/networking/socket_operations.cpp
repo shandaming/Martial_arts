@@ -4,6 +4,8 @@
 
 #include <arpa/inet.h>
 
+#include "socket_operations.h"
+
 inline void clear_last_error() { errno = 0; }
 
 template<typename ReturnType>
@@ -16,7 +18,7 @@ inline ReturnType error_wrapper(ReturnType return_value, std::error_code& ec)
 int non_blocking_socket(int domain, int type, int protocol, std::error_code& ec)
 {
 	int flags = type | SOCK_NONBLOCK | SOCK_CLOEXEC;
-	int result = error_wrapper(::socket(domain, flag, protocol), ec);
+	int result = error_wrapper(::socket(domain, flags, protocol), ec);
 	if(result >= 0)
 		ec = std::error_code();
 	return result;
@@ -66,21 +68,21 @@ bool non_blocking_accept(int sockfd, socket_addr_type* addr, socklen_t addrlen, 
 
 	while(1)
 	{
-		new_socket = error_wrapper(::accept4(sockfd, addr, &addrlen), ec);
+		new_socket = error_wrapper(::accept4(sockfd, addr, &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC), ec);
 		if(new_socket != invalid_socket)
 		{
 			ec = std::error_code();
 			return new_socket;
 		}
 
-		if(ec.value() == std::errc::interrupted)
+		if(std::errc(ec.value()) == std::errc::interrupted)
 			continue;
 
-		if(ec.value() == std::errc::operation_would_block || 
-				ec.value() == std::errc::resource_unavailable_try_again)
+		if(std::errc(ec.value()) == std::errc::operation_would_block || 
+				std::errc(ec.value()) == std::errc::resource_unavailable_try_again)
 		{}
-		else if(ec.value() == std::errc::connection_aborted ||
-				ec.value() == std::errc::protocol_error)
+		else if(std::errc(ec.value()) == std::errc::connection_aborted ||
+				std::errc(ec.value()) == std::errc::protocol_error)
 			return true;
 		else
 			return true;
@@ -549,9 +551,9 @@ bool non_blocking_send(int sockfd, const iovec* buf, size_t count, int flags, st
 	while(1)
 	{
 		int bytes = send(sockfd, buf, count, flags, ec);
-		if(ec.value() == std::interrupted)
+		if(ec.value() == std::errc::interrupted)
 			continue;
-		if(ec.value() == std::would_block || ec.value() == std::try_again)
+		if(ec.value() == std::errc::would_block || ec.value() == std::errc::try_again)
 			return false;
 		if(bytes >= 0)
 		{

@@ -12,11 +12,7 @@
 acceptor::acceptor(Event_loop* loop, const std::string& bind_ip, uint16_t port, bool reuseport) : 
 	loop_(loop),
 	endpoint_(make_address(bind_ip), port),
-	is_open_(false),
-	//idle_fd_(open("/dev/null", O_RDONLY | O_CLOEXEC))
-{
-	//assert(idle_fd_ >= 0);
-}
+	is_open_(false) {}
 
 acceptor::~acceptor()
 {
