@@ -22,12 +22,21 @@ int create_timerfd()
 
 timespec how_much_time_from_now(Timestamp when)
 {
-std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-std::chrono::duration_cast<std::chrono::microseconds>(now_c).count();
+//std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+//std::time_t now_c = std::chrono::system_clock::to_time_t(now);
+//std::chrono::duration_cast<std::chrono::microseconds>(now_c).count();
 
-	int64_t microseconds = when.micro_seconds_since_epoch() -
-		Timestamp::now().micro_seconds_since_epoch();
+#if 1
+	//auto now = std::chrono::system_clock::now();
+	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(when).count();
+	auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(when).count() - seconds;
+
+	struct timespec ts;
+	ts.tv_sec = seconds;
+	ts.tv_nsec = nanoseconds;
+#endif
+
+	int64_t microseconds = when.micro_seconds_since_epoch() - Timestamp::now().micro_seconds_since_epoch();
 	if (microseconds < 100)
 	{
 		microseconds = 100;
