@@ -7,6 +7,8 @@
 
 #include <sys/uio.h>
 
+#include <system_error>
+
 #include "socket_types.h"
 
 int non_blocking_socket(int domain, int type, int protocol, std::error_code& ec);

@@ -13,7 +13,7 @@ struct networking_exception : std::exception
 {
 	networking_exception() : message() {}
 	networking_exception(const std::string& msg) : message(msg) {}
-	networking_exception(const std::error_code& ec) : message(ec.message) {}
+	networking_exception(const std::error_code& ec) : message(ec.message()) {}
 
 	~networking_exception() noexcept {}
 
