@@ -1,4 +1,4 @@
-SRC_DIRS := .
+SRC_DIRS := ./src
 
 # Find all the C and C++ files we want to compile
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c)

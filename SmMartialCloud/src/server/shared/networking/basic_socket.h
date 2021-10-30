@@ -69,15 +69,6 @@ public:
 	void shutdown(shutdown_type type, std::error_code& ec);
 	void close();
 
-/*
-	bool set_reuse_addr();
-	bool set_reuse_port();
-
-	bool set_no_delay(bool enable);
-	bool set_keep_alive();
-	bool set_send_buffer_size();
-*/
-
 	bool set_option(const socket_option& option);
 
 	endpoint local_endpoint(std::error_code& ec);

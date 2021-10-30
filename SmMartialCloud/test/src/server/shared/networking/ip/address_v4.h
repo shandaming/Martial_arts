@@ -97,8 +97,4 @@ address_v4 make_address_v4(const char* str, std::error_code& ec) ;
 address_v4 make_address_v4(const std::string& str);
 address_v4 make_address_v4(const std::string& str, std::error_code& ec) ;
 
-template <typename Elem, typename Traits>
-std::basic_ostream<Elem, Traits>& operator<<(
-    std::basic_ostream<Elem, Traits>& os, const address_v4& addr);
-
 #endif
