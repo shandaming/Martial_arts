@@ -1,4 +1,4 @@
-cmake_minimum_required(version 3.11)
+cmake_minimum_required(VERSION 3.11)
 
 # add this options before PROJECT keyword // ？？禁止避免CMakeFiles/并CMakeCache.txt在源目录中创建
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -43,6 +43,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 #  include 指令用来载入并运行来自于文件或模块的 CMake 代码。
+include(Debug)
 include(CheckCXXSourceRuns)
 include(CheckIncludeFiles)
 include(ConfigureScripts)
@@ -56,15 +57,21 @@ if(NOPCH)
   set(USE_SCRIPTPCH 0)
 endif()
 
+# 添加编译器标准和库接口
 include(ConfigureBaseTargets)
+# 检查平台
 include(CheckPlatform)
 
 include(GroupSources)
 include(AutoCollect)
 
+# include(cmake/external_module.cmake)
+
 # find_package 查找模块
 find_package(PCHSupport)
 find_package(MySQL)
+find_package(GTest)
+find_package(GMock)
 
 if(NOT WITHOUT_GIT)
   find_package(Git 1.7)
