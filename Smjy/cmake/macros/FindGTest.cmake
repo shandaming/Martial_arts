@@ -9,7 +9,7 @@ find_path(GTEST_INCLUDE_DIR
     "Specify the directory containing gtest.h."
 )
 
-LOG_DEBUG("Found GTest path = ${GTEST_INCLUDE_DIR}")
+LOG_DEBUG("FindGTest Found GTest path = ${GTEST_INCLUDE_DIR}")
 
 find_library(GTEST_LIBRARY
   NAMES
@@ -22,7 +22,7 @@ find_library(GTEST_LIBRARY
     "Specify the location of the gtest library here."
 )
 
-LOG_DEBUG("Found GTest library: ${GTEST_LIBRARY}")
+LOG_DEBUG("FindGTest Found GTest library: ${GTEST_LIBRARY}")
 
 
 include(FindPackageHandleStandardArgs)
@@ -34,7 +34,7 @@ find_package_handle_standard_args(GTest
 
 mark_as_advanced(GTEST_FOUND GTEST_INCLUDE_DIR GTEST_LIBRARY)
 
-LOG_DEBUG("${GTEST_FOUND}")
+LOG_DEBUG("FindGTest ${GTEST_FOUND}")
 
 if(GTEST_FOUND)
   message(STATUS "Found GTest library: ${GTEST_LIBRARY}")

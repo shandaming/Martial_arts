@@ -9,7 +9,7 @@ find_path(GMOCK_INCLUDE_DIR
     "Specify the directory containing gmock.h."
 )
 
-LOG_DEBUG("Found GMock path = ${GMOCK_INCLUDE_DIR}")
+LOG_DEBUG("FindGMock Found GMock path = ${GMOCK_INCLUDE_DIR}")
 
 find_library(GMOCK_LIBRARY
   NAMES
@@ -22,7 +22,7 @@ find_library(GMOCK_LIBRARY
     "Specify the location of the gmock library here."
 )
 
-LOG_DEBUG("Found GMock library: ${GMOCK_LIBRARY}")
+LOG_DEBUG("FindGMock Found GMock library: ${GMOCK_LIBRARY}")
 
 #if(GMOCK_INCLUDE_DIR AND EXISTS "${GMOCK_INCLUDE_DIR}/gmock.h")
 #endif()
@@ -36,7 +36,7 @@ find_package_handle_standard_args(GMock
 
 mark_as_advanced(GMOCK_FOUND GMOCK_INCLUDE_DIR GMOCK_LIBRARY)
 
-LOG_DEBUG("${GMOCK_FOUND}")
+LOG_DEBUG("FindGMock ${GMOCK_FOUND}")
 
 if(GMOCK_FOUND)
   message(STATUS "Found GMock library: ${GMOCK_LIBRARY}")

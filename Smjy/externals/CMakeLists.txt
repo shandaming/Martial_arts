@@ -23,7 +23,7 @@ endif()
 
 if(TOOLS)
   add_subdirectory(bzip2)
-  add_subdirectory(libmpq)
+  # add_subdirectory(libmpq)
 endif()
 
 if(BUILD_TESTING)

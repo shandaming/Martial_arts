@@ -104,14 +104,3 @@ if(BUILD_TESTING)
     set_property(GLOBAL PROPERTY USE_FOLDERS OFF)
   endif()
 endif()
-
-# --------------------------------------
-
-configure_file(config.h.in configh.h)
-target_include_directories(Smjy PUBLIC "$(PROJECT_BINARY_DIR)")
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-
-

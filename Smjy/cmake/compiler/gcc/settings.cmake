@@ -2,6 +2,8 @@
 target_compile_definitions(trinity-compile-option-interface
   INTERFACE
     -D_BUILD_DIRECTIVE="$<CONFIG>")
+    
+LOG_DEBUG("gcc CONFIG = ${CONFIG}; INTERFACE = ${INTERFACE}")
 
 set(GCC_EXPECTED_VERSION 8.3.0)
 

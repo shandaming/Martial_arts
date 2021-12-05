@@ -1,4 +1,4 @@
-set(DEBUG_MODE 0)
+set(DEBUG_MODE 1)
 
 macro(LOG_DEBUG info)
   if(DEBUG_MODE)

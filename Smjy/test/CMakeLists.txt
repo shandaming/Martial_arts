@@ -10,9 +10,7 @@ add_executable(tests ${TEST_SOURCES})
 target_link_libraries(tests
   PRIVATE
     trinity-core-interface
-    game
-    gtest
-    gmock)
+    game)
 
 CollectIncludeDirectories(
   ${CMAKE_CURRENT_SOURCE_DIR}
