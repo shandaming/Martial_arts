@@ -1,0 +1,13 @@
+add_subdirectory(threads)
+add_subdirectory(json)
+add_subdirectory(utf8cpp)
+add_subdirectory(fmt)
+add_subdirectory(sdl2)
+add_subdirectory(sdl2_image)
+add_subdirectory(sdl2_mixer)
+add_subdirectory(sdl2_ttf)
+
+if(BUILD_TESTING)
+  add_subdirectory(gtest)
+  add_subdirectory(gmock)
+endif()

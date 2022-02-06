@@ -9,12 +9,13 @@
 #include <string>
 
 struct SDL_Color;
+struct SDL_Surface;
 
 class window
 {
 public:
-	window(const std::string& title, int x, int y, int w, int h, 
-				uint32_t window_flags, uint32_t render_flags);
+	window(const std::string& title, int w, int h, 
+				uint32_t window_flags);
 
 	~window();
 
@@ -37,13 +38,12 @@ public:
 	void set_title(const std::string& title);
 	void set_icon(SDL_Surface* icon);
 	void set_minimum_size(window_size& minimum_size);
-	void set_size(int w, int h));
+	void set_size(int w, int h);
 
 	operator SDL_Window*();
 	operator SDL_Renderer*();
 private:
 	SDL_Window* window_;
-	uint32_t pixel_format_;
 };
 
 #endif
