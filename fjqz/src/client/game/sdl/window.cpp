@@ -1,42 +1,28 @@
-/*
- * Copyright (C) 2017 by Shan Daming <shandaming@hotmail.com>
- */
-
 #include <SDL2/SDL_render.h>
 
 #include "window.h"
+#include "errors.h"
 #include "point.h"
-#include "sdl2_exception.h"
 
-window::window(const std::string& title, int x, int y, int w, int h,
-		uint32_t window_flags, uint32_t render_flags) : 
-		window_(SDL_CreateWindow(title.c_str(), x, y, w, h, window_flags)),
-		pixel_format_(SDL_PIXELFORMAT_UNKNOWN)
+window::window(const std::string& title, int w, int h,
+		uint32_t window_flags) : 
+		window_(SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h, window_flags))
 {
-	if(!window_)
-		throw sdl2_exception("Failed to create a SDL_Window object.");
+	ASSERT(window_, "Failded to create a SDL_Window object.");
 
-#if SDL_VERSION_ATLEAST(2, 0, 10)
-	SDL_SetHint(SDL_HINT_RENDER_BATCHING, "0"); // 故事模式需要关闭渲染批处理
-#endif
-
-	if(!SDL_CreateRenderer(window_, -1, render_flags))
-		throw sdl2_exception("Failed to create a SDL_Renderer object.");
+	ASSERT(SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED), 
+			"Failed to create a SDL_Renderer object.");
 
 	SDL_RendererInfo info;
-	if(SDL_GetRendererInfo(*this, &info) != 0)
-		throw sdl2_exception("Failed to retrieve the information of the \
-				renderer.");
+	ASSERT(!SDL_GetRendererInfo(*this, &info), 
+			"Failed to retrieve the information of the renderer.");
 
-	if(info.num_texture_formats == 0)
-		throw sdl2_exception("The renderer has no texture information \
-				available.");
+	ASSERT(info.num_texture_formats, "The renderer has no texture information available.");
 
 	SDL_SetRenderDrawBlendMode(*this, SDL_BLENDMODE_BLEND);
 
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-
-	pixel_format_ = info.texture_formats[0];
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
 	fill_color(0, 0, 0);
 	render();
@@ -98,8 +84,7 @@ void window::full_screen()
 void window::fill_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
 	SDL_SetRenderDrawColor(*this, r, g, b, a);
-	if(SDL_RenderClear(*this) != 0)
-		throw sdl2_exception("Failed to clear the SDL_Renderer object.");
+	ASSERT(!SDL_RenderClear(*this), "Failed to clear the SDL_Renderer object.");
 }
 
 void window::render()
