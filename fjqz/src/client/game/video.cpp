@@ -21,6 +21,7 @@ video::~video()
 	SDL_Quit();
 }
 
+#if 0
 void video::video_event_handler::handle_window_event(const SDL_Event& event)
 {
 	if(event.type == SDL_WINDOWEVENT) {
@@ -43,7 +44,7 @@ void video::video_event_handler::handle_window_event(const SDL_Event& event)
 		}
 	}
 }
-
+#endif
 
 void video::init_window()
 {
@@ -115,7 +116,7 @@ void video::clear_screen()
 	window_->fill(0, 0, 0, 255);
 }
 
-sdl::window_* video::get_window()
+window* video::get_window() const
 {
 	return window_.get();
 }

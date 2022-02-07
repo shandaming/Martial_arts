@@ -1,7 +1,8 @@
 #ifndef _GAME_VIDEO_H
 #define _GAME_VIDEO_H
 
-#include "events.h"
+//#include "events.h"
+#include <SDL2/SDL.h>
 
 #include <memory>
 
@@ -14,7 +15,7 @@ public:
 	static video* instance();
 
 	void init_window();
-	window* get_window();
+	window* get_window() const;
 	void set_fullscreen(bool ison);
 
 	SDL_Rect screen_area() const;
@@ -42,6 +43,7 @@ private:
 
 	void initSDL();
 
+#if 0
 	class video_event_handler : public sdl_handler
 	{
 	public:
@@ -52,9 +54,11 @@ private:
 	};
 
 	video_event_handler event_handler_;
-
+#endif
 	int refresh_rate_;
 	std::unique_ptr<window> window_;
 };
+
+#define VIDEO video::instance()
 
 #endif

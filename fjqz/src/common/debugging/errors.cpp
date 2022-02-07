@@ -1,6 +1,7 @@
 #include <thread>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 
 #include "error.h"
 

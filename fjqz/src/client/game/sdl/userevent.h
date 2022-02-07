@@ -8,41 +8,38 @@
 #include <cstring>
 #include <SDL2/SDL_events.h>
 
-namespace sdl
+class user_event
 {
-	class User_event
+public:
+	user_event()
 	{
-		public:
-			User_event()
-			{
-				memset(&event_, 0, sizeof(SDL_UserEvent));
-			}
+		memset(&event_, 0, sizeof(SDL_UserEvent));
+	}
 
-			User_event(int type) : User_event()
-			{
-				event_.type = type;
-			}
+	user_event(int type) : user_event()
+	{
+		event_.type = type;
+	}
 
-			User_event(int type, int code) : User_event(type)
-			{
-				event_.code = code;
-			}
+	user_event(int type, int code) : user_event(type)
+	{
+		event_.code = code;
+	}
 
-			User_event(int type, int data1, int data2) : User_event(type)
-			{
-				event_.data1 = reinterpret_cast<void*>(data1);
-				event_.data2 = reinterpret_cast<void*>(data2);
-			}
+	user_event(int type, int data1, int data2) : user_event(type)
+	{
+		event_.data1 = reinterpret_cast<void*>(data1);
+		event_.data2 = reinterpret_cast<void*>(data2);
+	}
 
-			User_event(int type, void* data1) : User_event(type)
-			{
-				event_.data1 = data1;
-			}
+	user_event(int type, void* data1) : user_event(type)
+	{
+		event_.data1 = data1;
+	}
 
-			operator SDL_UserEvent() { return event_; }
-		private:
-			SDL_UserEvent event_;
-	};
-}
+	operator SDL_UserEvent() const { return event_; }
+private:
+	SDL_UserEvent event_;
+};
 
 #endif
