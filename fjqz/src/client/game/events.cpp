@@ -1,5 +1,6 @@
 #include "events.h"
 
+#if 0
 #include "cursor.h"
 #include "desktop/clipboard.hpp"
 #include "log.h"
@@ -967,3 +968,5 @@ void call_in_main_thread(const std::function<void(void)>& f)
 }
 
 } // end events namespace
+
+#endif

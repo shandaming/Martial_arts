@@ -1,7 +1,3 @@
-/*
- * Copyright (C) 2019
- */
-
 #ifndef __STRING_FORMAT_H
 #define __STRING_FORMAT_H
 
