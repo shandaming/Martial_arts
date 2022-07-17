@@ -5,7 +5,7 @@
 #include "log.h"
 #include "quit_confirmation.hpp"
 #include "sdl/userevent.h"
-#include "utils/ranges.hpp"
+#include <ranges>
 #include "video.h"
 
 #include <algorithm>
@@ -65,9 +65,9 @@ void context::add_handler(sdl_handler* ptr)
 
 bool context::has_handler(const sdl_handler* ptr) const
 {
-	if(handlers.cend() != std::find(handlers.cbegin(), handlers.cend(), ptr)) {
+	if(handlers.cend() != std::find(handlers.cbegin(), handlers.cend(), ptr))
 		return true;
-	}
+
 	return staging_handlers.cend() != std::find(staging_handlers.cbegin(), staging_handlers.cend(), ptr);
 }
 
@@ -78,85 +78,86 @@ bool context::remove_handler(sdl_handler* ptr)
 
 	// The handler is most likely on the back of the events list,
 	// so look there first, otherwise do a complete search.
-	if(!handlers.empty() && handlers.back() == ptr) {
-		if(focused_handler != handlers.end() && *focused_handler == ptr) {
+	if(!handlers.empty() && handlers.back() == ptr)
+	{
+		if(focused_handler != handlers.end() && *focused_handler == ptr)
 			focused_handler = handlers.end();
-		}
 
 		handlers.pop_back();
-	} else {
+	}
+	else
+	{
 		const handler_list::iterator i = std::find(handlers.begin(), handlers.end(), ptr);
 
-		if(i == handlers.end()) {
+		if(i == handlers.end())
+		{
 			--depth;
 
 			// The handler may be in the staging area. Search it from there.
 			auto j = std::find(staging_handlers.begin(), staging_handlers.end(), ptr);
-			if(j != staging_handlers.end()) {
+			if(j != staging_handlers.end())
+			{
 				staging_handlers.erase(j);
 				return true;
-			} else {
+			}
+			else
+			{
 				return false;
 			}
 		}
 
-		if(i == focused_handler) {
+		if(i == focused_handler)
 			focused_handler != handlers.begin() ? --focused_handler : ++focused_handler;
-		}
 
 		handlers.erase(i);
 	}
 
 	--depth;
 
-	if(depth == 0) {
+	if(depth == 0)
 		cycle_focus();
-	} else {
+	else
 		focused_handler = handlers.end();
-	}
 
 	return true;
 }
 
 void context::cycle_focus()
 {
-	if(handlers.begin() == handlers.end()) {
+	if(handlers.begin() == handlers.end())
 		return;
-	}
 
 	handler_list::iterator current = focused_handler;
 	handler_list::iterator last = focused_handler;
 
-	if(last != handlers.begin()) {
+	if(last != handlers.begin())
 		--last;
-	}
 
-	if(current == handlers.end()) {
+	if(current == handlers.end())
 		current = handlers.begin();
-	} else {
+	else
 		++current;
-	}
 
-	while(current != last) {
-		if(current != handlers.end() && (*current)->requires_event_focus()) {
+	while(current != last)
+	{
+		if(current != handlers.end() && (*current)->requires_event_focus())
+		{
 			focused_handler = current;
 			break;
 		}
 
-		if(current == handlers.end()) {
+		if(current == handlers.end())
 			current = handlers.begin();
-		} else {
+		else
 			++current;
-		}
 	}
 }
 
 void context::set_focus(const sdl_handler* ptr)
 {
 	const handler_list::iterator i = std::find(handlers.begin(), handlers.end(), ptr);
-	if(i != handlers.end() && (*i)->requires_event_focus()) {
+	if(i != handlers.end() && (*i)->requires_event_focus())
 		focused_handler = i;
-	}
 }
 
 void context::add_staging_handlers()
@@ -167,14 +168,13 @@ void context::add_staging_handlers()
 
 context::~context()
 {
-	for(sdl_handler* h : handlers) {
-		if(h->has_joined()) {
+	for(sdl_handler* h : handlers)
+	{
+		if(h->has_joined())
 			h->has_joined_ = false;
-		}
 
-		if(h->has_joined_global()) {
+		if(h->has_joined_global())
 			h->has_joined_global_ = false;
-		}
 	}
 }
 
@@ -219,16 +219,20 @@ sdl_handler::sdl_handler(const bool auto_join)
 	}
 }
 
-sdl_handler::sdl_handler(const sdl_handler &that)
-	: has_joined_(that.has_joined_)
-	, has_joined_global_(that.has_joined_global_)
+sdl_handler::sdl_handler(const sdl_handler &that) :
+	has_joined_(that.has_joined_),
+	has_joined_global_(that.has_joined_global_)
 {
-	if(has_joined_global_) {
+	if(has_joined_global_)
+	{
 		assert(!event_contexts.empty());
 		event_contexts.front().add_handler(this);
-	} else if(has_joined_) {
+	}
+	else if(has_joined_)
+	{
 		bool found_context = false;
-		for(auto &context : utils::reversed_view(event_contexts)) {
+		for(auto &context : std::views::reverse(event_contexts))
+		{
 			if(context.has_handler(&that)) {
 				found_context = true;
 				context.add_handler(this);
@@ -236,26 +240,34 @@ sdl_handler::sdl_handler(const sdl_handler &that)
 			}
 		}
 
-		if (!found_context) {
+		if (!found_context)
 			throw std::logic_error("Copy-constructing a sdl_handler that has_joined_ but can't be found by searching contexts");
-		}
 	}
 }
 
 sdl_handler &sdl_handler::operator=(const sdl_handler &that)
 {
-	if(that.has_joined_global_) {
+	if(that.has_joined_global_)
+	{
 		join_global();
-	} else if(that.has_joined_) {
-		for(auto &context : utils::reversed_view(event_contexts)) {
-			if(context.has_handler(&that)) {
+	}
+	else if(that.has_joined_)
+	{
+		for(auto &context : std::views::reverse(event_contexts))
+		{
+			if(context.has_handler(&that))
+			{
 				join(context);
 				break;
 			}
 		}
-	} else if(has_joined_) {
+	}
+	else if(has_joined_)
+	{
 		leave();
-	} else if(has_joined_global_) {
+	}
+	else if(has_joined_global_)
+	{
 		leave_global();
 	}
 
@@ -264,11 +276,13 @@ sdl_handler &sdl_handler::operator=(const sdl_handler &that)
 
 sdl_handler::~sdl_handler()
 {
-	if(has_joined_) {
+	if(has_joined_)
+	{
 		leave();
 	}
 
-	if(has_joined_global_) {
+	if(has_joined_global_)
+	{
 		leave_global();
 	}
 }
@@ -284,11 +298,13 @@ void sdl_handler::join()
 
 void sdl_handler::join(context& c)
 {
-	if(has_joined_global_) {
+	if(has_joined_global_)
+	{
 		leave_global();
 	}
 
-	if(has_joined_) {
+	if(has_joined_)
+	{
 		leave(); // should not be in multiple event contexts
 	}
 
@@ -297,19 +313,23 @@ void sdl_handler::join(context& c)
 	has_joined_ = true;
 
 	// instruct members to join
-	for(auto member : handler_members()) {
+	for(auto member : handler_members())
+	{
 		member->join(c);
 	}
 }
 
 void sdl_handler::join_same(sdl_handler* parent)
 {
-	if(has_joined_) {
+	if(has_joined_)
+	{
 		leave(); // should not be in multiple event contexts
 	}
 
-	for(auto& context : utils::reversed_view(event_contexts)) {
-		if(context.has_handler(parent)) {
+	for(auto& context : std::views::reverse(event_contexts))
+	{
+		if(context.has_handler(parent))
+		{
 			join(context);
 			return;
 		}
@@ -322,16 +342,20 @@ void sdl_handler::leave()
 {
 	sdl_handler_vector members = handler_members();
 
-	if(members.empty()) {
+	if(members.empty())
+	{
 		assert(event_contexts.empty() == false);
 	}
 
-	for(auto member : members) {
+	for(auto member : members)
+	{
 		member->leave();
 	}
 
-	for(auto& context : utils::reversed_view(event_contexts)) {
-		if(context.remove_handler(this)) {
+	for(auto& context : std::views::reverse(event_contexts))
+	{
+		if(context.remove_handler(this))
+		{
 			break;
 		}
 	}
@@ -341,11 +365,13 @@ void sdl_handler::leave()
 
 void sdl_handler::join_global()
 {
-	if(has_joined_) {
+	if(has_joined_)
+	{
 		leave();
 	}
 
-	if(has_joined_global_) {
+	if(has_joined_global_)
+	{
 		leave_global(); // Should not be in multiple event contexts
 	}
 
@@ -354,14 +380,16 @@ void sdl_handler::join_global()
 	has_joined_global_ = true;
 
 	// Instruct members to join
-	for(auto member : handler_members()) {
+	for(auto member : handler_members())
+	{
 		member->join_global();
 	}
 }
 
 void sdl_handler::leave_global()
 {
-	for(auto member : handler_members()) {
+	for(auto member : handler_members())
+	{
 		member->leave_global();
 	}
 
@@ -372,18 +400,21 @@ void sdl_handler::leave_global()
 
 void focus_handler(const sdl_handler* ptr)
 {
-	if(event_contexts.empty() == false) {
+	if(event_contexts.empty() == false)
+	{
 		event_contexts.back().set_focus(ptr);
 	}
 }
 
 bool has_focus(const sdl_handler* hand, const SDL_Event* event)
 {
-	if(event_contexts.empty()) {
+	if(event_contexts.empty())
+	{
 		return true;
 	}
 
-	if(hand->requires_event_focus(event) == false) {
+	if(hand->requires_event_focus(event) == false)
+	{
 		return true;
 	}
 
@@ -392,21 +423,27 @@ bool has_focus(const sdl_handler* hand, const SDL_Event* event)
 
 	// If no-one has focus at the moment, this handler obviously wants
 	// focus, so give it to it.
-	if(foc == handlers.end()) {
+	if(foc == handlers.end())
+	{
 		focus_handler(hand);
 		return true;
 	}
 
 	sdl_handler* const foc_hand = *foc;
-	if(foc_hand == hand) {
+	if(foc_hand == hand)
+	{
 		return true;
-	} else if(!foc_hand->requires_event_focus(event)) {
+	}
+	else if(!foc_hand->requires_event_focus(event))
+	{
 		// If the currently focused handler doesn't need focus for this event
 		// allow the most recent interested handler to take care of it
-		for(auto i = handlers.rbegin(); i != handlers.rend(); ++i) {
+		for(auto i = handlers.rbegin(); i != handlers.rend(); ++i)
+		{
 			sdl_handler* const thief_hand = *i;
 
-			if(thief_hand != foc_hand && thief_hand->requires_event_focus(event)) {
+			if(thief_hand != foc_hand && thief_hand->requires_event_focus(event))
+			{
 				// Steal focus
 				focus_handler(thief_hand);
 
@@ -421,25 +458,27 @@ bool has_focus(const sdl_handler* hand, const SDL_Event* event)
 	return false;
 }
 
-const uint32_t resize_timeout = 100;
+constexpr uint32_t resize_timeout = 100;
 SDL_Event last_resize_event;
 bool last_resize_event_used = true;
 
 static bool remove_on_resize(const SDL_Event& a)
 {
-	if(a.type == DRAW_EVENT || a.type == DRAW_ALL_EVENT) {
+	if(a.type == DRAW_EVENT || a.type == DRAW_ALL_EVENT)
+	{
 		return true;
 	}
 
-	if(a.type == SHOW_HELPTIP_EVENT) {
+	if(a.type == SHOW_HELPTIP_EVENT)
+	{
 		return true;
 	}
 
 	if((a.type == SDL_WINDOWEVENT) && (
 		a.window.event == SDL_WINDOWEVENT_RESIZED ||
 		a.window.event == SDL_WINDOWEVENT_SIZE_CHANGED ||
-		a.window.event == SDL_WINDOWEVENT_EXPOSED)
-	) {
+		a.window.event == SDL_WINDOWEVENT_EXPOSED))
+	{
 		return true;
 	}
 
@@ -451,7 +490,8 @@ static const std::thread::id main_thread = std::this_thread::get_id();
 
 void pump()
 {
-	if(std::this_thread::get_id() != main_thread) {
+	if(std::this_thread::get_id() != main_thread)
+	{
 		// Can only call this on the main thread!
 		return;
 	}
@@ -460,6 +500,7 @@ void pump()
 	pump_info info;
 
 	// Used to keep track of double click events
+	// 用于跟踪双击事件
 	static int last_mouse_down = -1;
 	static int last_click_x = -1, last_click_y = -1;
 
@@ -468,8 +509,10 @@ void pump()
 	int begin_ignoring = 0;
 
 	std::vector<SDL_Event> events;
-	while(SDL_PollEvent(&temp_event)) {
-		if(temp_event.type == INVOKE_FUNCTION_EVENT) {
+	while(SDL_PollEvent(&temp_event))
+	{
+		if(temp_event.type == INVOKE_FUNCTION_EVENT)
+		{
 			static_cast<invoked_function_data*>(temp_event.user.data1)->call();
 			continue;
 		}
@@ -479,11 +522,14 @@ void pump()
 
 		if(!begin_ignoring && temp_event.type == SDL_WINDOWEVENT && (
 			temp_event.window.event == SDL_WINDOWEVENT_ENTER ||
-			temp_event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED)
-		) {
+			temp_event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED))
+		{
 			begin_ignoring = poll_count;
-		} else if(begin_ignoring > 0 && is_input(temp_event)) {
+		}
+		else if(begin_ignoring > 0 && is_input(temp_event))
+		{
 			// ignore user input events that occurred after the window was activated
+			//忽略窗口激活后发生的用户输入事件
 			continue;
 		}
 
@@ -491,48 +537,63 @@ void pump()
 	}
 
 	auto ev_it = events.begin();
-	for(int i = 1; i < begin_ignoring; ++i) {
-		if(is_input(*ev_it)) {
+	for(int i = 1; i < begin_ignoring; ++i)
+	{
+		if(is_input(*ev_it))
+		{
 			// ignore user input events that occurred before the window was activated
+			// 忽略在窗口被激活之前发生的用户输入事件
 			ev_it = events.erase(ev_it);
-		} else {
+		}
+		else
+		{
 			++ev_it;
 		}
 	}
 
 	bool resize_found = false;
-	for(const SDL_Event& event : utils::reversed_view(events)) {
-		if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
+	for(const SDL_Event& event : std::views::reverse(events))
+	{
+		if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
+		{
 			resize_found = true;
 			last_resize_event = event;
 			last_resize_event_used = false;
 
 			// Since we're working backwards, the first resize event found is the last in the list.
+			// 由于我们正在向后工作，因此找到的第一个调整大小事件是列表中的最后一个。
 			break;
 		}
 	}
 
 	// remove all inputs, draw events and only keep the last of the resize events
 	// This will turn horrible after ~49 days when the uint32_t wraps.
-	if(resize_found || SDL_GetTicks() <= last_resize_event.window.timestamp + resize_timeout) {
+	// 删除所有输入，绘制事件并仅保留最后一个调整大小事件
+	//  当 uint32_t 包装约 49 天后，这将变得可怕。
+	if(resize_found || SDL_GetTicks() <= last_resize_event.window.timestamp + resize_timeout)
+	{
 		events.erase(std::remove_if(events.begin(), events.end(), remove_on_resize), events.end());
-	} else if(SDL_GetTicks() > last_resize_event.window.timestamp + resize_timeout && !last_resize_event_used) {
+	}
+	else if(SDL_GetTicks() > last_resize_event.window.timestamp + resize_timeout && !last_resize_event_used)
+	{
 		events.insert(events.begin(), last_resize_event);
 		last_resize_event_used = true;
 	}
 
 	// Move all draw events to the end of the queue
 	auto first_draw_event = std::stable_partition(events.begin(), events.end(),
-		[](const SDL_Event& e) { return e.type != DRAW_EVENT; }
-	);
+		[](const SDL_Event& e) { return e.type != DRAW_EVENT; });
 
-	if(first_draw_event != events.end()) {
-		// Remove all draw events except one
+	if(first_draw_event != events.end())
+	{
+		// Remove all draw events except one 删除除一个之外的所有绘图事件
 		events.erase(first_draw_event + 1, events.end());
 	}
 
-	for(SDL_Event& event : events) {
-		for(context& c : event_contexts) {
+	for(SDL_Event& event : events)
+	{
+		for(context& c : event_contexts)
+		{
 			c.add_staging_handlers();
 		}
 
@@ -594,142 +655,165 @@ void pump()
 		}
 #endif
 
-		switch(event.type) {
-		case SDL_WINDOWEVENT:
-			switch(event.window.event) {
-			case SDL_WINDOWEVENT_ENTER:
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
-				cursor::set_focus(1);
-				break;
+		switch(event.type)
+		{
+			case SDL_WINDOWEVENT:
+				switch(event.window.event)
+				{
+				case SDL_WINDOWEVENT_ENTER:
+				case SDL_WINDOWEVENT_FOCUS_GAINED:
+					cursor::set_focus(1);
+					break;
 
-			case SDL_WINDOWEVENT_LEAVE:
-			case SDL_WINDOWEVENT_FOCUS_LOST:
-				cursor::set_focus(1);
-				break;
+				case SDL_WINDOWEVENT_LEAVE:
+				case SDL_WINDOWEVENT_FOCUS_LOST:
+					cursor::set_focus(1);
+					break;
 
-			case SDL_WINDOWEVENT_RESIZED:
-				info.resize_dimensions.first = event.window.data1;
-				info.resize_dimensions.second = event.window.data2;
-				break;
-			}
+				case SDL_WINDOWEVENT_RESIZED:
+					info.resize_dimensions.first = event.window.data1;
+					info.resize_dimensions.second = event.window.data2;
+					break;
+				}
 
-			// make sure this runs in it's own scope.
-			{
-				flip_locker flip_lock(CVideo::get_singleton());
-				for(auto& context : event_contexts) {
-					for(auto handler : context.handlers) {
-						handler->handle_window_event(event);
+				// make sure this runs in it's own scope.
+				{
+					flip_locker flip_lock(CVideo::get_singleton());
+					for(auto& context : event_contexts)
+					{
+						for(auto handler : context.handlers)
+						{
+							handler->handle_window_event(event);
+						}
+					}
+
+					for(auto global_handler : event_contexts.front().handlers)
+					{
+						global_handler->handle_window_event(event);
 					}
 				}
 
-				for(auto global_handler : event_contexts.front().handlers) {
-					global_handler->handle_window_event(event);
-				}
+				// This event was just distributed, don't re-distribute.
+				// 此活动已分发，请勿重新分发。
+				continue;
+
+			case SDL_MOUSEMOTION:
+			{
+				// Always make sure a cursor is displayed if the mouse moves or if the user clicks
+				// 始终确保在鼠标移动或用户单击时显示光标
+				cursor::set_focus(true);
+				raise_help_string_event(event.motion.x, event.motion.y);
+				break;
 			}
 
-			// This event was just distributed, don't re-distribute.
-			continue;
+			case SDL_MOUSEBUTTONDOWN:
+			{
+				// Always make sure a cursor is displayed if the mouse moves or if the user clicks
+				// 始终确保在鼠标移动或用户单击时显示光标
+				cursor::set_focus(true);
+				if(event.button.button == SDL_BUTTON_LEFT || event.button.which == SDL_TOUCH_MOUSEID)
+				{
+					static constexpr int DoubleClickTime = 500;
+	#ifdef __IPHONEOS__
+					static const int DoubleClickMaxMove = 15;
+	#else
+					static constexpr int DoubleClickMaxMove = 3;
+	#endif
 
-		case SDL_MOUSEMOTION: {
-			// Always make sure a cursor is displayed if the mouse moves or if the user clicks
-			cursor::set_focus(true);
-			raise_help_string_event(event.motion.x, event.motion.y);
-			break;
-		}
+					if(last_mouse_down >= 0 && info.ticks() - last_mouse_down < DoubleClickTime
+							&& std::abs(event.button.x - last_click_x) < DoubleClickMaxMove
+							&& std::abs(event.button.y - last_click_y) < DoubleClickMaxMove)
+					{
+						sdl::UserEvent user_event(DOUBLE_CLICK_EVENT, event.button.which, event.button.x, event.button.y);
+						::SDL_PushEvent(reinterpret_cast<SDL_Event*>(&user_event));
+					}
 
-		case SDL_MOUSEBUTTONDOWN: {
-			// Always make sure a cursor is displayed if the mouse moves or if the user clicks
-			cursor::set_focus(true);
-			if(event.button.button == SDL_BUTTON_LEFT || event.button.which == SDL_TOUCH_MOUSEID) {
-				static const int DoubleClickTime = 500;
-#ifdef __IPHONEOS__
-				static const int DoubleClickMaxMove = 15;
-#else
-				static const int DoubleClickMaxMove = 3;
-#endif
-
-				if(last_mouse_down >= 0 && info.ticks() - last_mouse_down < DoubleClickTime
-						&& std::abs(event.button.x - last_click_x) < DoubleClickMaxMove
-						&& std::abs(event.button.y - last_click_y) < DoubleClickMaxMove
-				) {
-					sdl::UserEvent user_event(DOUBLE_CLICK_EVENT, event.button.which, event.button.x, event.button.y);
-					::SDL_PushEvent(reinterpret_cast<SDL_Event*>(&user_event));
+					last_mouse_down = info.ticks();
+					last_click_x = event.button.x;
+					last_click_y = event.button.y;
 				}
-
-				last_mouse_down = info.ticks();
-				last_click_x = event.button.x;
-				last_click_y = event.button.y;
-			}
-			break;
-		}
-
-		case DRAW_ALL_EVENT: {
-			flip_locker flip_lock(CVideo::get_singleton());
-
-			/* Iterate backwards as the most recent things will be at the top */
-			// FIXME? ^ that isn't happening here.
-			for(auto& context : event_contexts) {
-				for(auto handler : context.handlers) {
-					handler->handle_event(event);
-				}
+				break;
 			}
 
-			continue; // do not do further handling here
-		}
+			case DRAW_ALL_EVENT:
+			{
+				flip_locker flip_lock(CVideo::get_singleton());
 
-#ifndef __APPLE__
-		case SDL_KEYDOWN: {
-			if(event.key.keysym.sym == SDLK_F4 &&
-				(event.key.keysym.mod == KMOD_RALT || event.key.keysym.mod == KMOD_LALT)
-			) {
+				/* Iterate backwards as the most recent things will be at the top 向后迭代，因为最近的内容将位于顶部 */
+				// FIXME? ^ that isn't happening here.
+				for(auto& context : event_contexts)
+				{
+					for(auto handler : context.handlers)
+					{
+						handler->handle_event(event);
+					}
+				}
+
+				continue; // do not do further handling here
+			}
+
+	#ifndef __APPLE__
+			case SDL_KEYDOWN:
+			{
+				if(event.key.keysym.sym == SDLK_F4 &&
+					(event.key.keysym.mod == KMOD_RALT || event.key.keysym.mod == KMOD_LALT))
+				{
+					quit_confirmation::quit_to_desktop();
+					continue; // this event is already handled
+				}
+				break;
+			}
+	#endif
+
+	#if defined(_X11) && !defined(__APPLE__)
+			case SDL_SYSWMEVENT:
+			{
+				// clipboard support for X11
+				desktop::clipboard::handle_system_event(event);
+				break;
+			}
+	#endif
+
+	#if defined _WIN32
+			case SDL_SYSWMEVENT:
+			{
+				windows_tray_notification::handle_system_event(event);
+				break;
+			}
+	#endif
+
+			case SDL_QUIT:
+			{
 				quit_confirmation::quit_to_desktop();
-				continue; // this event is already handled
+				continue; // this event is already handled.
 			}
-			break;
-		}
-#endif
-
-#if defined(_X11) && !defined(__APPLE__)
-		case SDL_SYSWMEVENT: {
-			// clipboard support for X11
-			desktop::clipboard::handle_system_event(event);
-			break;
-		}
-#endif
-
-#if defined _WIN32
-		case SDL_SYSWMEVENT: {
-			windows_tray_notification::handle_system_event(event);
-			break;
-		}
-#endif
-
-		case SDL_QUIT: {
-			quit_confirmation::quit_to_desktop();
-			continue; // this event is already handled.
-		}
 		}
 
-		for(auto global_handler : event_contexts.front().handlers) {
+		for(auto global_handler : event_contexts.front().handlers)
+		{
 			global_handler->handle_event(event);
 		}
 
-		if(event_contexts.empty() == false) {
-			for(auto handler : event_contexts.back().handlers) {
+		if(event_contexts.empty() == false)
+		{
+			for(auto handler : event_contexts.back().handlers)
+			{
 				handler->handle_event(event);
 			}
 		}
 	}
 
 	// Inform the pump monitors that an events::pump() has occurred
-	for(auto monitor : pump_monitors) {
+	for(auto monitor : pump_monitors)
+	{
 		monitor->process(info);
 	}
 }
 
 void raise_process_event()
 {
-	if(event_contexts.empty() == false) {
+	if(event_contexts.empty() == false)
+	{
 		event_contexts.back().add_staging_handlers();
 
 		for(auto handler : event_contexts.back().handlers) {
@@ -744,20 +828,22 @@ void raise_resize_event()
 	event.window.type = SDL_WINDOWEVENT;
 	event.window.event = SDL_WINDOWEVENT_RESIZED;
 	event.window.windowID = 0; // We don't check this anyway... I think...
-	event.window.data1 = CVideo::get_singleton().get_width();
-	event.window.data2 = CVideo::get_singleton().get_height();
+	event.window.data1 = VIDEO->get_width();
+	event.window.data2 = VIDEO->get_height();
 
 	SDL_PushEvent(&event);
 }
 
 void raise_draw_event()
 {
-	if(event_contexts.empty() == false) {
+	if(event_contexts.empty() == false)
+	{
 		event_contexts.back().add_staging_handlers();
 
 		// Events may cause more event handlers to be added and/or removed,
 		// so we must use indexes instead of iterators here.
-		for(auto handler : event_contexts.back().handlers) {
+		for(auto handler : event_contexts.back().handlers)
+		{
 			handler->draw();
 		}
 	}
@@ -765,8 +851,10 @@ void raise_draw_event()
 
 void raise_draw_all_event()
 {
-	for(auto& context : event_contexts) {
-		for(auto handler : context.handlers) {
+	for(auto& context : event_contexts)
+	{
+		for(auto handler : context.handlers)
+		{
 			handler->draw();
 		}
 	}
@@ -774,8 +862,10 @@ void raise_draw_all_event()
 
 void raise_volatile_draw_event()
 {
-	if(event_contexts.empty() == false) {
-		for(auto handler : event_contexts.back().handlers) {
+	if(event_contexts.empty() == false)
+	{
+		for(auto handler : event_contexts.back().handlers)
+		{
 			handler->volatile_draw();
 		}
 	}
@@ -783,8 +873,10 @@ void raise_volatile_draw_event()
 
 void raise_volatile_draw_all_event()
 {
-	for(auto& context : event_contexts) {
-		for(auto handler : context.handlers) {
+	for(auto& context : event_contexts)
+	{
+		for(auto handler : context.handlers)
+		{
 			handler->volatile_draw();
 		}
 	}
@@ -792,8 +884,10 @@ void raise_volatile_draw_all_event()
 
 void raise_volatile_undraw_event()
 {
-	if(event_contexts.empty() == false) {
-		for(auto handler : event_contexts.back().handlers) {
+	if(event_contexts.empty() == false)
+	{
+		for(auto handler : event_contexts.back().handlers)
+		{
 			handler->volatile_undraw();
 		}
 	}
@@ -801,8 +895,10 @@ void raise_volatile_undraw_event()
 
 void raise_help_string_event(int mousex, int mousey)
 {
-	if(event_contexts.empty() == false) {
-		for(auto handler : event_contexts.back().handlers) {
+	if(event_contexts.empty() == false)
+	{
+		for(auto handler : event_contexts.back().handlers)
+		{
 			handler->process_help_string(mousex, mousey);
 			handler->process_tooltip_string(mousex, mousey);
 		}
@@ -811,14 +907,17 @@ void raise_help_string_event(int mousex, int mousey)
 
 int pump_info::ticks(unsigned* refresh_counter, unsigned refresh_rate)
 {
-	if(!ticks_ && !(refresh_counter && ++*refresh_counter % refresh_rate)) {
+	if(!ticks_ && !(refresh_counter && ++*refresh_counter % refresh_rate))
+	{
 		ticks_ = ::SDL_GetTicks();
 	}
 
 	return ticks_;
 }
 
-/* The constants for the minimum and maximum are picked from the headers. */
+/* The constants for the minimum and maximum are picked from the headers.
+ * 最小值和最大值的常量是从标题中挑选出来的。
+ * */
 #define INPUT_MIN 0x300
 #define INPUT_MAX 0x8FF
 
@@ -836,9 +935,11 @@ void peek_for_resize()
 {
 	SDL_Event events[100];
 	int num = SDL_PeepEvents(events, 100, SDL_PEEKEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT);
-	for(int i = 0; i < num; ++i) {
-		if(events[i].type == SDL_WINDOWEVENT && events[i].window.event == SDL_WINDOWEVENT_RESIZED) {
-			CVideo::get_singleton().update_framebuffer();
+	for(int i = 0; i < num; ++i)
+	{
+		if(events[i].type == SDL_WINDOWEVENT && events[i].window.event == SDL_WINDOWEVENT_RESIZED)
+		{
+			VIDEO->update_framebuffer();
 		}
 	}
 }

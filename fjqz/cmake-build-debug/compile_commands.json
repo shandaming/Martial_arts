@@ -1,0 +1,72 @@
+[
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -g -w -std=gnu++2a -o externals/fmt/CMakeFiles/fmt.dir/src/fmt.cc.o -c /home/mylw/Martial_arts/fjqz/externals/fmt/src/fmt.cc",
+  "file": "/home/mylw/Martial_arts/fjqz/externals/fmt/src/fmt.cc"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -g -w -std=gnu++2a -o externals/fmt/CMakeFiles/fmt.dir/src/format.cc.o -c /home/mylw/Martial_arts/fjqz/externals/fmt/src/format.cc",
+  "file": "/home/mylw/Martial_arts/fjqz/externals/fmt/src/format.cc"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -g -w -std=gnu++2a -o externals/fmt/CMakeFiles/fmt.dir/src/os.cc.o -c /home/mylw/Martial_arts/fjqz/externals/fmt/src/os.cc",
+  "file": "/home/mylw/Martial_arts/fjqz/externals/fmt/src/os.cc"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/common -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -std=gnu++2a -o src/common/CMakeFiles/common.dir/confignuration/config.cpp.o -c /home/mylw/Martial_arts/fjqz/src/common/confignuration/config.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/common/confignuration/config.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/common -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -std=gnu++2a -o src/common/CMakeFiles/common.dir/debugging/errors.cpp.o -c /home/mylw/Martial_arts/fjqz/src/common/debugging/errors.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/common/debugging/errors.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/common -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -std=gnu++2a -o src/common/CMakeFiles/common.dir/logging/log.cpp.o -c /home/mylw/Martial_arts/fjqz/src/common/logging/log.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/common/logging/log.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/common -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -std=gnu++2a -o src/common/CMakeFiles/common.dir/utility/uitl.cpp.o -c /home/mylw/Martial_arts/fjqz/src/common/utility/uitl.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/common/utility/uitl.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game/sdl -I/home/mylw/Martial_arts/fjqz/src/client/game/world -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g   -fno-delete-null-pointer-checks -o src/client/game/CMakeFiles/game.dir/events.cpp.o -c /home/mylw/Martial_arts/fjqz/src/client/game/events.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/client/game/events.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game/sdl -I/home/mylw/Martial_arts/fjqz/src/client/game/world -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g   -fno-delete-null-pointer-checks -o src/client/game/CMakeFiles/game.dir/video.cpp.o -c /home/mylw/Martial_arts/fjqz/src/client/game/video.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/client/game/video.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game/sdl -I/home/mylw/Martial_arts/fjqz/src/client/game/world -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g   -fno-delete-null-pointer-checks -o src/client/game/CMakeFiles/game.dir/sdl/point.cpp.o -c /home/mylw/Martial_arts/fjqz/src/client/game/sdl/point.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/client/game/sdl/point.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game/sdl -I/home/mylw/Martial_arts/fjqz/src/client/game/world -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g   -fno-delete-null-pointer-checks -o src/client/game/CMakeFiles/game.dir/sdl/texture.cpp.o -c /home/mylw/Martial_arts/fjqz/src/client/game/sdl/texture.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/client/game/sdl/texture.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game/sdl -I/home/mylw/Martial_arts/fjqz/src/client/game/world -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g   -fno-delete-null-pointer-checks -o src/client/game/CMakeFiles/game.dir/sdl/window.cpp.o -c /home/mylw/Martial_arts/fjqz/src/client/game/sdl/window.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/client/game/sdl/window.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game -I/home/mylw/Martial_arts/fjqz/src/client/game/sdl -I/home/mylw/Martial_arts/fjqz/src/client/game/world -I/home/mylw/Martial_arts/fjqz/cmake-build-debug -I/home/mylw/Martial_arts/fjqz/src/common -I/home/mylw/Martial_arts/fjqz/src/common/confignuration -I/home/mylw/Martial_arts/fjqz/src/common/debugging -I/home/mylw/Martial_arts/fjqz/src/common/logging -I/home/mylw/Martial_arts/fjqz/src/common/utility -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -I/home/mylw/Martial_arts/fjqz/externals/utf8cpp -g   -fno-delete-null-pointer-checks -o src/client/game/CMakeFiles/game.dir/world/world.cpp.o -c /home/mylw/Martial_arts/fjqz/src/client/game/world/world.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/client/game/world/world.cpp"
+},
+{
+  "directory": "/home/mylw/Martial_arts/fjqz/cmake-build-debug",
+  "command": "/usr/bin/c++ -DHAVE_SSE2 -D_BUILD_DIRECTIVE=\\\"Debug\\\" -D_TRINITY_CORE_CONFIG=\\\"/usr/local/etc/worldserver.conf\\\" -D__SSE2__ -I/home/mylw/Martial_arts/fjqz/src/client/world -I/home/mylw/Martial_arts/fjqz/cmake-build-debug/src/client/world -I/home/mylw/Martial_arts/fjqz/externals/fmt/include -I/home/mylw/Martial_arts/fjqz/externals/json -g   -fno-delete-null-pointer-checks -W -Wall -Wextra -Winit-self -Winvalid-pch -Wfatal-errors -Woverloaded-virtual -std=gnu++2a -o src/client/world/CMakeFiles/fjqz.dir/main.cpp.o -c /home/mylw/Martial_arts/fjqz/src/client/world/main.cpp",
+  "file": "/home/mylw/Martial_arts/fjqz/src/client/world/main.cpp"
+}
+]

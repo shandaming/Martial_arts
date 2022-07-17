@@ -28,7 +28,6 @@ public:
 		return refresh_rate_;
 	}
 
-
 	void flip();
 
 	void clear_screen();
@@ -37,18 +36,18 @@ public:
 private:
 	video();
 	~video();
-	video(const CVideo&) = delete;
-	video& operator=(const CVideo&) = delete;
+	video(const video&) = delete;
+	video& operator=(const video&) = delete;
 
 	void initSDL();
 
-	class video_event_handler : public sdl_handler
+	class video_event_handler : public events::sdl_handler
 	{
 	public:
 		video_event_handler() : sdl_handler(false) {}
 
 		void handle_event(const SDL_Event&) override {}
-		virtual void handle_window_event(const SDL_Event& event);
+		void handle_window_event(const SDL_Event& event) override;
 	};
 
 	video_event_handler event_handler_;
@@ -56,5 +55,7 @@ private:
 	int refresh_rate_;
 	std::unique_ptr<window> window_;
 };
+
+#define VIDEO video::instance()
 
 #endif

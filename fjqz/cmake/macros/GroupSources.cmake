@@ -26,6 +26,11 @@ macro(GroupSources dir)
           string(FIND ${element_dir} "/" delemiter_pos)
           if(NOT ${delemiter_pos} EQUAL -1)
             string(SUBSTRING ${element_dir} 0 ${delemiter_pos} group_name)
+            # 您可以使用正则表达式或显式列表控制文件在每个文件夹中的显示方式source_group：
+            # 您还可以控制目标内的文件夹的显示方式。有两种方法，都使用source_group命令。您可以使用 明确列出文件FILES，
+            # 或使用REGULAR_EXPRESSION. 这样您就可以完全控制文件夹结构。但是，如果您的磁盘布局设计得很好，您可能只想模仿它。
+            # 在 CMake 3.8+ 中，您可以使用新版本的source_group命令轻松完成此操作：
+            # source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/base/dir" PREFIX "Header Files" FILES ${FILE_LIST})
             source_group("${group_name}" FILES ${dir}/${element})
           else()
             # Build hierarchical structure.
@@ -47,5 +52,9 @@ endmacro()
 
 if(WITH_SOURCE_TREE STREQUAL "hierarchical-folders")
   # Use folders
+  # 一些 IDE，比如 Xcode，支持文件夹。您必须手动启用USE_FOLDERS全局属性以允许 CMake 按文件夹组织文件：
+  # set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+  # 然后，您可以在创建目标后将目标添加到文件夹： 文件夹可以嵌套/
+  # set_property(TARGET MyFile PROPERTY FOLDER "Scripts")
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()

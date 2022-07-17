@@ -2,9 +2,7 @@
 #include "texture.h"
 #include "video.h"
 
-texture::texture(SDL_Texture* t) : texture_(t)
-{
-}
+texture::texture(SDL_Texture* t) : texture_(t){}
 
 texture::~texture()
 {

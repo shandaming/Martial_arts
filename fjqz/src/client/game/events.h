@@ -28,9 +28,7 @@ public:
 	context() :
 		handlers(),
 		focused_handler(handlers.end()),
-		staging_handlers()
-	{
-	}
+		staging_handlers() {}
 
 	~context();
 
@@ -134,7 +132,8 @@ void pump();
 //look for resize events and update references to the screen area
 void peek_for_resize();
 
-struct pump_info {
+struct pump_info
+{
 	pump_info() : resize_dimensions(), ticks_(0) {}
 	std::pair<int,int> resize_dimensions;
 	int ticks(unsigned *refresh_counter=nullptr, unsigned refresh_rate=1);
@@ -142,7 +141,8 @@ private:
 	int ticks_; //0 if not calculated
 };
 
-class pump_monitor {
+class pump_monitor
+{
 //pump_monitors receive notification after an events::pump() occurs
 public:
 	pump_monitor();

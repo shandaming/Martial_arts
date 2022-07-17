@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.11)
+# 最低版本求
+cmake_minimum_required(VERSION 3.16)
 
 # add this options before PROJECT keyword // ？？禁止避免CMakeFiles/并CMakeCache.txt在源目录中创建
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
@@ -6,7 +7,7 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # 导出
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+# 设置项目
 project(fjqz VERSION 0.01)
 
 # CMake policies (can not be handled elsewhere) // 升级兼容低版本告警

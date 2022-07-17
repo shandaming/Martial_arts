@@ -7,8 +7,8 @@
 
 #include "fmt/printf.h"
 
-template<typename... Args>
-inline std::string string_format(const char* fmt, Args&&... args)
+template<typename Format, typename... Args>
+inline std::string string_format(Format&& fmt, Args&&... args)
 {
         try
         {

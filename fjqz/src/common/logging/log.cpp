@@ -6,7 +6,7 @@
 
 #include "log.h"
 
-out_message(const std::string& filter, log_level level, std::string&& message)
+void out_message(const std::string& filter, log_level level, std::string&& message)
 {
     SDL_LogPriority priority;
 
@@ -15,7 +15,7 @@ out_message(const std::string& filter, log_level level, std::string&& message)
         case LOG_LEVEL_DEBUG:
             priority = SDL_LOG_PRIORITY_DEBUG;
             break;
-        case LOG_LEVE_INFO:
+        case LOG_LEVEL_INFO:
             priority = SDL_LOG_PRIORITY_INFO;
             break;
         case LOG_LEVEL_WARN:
@@ -24,7 +24,7 @@ out_message(const std::string& filter, log_level level, std::string&& message)
         case LOG_LEVEL_ERROR:
             priority = SDL_LOG_PRIORITY_ERROR;
             break;
-        case LOG_LEVEL_TATAL:
+        case LOG_LEVEL_FATAL:
             priority = SDL_LOG_PRIORITY_CRITICAL;
             break;
         case LOG_LEVEL_TRACE:
@@ -33,5 +33,5 @@ out_message(const std::string& filter, log_level level, std::string&& message)
             break;
     }
 
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, priority, filter, " ", message.c_str());
+    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, priority, filter.c_str(), " ", message.c_str());
 }

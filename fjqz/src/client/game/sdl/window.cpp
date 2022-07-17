@@ -42,15 +42,15 @@ void window::set_size(int w, int h)
 SDL_Point window::get_size()
 {
 	SDL_Point size;
-	SDL_GetWindowSize(*this, &size.width, &size.height);
+	SDL_GetWindowSize(*this, &size.x, &size.y);
 
 	return size;
 }
 
-window_size window::get_renderer_output_size()
+SDL_Point window::get_renderer_output_size()
 {
 	SDL_Point size;
-	SDL_GetRendererOutputSize(*this, &size.width, &size.height);
+	SDL_GetRendererOutputSize(*this, &size.x, &size.y);
 
 	return size;
 }
@@ -107,9 +107,9 @@ uint32_t window::get_flags()
 	return SDL_GetWindowFlags(window_);
 }
 
-void window::set_minimum_size(window_size& minimum_size)
+void window::set_minimum_size(int width, int height)
 {
-	SDL_SetWindowMinimumSize(window_, minimum_size.width, minimum_size.height);
+	SDL_SetWindowMinimumSize(window_, width, height);
 }
 
 int window::get_display_index()

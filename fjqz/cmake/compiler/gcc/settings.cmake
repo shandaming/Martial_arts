@@ -50,6 +50,10 @@ if(WITH_COREDEBUG)
   message(STATUS "GCC: Debug-flags set (-g3)")
 endif()
 
+# Sanitizers(请参考https://github.com/google/Sanitizers )已经成为静态和动态代码分析的非常有用的工具。
+# 通过使用适当的标志重新编译代码并链接到必要的库，可以检查内存错误(地址清理器)、未初始化的读取(内存清理器)、
+# 线程安全(线程清理器)和未定义的行为(未定义的行为清理器)相关的问题。与同类型分析工具相比，Sanitizers带来的性能损失通常要小得多，
+# 而且往往提供关于检测到的问题的更详细的信息。缺点是，代码(可能还有工具链的一部分)需要使用附加的标志重新编译。
 if(ASAN)
   target_compile_options(fjqz-compile-option-interface
     INTERFACE

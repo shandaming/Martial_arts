@@ -1,15 +1,15 @@
 # An interface library to make the target com available to other targets 使目标 com 可用于其他目标的接口库 
 add_library(fjqz-compile-option-interface INTERFACE)
 
-# Use -std=c++11 instead of -std=gnu++11
-set(CXX_EXTENSIONS ON)
-
 # An interface library to make the target features available to other targets 使目标功能可用于其他目标的接口库 
 add_library(fjqz-feature-interface INTERFACE)
 
+# Use -std=c++11 instead of -std=gnu++11
+set(CXX_EXTENSIONS ON)
+
 target_compile_features(fjqz-feature-interface
   INTERFACE
-    cxx_std_17)
+  cxx_std_20)
 
 # An interface library to make the warnings level available to other targets
 # This interface taget is set-up through the platform specific script 使警告级别可用于其他目标的接口库。 此接口目标是通过平台特定脚本设置的 

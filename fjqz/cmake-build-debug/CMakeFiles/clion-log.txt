@@ -1,0 +1,34 @@
+/snap/clion/198/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/198/bin/ninja/linux/ninja -G Ninja -S /home/mylw/Martial_arts/fjqz -B /home/mylw/Martial_arts/fjqz/cmake-build-debug
+-- Detected 64-bit platform
+-- UNIX: Configuring uninstall target
+-- UNIX: Created uninstall target
+-- UNIX: Using default system linker
+-- UNIX: Detected compiler: /usr/bin/cc
+[DEBUG] gcc CONFIG = ; INTERFACE = 
+-- GCC: Minimum version required is 8.3.0, found 10.3.0 - ok!
+-- GCC: SFMT enabled, SSE2 flags forced
+-- GCC: All warnings enabled
+
+* Smjy revision   :   ( branch)
+* Smjy buildtype  : Debug
+
+* Install core to        : /usr/local
+
+* Build smjy        : No
+* Build unit tests       : No (default)
+* Show all warnings      : Yes
+* Use coreside debug     : No  (default)
+* Show source tree       : Yes (hierarchical)
+* Use GIT revision hash  : Yes (default)
+
+-- Found SDL2 library: -lSDL2
+-- Found SDL2 headers: /usr/include/SDL2
+-- Found SDL2_image library: /usr/lib/x86_64-linux-gnu/libSDL2_image.so
+-- Found SDL2_image headers: /usr/include/SDL2
+-- Found SDL2_mixer library: /usr/lib/x86_64-linux-gnu/libSDL2_mixer.so
+-- Found SDL2_mixer headers: /usr/include/SDL2
+-- Found SDL2_ttf library: /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so
+-- Found SDL2_ttf headers: /usr/include/SDL2
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/mylw/Martial_arts/fjqz/cmake-build-debug

@@ -16,6 +16,7 @@ list(APPEND PRIVATE_SOURCES ${sources_windows})
 
 GroupSources(${CMAKE_CURRENT_SOURCE_DIR})
 
+# 制作可执行文件
 add_executable(fjqz
   ${PRIVATE_SOURCES}
 )
@@ -30,6 +31,7 @@ if(UNIX AND NOT NOJEM AND NOT APPLE)
   set(fjqz_LINK_FLAGS "-pthread ${fjqz_LINK_FLAGS}")
 endif()
 
+# set_target_properties 可以设置编译器标志、其他变量等目标属性
 set_target_properties(fjqz PROPERTIES LINK_FLAGS "${fjqz_LINK_FLAGS}")
 
 target_link_libraries(fjqz

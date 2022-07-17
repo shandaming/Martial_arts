@@ -6,7 +6,7 @@
 
 namespace fs = std::filesystem;
 
-#define CONFIG_FILE "jy.cfg"
+#define CONFIG_FILE "jy.json"
 
 
 int main(int argc, char* argv[])

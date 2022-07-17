@@ -16,7 +16,7 @@ target_include_directories(game-interface
 
 target_link_libraries(game-interface
   INTERFACE
-    sdl)
+	common)
 
 add_library(game
   ${PRIVATE_SOURCES})
