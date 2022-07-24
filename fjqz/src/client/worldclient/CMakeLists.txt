@@ -39,7 +39,8 @@ target_link_libraries(fjqz
     fjqz-core-interface
   PUBLIC
     fmt
-    json)
+    json
+    game-interface)
 
 CollectIncludeDirectories(
   ${CMAKE_CURRENT_SOURCE_DIR}

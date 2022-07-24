@@ -15,8 +15,6 @@
 #define DRAW_ALL_EVENT (SDL_USEREVENT + 6)
 #define INVOKE_FUNCTION_EVENT (SDL_USEREVENT + 7)
 
-#if 0
-
 namespace events
 {
 
@@ -175,7 +173,5 @@ void discard_input();
 }
 
 typedef std::vector<events::sdl_handler*> sdl_handler_vector;
-
-#endif
 
 #endif

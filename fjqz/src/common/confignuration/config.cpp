@@ -10,25 +10,81 @@
 
 using json = nlohmann::json;
 
-static json object;
+namespace
+{
+json object_;
+std::string filename_;
+}
 
-bool config_mgr::load_init(const std::string& file) {
-	std::ifstream in(file, std::ifstream::in);
+bool config_mgr::load_init(const std::string& file) 
+{
+	filename_ = file;
+
+	std::ifstream in(filename_, std::ifstream::in);
 	if (!in.is_open())
 	{
-		LOG_ERROR("Open config file {} failed.", file);
+		LOG_ERROR("Open config file {} failed.", filename_);
 		return false;
 	}
 
 	try
 	{
-		in >> object;
+		in >> object_;
 		return true;
 	}
-	catch (std::exception &e) {
+	catch (std::exception &e) 
+	{
 		LOG_ERROR("%s", e.what());
 		return false;
 	}
+}
+
+void config_mgr::save_json()
+{
+	std::ofstream out(filename_, std::ofstream::out | std::ofstream::trunc);
+	if (!out.is_open())
+	{
+		LOG_ERROR("Open config file {} failed.", filename_);
+		return;
+	}
+
+	try
+	{
+		object_ >> out;
+	}
+	catch (std::exception& e)
+	{
+		LOG_ERROR("%s", e.what());
+	}
+}
+
+int get_window_value(const std::string& key) const
+{
+	auto& window = object_.at("window");
+	return window.at(key);
+}
+
+void set_window_value(const std::string& key, int value)
+{
+	object_["window"][key] = value;
+}
+
+template<typename T, typename Format, typename... Args>
+void get_json_value(T& value, Format&& fmt, Args&&... args)
+{
+	value = value[fmt];
+	if constexpr (sizeof...(arg_left) > 0)
+	{
+		get_json_value(value, std::forward<Args>(args)...)];
+	}
+}
+
+template<typename Format, typename... Args>
+auto get_value_default(Format&& fmt, Args&&... args)
+{
+	auto value = object_[fmt];
+	get_json_value(value, std::forward<Args>(args)...);
+	return value;
 }
 
 template<class T>

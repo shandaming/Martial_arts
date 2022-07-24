@@ -1,10 +1,9 @@
 #include "events.h"
 
-#if 0
-#include "cursor.h"
-#include "desktop/clipboard.hpp"
+//#include "cursor.h"
+//#include "desktop/clipboard.hpp"
 #include "log.h"
-#include "quit_confirmation.hpp"
+//#include "quit_confirmation.hpp"
 #include "sdl/userevent.h"
 #include <ranges>
 #include "video.h"
@@ -17,7 +16,6 @@
 #include <thread>
 #include <utility>
 #include <vector>
-
 #include <SDL2/SDL.h>
 
 namespace
@@ -38,16 +36,7 @@ struct invoked_function_data
 
 	void call()
 	{
-		try {
-			f();
-		} catch(const CVideo::quit&) {
-			// Handle this exception in the main thread.
-			throw;
-		} catch(...) {
-			finished.set_exception(std::current_exception());
-			return;
-		}
-
+		f();
 		finished.set_value();
 	}
 };
@@ -156,7 +145,7 @@ void context::cycle_focus()
 
 void context::set_focus(const sdl_handler* ptr)
 {
-	const handler_list::iterator i = std::find(handlers.begin(), handlers.end(), ptr);
+	auto i = std::find(handlers.begin(), handlers.end(), ptr);
 	if(i != handlers.end() && (*i)->requires_event_focus())
 		focused_handler = i;
 }
@@ -947,7 +936,8 @@ void peek_for_resize()
 
 void call_in_main_thread(const std::function<void(void)>& f)
 {
-	if(std::this_thread::get_id() == main_thread) {
+	if(std::this_thread::get_id() == main_thread)
+	{
 		// nothing special to do if called from the main thread.
 		f();
 		return;
@@ -956,7 +946,7 @@ void call_in_main_thread(const std::function<void(void)>& f)
 	invoked_function_data fdata{f};
 
 	SDL_Event sdl_event;
-	sdl::UserEvent sdl_userevent(INVOKE_FUNCTION_EVENT, &fdata);
+	user_event sdl_userevent(INVOKE_FUNCTION_EVENT, &fdata);
 
 	sdl_event.type = INVOKE_FUNCTION_EVENT;
 	sdl_event.user = sdl_userevent;
@@ -968,5 +958,3 @@ void call_in_main_thread(const std::function<void(void)>& f)
 }
 
 } // end events namespace
-
-#endif

@@ -55,10 +55,9 @@ SDL_Point window::get_renderer_output_size()
 	return size;
 }
 
-void window::center_on_screen()
+void window::center()
 {
-	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED,
-			SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowPosition(window_, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 void window::maximize()

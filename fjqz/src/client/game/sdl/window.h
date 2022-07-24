@@ -27,7 +27,7 @@ public:
 	uint32_t get_flags();
 	int get_display_index();
 
-	void center_on_screen();
+	void center();
 	void maximize();
 	void restore();
 	void to_window();

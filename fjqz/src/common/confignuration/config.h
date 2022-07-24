@@ -13,6 +13,10 @@ public:
 	static config_mgr* instance();
 
 	bool load_init(const std::string& file);
+	void save_json();
+
+	int get_window_value(const std::string& key) const;
+	void set_window_value(const std::string& key, int value);
 
 	std::string get_string_default(const std::string& name, const std::string& def) const;
 	bool get_bool_default(const std::string& name, bool def) const;
@@ -21,6 +25,7 @@ public:
 
 private:
 	config_mgr(){}
+	~config_mgr() { save_json(); }
 	config_mgr(const config_mgr&) = delete;
 	config_mgr& operator=(const config_mgr&) = delete;
 

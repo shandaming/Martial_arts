@@ -4,15 +4,17 @@
 #include <cstdint>
 
 struct SDL_Texture;
+struct SDL_Surface;
 
 class texture
 {
 public:
+	texture();
     explicit texture(SDL_Texture* t);
     ~texture();
 
 	texture(const texture&) = delete;
-	texture& operator=(const SDL_Texture* r);
+	texture& operator=(SDL_Texture* r);
 
     void set_alpha_mod(uint8_t a);
     void set_blend_mod();
@@ -20,7 +22,7 @@ public:
 
 	struct info
 	{
-		explicit info(SDL_texture* t);
+		explicit info(SDL_Texture* t);
 
 		uint32_t format;
 		int access;
@@ -34,9 +36,10 @@ public:
 
 	bool null() const { return texture_ == nullptr; }
 private:
-	const SDL_Texture* texture_;
+	SDL_Texture* texture_;
 };
 
 SDL_Texture* make_texture(int w, int h);
+SDL_Texture* make_texture_from_surface(SDL_Surface* surface);
 
 #endif

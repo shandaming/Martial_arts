@@ -5,8 +5,10 @@
 
 #include <memory>
 
+struct SDL_Renderer;
 struct point;
 class window;
+class texture;
 
 class video
 {
@@ -16,12 +18,14 @@ public:
 	void init_window();
 	window* get_window();
 	void set_fullscreen(bool ison);
+	bool set_resolution(const point& resolution);
 
 	SDL_Rect screen_area() const;
 
+	void update_framebuffer();
+
 	int get_width() const;
 	int get_height() const;
-
 
 	int current_refresh_rate() const
 	{
@@ -31,6 +35,13 @@ public:
 	void flip();
 
 	void clear_screen();
+
+	bool is_fullscreen() const;
+	point current_resolution();
+
+	texture& get_texture() const;
+	SDL_Renderer* get_renderer();
+
 	static void delay(unsigned int milliseconds);
 
 private:
@@ -40,6 +51,9 @@ private:
 	video& operator=(const video&) = delete;
 
 	void initSDL();
+
+	enum MODE_EVENT { TO_RES, TO_FULLSCREEN, TO_WINDOWED, TO_MAXIMIZED_WINDOW };
+	void set_window_mode(const MODE_EVENT mode, const point& size);
 
 	class video_event_handler : public events::sdl_handler
 	{
