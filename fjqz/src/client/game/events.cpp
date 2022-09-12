@@ -486,7 +486,6 @@ void pump()
 		return;
 	}
 
-	peek_for_resize();
 	pump_info info;
 
 	// Used to keep track of double click events
@@ -508,7 +507,6 @@ void pump()
 		}
 
 		++poll_count;
-		peek_for_resize();
 
 		if(!begin_ignoring && temp_event.type == SDL_WINDOWEVENT && (
 			temp_event.window.event == SDL_WINDOWEVENT_ENTER ||
@@ -652,12 +650,12 @@ void pump()
 				{
 				case SDL_WINDOWEVENT_ENTER:
 				case SDL_WINDOWEVENT_FOCUS_GAINED:
-					cursor::set_focus(1);
+					//cursor::set_focus(1);
 					break;
 
 				case SDL_WINDOWEVENT_LEAVE:
 				case SDL_WINDOWEVENT_FOCUS_LOST:
-					cursor::set_focus(1);
+					//cursor::set_focus(1);
 					break;
 
 				case SDL_WINDOWEVENT_RESIZED:
@@ -691,7 +689,7 @@ void pump()
 			{
 				// Always make sure a cursor is displayed if the mouse moves or if the user clicks
 				// 始终确保在鼠标移动或用户单击时显示光标
-				cursor::set_focus(true);
+				//cursor::set_focus(true);
 				raise_help_string_event(event.motion.x, event.motion.y);
 				break;
 			}
@@ -700,7 +698,7 @@ void pump()
 			{
 				// Always make sure a cursor is displayed if the mouse moves or if the user clicks
 				// 始终确保在鼠标移动或用户单击时显示光标
-				cursor::set_focus(true);
+				//cursor::set_focus(true);
 				if(event.button.button == SDL_BUTTON_LEFT || event.button.which == SDL_TOUCH_MOUSEID)
 				{
 					static constexpr int DoubleClickTime = 500;
@@ -714,8 +712,8 @@ void pump()
 							&& std::abs(event.button.x - last_click_x) < DoubleClickMaxMove
 							&& std::abs(event.button.y - last_click_y) < DoubleClickMaxMove)
 					{
-						sdl::UserEvent user_event(DOUBLE_CLICK_EVENT, event.button.which, event.button.x, event.button.y);
-						::SDL_PushEvent(reinterpret_cast<SDL_Event*>(&user_event));
+						user_event click_user_event(DOUBLE_CLICK_EVENT, event.button.which, event.button.x, event.button.y);
+						::SDL_PushEvent(reinterpret_cast<SDL_Event*>(&click_user_event));
 					}
 
 					last_mouse_down = info.ticks();
@@ -810,18 +808,6 @@ void raise_process_event()
 			handler->process_event();
 		}
 	}
-}
-
-void raise_resize_event()
-{
-	SDL_Event event;
-	event.window.type = SDL_WINDOWEVENT;
-	event.window.event = SDL_WINDOWEVENT_RESIZED;
-	event.window.windowID = 0; // We don't check this anyway... I think...
-	event.window.data1 = VIDEO->get_width();
-	event.window.data2 = VIDEO->get_height();
-
-	SDL_PushEvent(&event);
 }
 
 void raise_draw_event()
@@ -919,19 +905,6 @@ bool is_input(const SDL_Event& event)
 void discard_input()
 {
 	SDL_FlushEvents(INPUT_MIN, INPUT_MAX);
-}
-
-void peek_for_resize()
-{
-	SDL_Event events[100];
-	int num = SDL_PeepEvents(events, 100, SDL_PEEKEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT);
-	for(int i = 0; i < num; ++i)
-	{
-		if(events[i].type == SDL_WINDOWEVENT && events[i].window.event == SDL_WINDOWEVENT_RESIZED)
-		{
-			VIDEO->update_framebuffer();
-		}
-	}
 }
 
 void call_in_main_thread(const std::function<void(void)>& f)

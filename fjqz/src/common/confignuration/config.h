@@ -15,14 +15,8 @@ public:
 	bool load_init(const std::string& file);
 	void save_json();
 
-	int get_window_value(const std::string& key) const;
+	int get_window_value(const std::string& key);
 	void set_window_value(const std::string& key, int value);
-
-	std::string get_string_default(const std::string& name, const std::string& def) const;
-	bool get_bool_default(const std::string& name, bool def) const;
-	int get_int_default(const std::string& name, int def) const;
-	float get_float_default(const std::string& name, float def) const;
-
 private:
 	config_mgr(){}
 	~config_mgr() { save_json(); }

@@ -7,10 +7,6 @@
 #include "log.h"
 #include "errors.h"
 
-namespace
-{
-texture framebuffer_;
-}
 
 video::video() : window_() 
 {
@@ -80,16 +76,6 @@ void video::init_window()
 	refresh_rate_ = currentDisplayMode.refresh_rate != 0 ? currentDisplayMode.refresh_rate : 60;
 
 	event_handler_.join_global();
-	update_framebuffer();
-}
-
-void video::update_framebuffer()
-{
-	if (!window_)
-		return;
-
-	SDL_Surface* fb = SDL_GetWindowSurface(*window_);
-	framebuffer_ = make_texture_from_surface(fb);
 }
 
 SDL_Rect video::screen_area() const
@@ -119,11 +105,6 @@ int video::get_height() const
 SDL_Renderer* video::get_renderer()
 {
 	return (window_ ? *window_ : nullptr);
-}
-
-texture& video::get_texture() const
-{
-	return framebuffer_;
 }
 
 void video::delay(unsigned int milliseconds)
@@ -157,9 +138,9 @@ void video::set_window_mode(const MODE_EVENT mode, const point& size)
 			window_->set_size(size.x, size.y);
 			window_->center();
 			break;
+		default:
+			break;
 	}
-
-	update_framebuffer();
 }
 
 void video::flip()
@@ -229,9 +210,6 @@ bool video::set_resolution(const point& resolution)
 	preferences::_set_resolution(resolution);
 	preferences::_set_maximized(false);
 #endif
-	// Push a window-resized event to the queue. This is necessary so various areas
-	// of the game (like GUI2) update properly with the new size.
-	events::raise_resize_event();
 
 	return true;
 }

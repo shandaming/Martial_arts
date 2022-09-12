@@ -26,8 +26,9 @@ public:
 		event_.code = code;
 	}
 
-	user_event(int type, int data1, int data2) : user_event(type)
+	user_event(int type, int code, int data1, int data2) : user_event(type)
 	{
+		event_.code = code;
 		event_.data1 = reinterpret_cast<void*>(data1);
 		event_.data2 = reinterpret_cast<void*>(data2);
 	}

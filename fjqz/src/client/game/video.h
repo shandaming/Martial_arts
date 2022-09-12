@@ -22,8 +22,6 @@ public:
 
 	SDL_Rect screen_area() const;
 
-	void update_framebuffer();
-
 	int get_width() const;
 	int get_height() const;
 
@@ -39,7 +37,6 @@ public:
 	bool is_fullscreen() const;
 	point current_resolution();
 
-	texture& get_texture() const;
 	SDL_Renderer* get_renderer();
 
 	static void delay(unsigned int milliseconds);

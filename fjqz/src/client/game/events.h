@@ -15,9 +15,6 @@
 #define DRAW_ALL_EVENT (SDL_USEREVENT + 6)
 #define INVOKE_FUNCTION_EVENT (SDL_USEREVENT + 7)
 
-namespace events
-{
-
 class sdl_handler;
 
 typedef std::list<sdl_handler*> handler_list;
@@ -129,8 +126,6 @@ struct event_context
 //causes events to be dispatched to all handler objects.
 void pump();
 
-//look for resize events and update references to the screen area
-void peek_for_resize();
 
 struct pump_info
 {
@@ -151,7 +146,6 @@ public:
 };
 
 void raise_process_event();
-void raise_resize_event();
 void raise_draw_event();
 void raise_draw_all_event();
 void raise_volatile_draw_event();
@@ -170,8 +164,6 @@ bool is_input(const SDL_Event& event);
 /** Discards all input events. */
 void discard_input();
 
-}
-
-typedef std::vector<events::sdl_handler*> sdl_handler_vector;
+typedef std::vector<sdl_handler*> sdl_handler_vector;
 
 #endif
