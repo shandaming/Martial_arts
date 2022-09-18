@@ -13,8 +13,8 @@ public:
     explicit texture(SDL_Texture* t);
     ~texture();
 
-	texture(const texture&) = delete;
-	texture& operator=(SDL_Texture* r);
+	texture(texture&& r);
+	texture& operator=(texture&& r);
 
     void set_alpha_mod(uint8_t a);
     void set_blend_mod();
@@ -34,8 +34,11 @@ public:
 
 	operator SDL_Texture*() const { return texture_; }
 
-	bool null() const { return texture_ == nullptr; }
+	explicit operator bool() const { return texture_ != nullptr; }
 private:
+	texture(const texture&) = delete;
+	texture& operator=(const texture&) = delete;
+
 	SDL_Texture* texture_;
 };
 

@@ -6,7 +6,7 @@
 
 #include "log.h"
 
-void out_message(const std::string& filter, log_level level, std::string&& message)
+void out_message(std::string_view filter, log_level level, std::string&& message)
 {
     SDL_LogPriority priority;
 
@@ -33,5 +33,5 @@ void out_message(const std::string& filter, log_level level, std::string&& messa
             break;
     }
 
-    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, priority, filter.c_str(), " ", message.c_str());
+    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, priority, filter.data(), " ", message.c_str());
 }

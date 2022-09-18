@@ -1,9 +1,10 @@
 //
 // Created by mylw on 2022/5/1.
 //
-#include <algorithm>
+
 #include <cctype>
-#include <fstream>
+
+#include <vector>
 #include "uitl.h"
 
 bool string_equal(std::string_view a, std::string_view b)
@@ -21,26 +22,4 @@ bool string_to_bool(std::string_view str)
 	return false;
 }
 
-int get_file_data_length(std::fstream& in)
-{
-	in.seekg(std::ios::end);
-	int length = in.tellg();
-	in.seekg(std::ios::beg);
-	return length;
-}
 
-auto load_file_data(std::string_view file)
-{
-	std::vector<char> result;
-
-	std::fstream in(file.data(), std::ios::in | std::ios::binary);
-	if(!in.is_open())
-		return result;
-
-	int length = get_file_data_length(in);
-
-	result.resize(length);
-	in.read(result.data(), length);
-
-	return result;
-}

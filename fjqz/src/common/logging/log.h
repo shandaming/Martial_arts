@@ -17,12 +17,12 @@ enum log_level : uint8_t
 };
 
 template<typename Fmt, typename... Args>
-inline void out_message(const std::string& filter, log_level level, Fmt&& fmt, Args&&... args)
+inline void out_message(std::string_view filter, log_level level, Fmt&& fmt, Args&&... args)
 {
 	out_message(filter, level, string_format(std::forward<Fmt>(fmt), std::forward<Args>(args)...));
 }
 
-void out_message(const std::string& filter, log_level level, std::string&& message);
+void out_message(std::string_view filter, log_level level, std::string&& message);
 
 #define LOG_MESSAGE_BODY(filter_type, level, ...)	\
 	do	\

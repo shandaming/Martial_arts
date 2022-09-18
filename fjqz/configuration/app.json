@@ -7,5 +7,18 @@
 		"sound_volume": 10
 	},
 
-	"walk_speed": 5
+	"walk_speed": 5,
+  	"resource_path": {
+	  "eath": "",
+	  "surface": "",
+	  "building": "",
+	  "buildingx":"",
+	  "buildingy": "",
+	  "mmap": "",
+	  "smap": "",
+	  "fight": "",
+	  "icon": "",
+	  "header": "",
+
+	}
 }

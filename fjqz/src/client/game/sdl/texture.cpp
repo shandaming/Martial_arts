@@ -11,13 +11,19 @@ texture::~texture()
         SDL_DestroyTexture(texture_);
 }
 
-texture& texture::operator=(SDL_Texture* r)
+texture::texture(texture&& r) : texture_(r.texture_)
 {
-    if(texture_)
-        SDL_DestroyTexture(texture_);
+	r.texture_ = nullptr;
+}
 
-    texture_ = r;
-    return *this;
+texture& texture::operator=(texture&& r)
+{
+	if(&r != this)
+	{
+		texture_ = r.texture_;
+		r.texture_ = nullptr;
+	}
+	return *this;
 }
 
 void texture::set_alpha_mod(uint8_t a)

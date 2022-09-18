@@ -16,7 +16,7 @@ json object_;
 std::string filename_;
 }
 
-bool config_mgr::load_init(const std::string& file) 
+bool config_mgr::load_init(std::string_view& file)
 {
 	filename_ = file;
 
@@ -58,15 +58,21 @@ void config_mgr::save_json()
 	}
 }
 
-int get_window_value(const std::string& key)
+int config_mgr::get_window_value(std::string_view& key)
 {
 	auto& window = object_.at("window");
-	return window.at(key);
+	return window.at(key.data());
 }
 
-void set_window_value(const std::string& key, int value)
+void config_mgr::set_window_value(std::string_view& key, int value)
 {
-	object_["window"][key] = value;
+	object_["window"][key.data()] = value;
+}
+
+std::string config_mgr::get_resource_path(std::string_view& key)
+{
+	auto& window = object_.at("resource_path");
+	return window.at(key.data());
 }
 
 config_mgr* config_mgr::instance()
